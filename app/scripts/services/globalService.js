@@ -98,7 +98,14 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     url: "bulk-generate",
     mew: false,
     cx: false
-  }
+  },
+  emission: {
+    id: 13,
+    name: "Buy/Sell LibreCash",
+    url: "emission-librecash",
+    mew: true,
+    cx: true
+  },
   }
 
   var currentTab = 0
