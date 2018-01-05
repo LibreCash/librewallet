@@ -98,6 +98,13 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     url: "bulk-generate",
     mew: false,
     cx: false
+  },
+  bankStatus: {
+    id: 13,
+    name: "NAV_BankStatus",
+    url: "bank-status",
+    mew: true,
+    cx: false
   }
   }
 

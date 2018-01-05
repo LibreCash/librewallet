@@ -267,6 +267,7 @@ TXFEE_Desc                  : 'The TX Fee is paid to miners for including your T
 
 /* Navigation*/
 NAV_AddWallet               : 'Добавить кошелёк ',
+NAV_BankStatus              : 'Статус банка ',
 NAV_BulkGenerate            : 'Создать несколько кошельков ',
 NAV_Contact                 : 'Контакты ',
 NAV_Contracts               : 'контракт ',
