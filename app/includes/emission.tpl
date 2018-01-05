@@ -31,8 +31,8 @@
     @@if (site === 'mew' ) { @@include( './emission-content.tpl', { "site": "mew" } ) }
     @@if (site === 'cx'  ) { @@include( './emission-content.tpl', { "site": "cx"  } ) }
 
-    @@if (site === 'mew' ) { @@include( './sendTx-modal.tpl',   { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './sendTx-modal.tpl',   { "site": "cx"  } ) }
+    @@if (site === 'mew' ) { @@include( './emission-modal.tpl',   { "site": "mew" } ) }
+    @@if (site === 'cx'  ) { @@include( './emission-modal.tpl',   { "site": "cx"  } ) }
   </article>
 
 

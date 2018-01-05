@@ -109,24 +109,6 @@
 
       </div>
 
-      <!-- rateLimit -->
-      <div class="row form-group">
-        <div class="col-sm-11">
-          <label translate="SEND_amount">
-            Rate Limit:
-          </label>
-        </div>
-
-        <div class="col-sm-11">
-          <input type="text"
-                 class="form-control"
-                 placeholder="{{ 'SEND_amount_short' | translate }}"
-                 ng-model="tx.value"
-                 ng-disabled="tx.readOnly || checkTxReadOnly"
-                 ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'"/>
-        </div>
-      </div>
-
       <!-- Amount to Send - Load Token Balances
       <a class="col-sm-1 send__load-tokens"
          title="Load Token Balances"
@@ -147,6 +129,24 @@
           </span>
         </a>
       </p>
+
+      <!-- rateLimit -->
+      <div class="row form-group">
+        <div class="col-sm-11">
+          <label translate="LBT_ratelimit">
+            Rate Limit:
+          </label>
+        </div>
+
+        <div class="col-sm-11">
+          <input type="text"
+                 class="form-control"
+                 placeholder="0"
+                 ng-model="tx.rateLimit"
+                 ng-disabled="tx.readOnly || checkTxReadOnly"
+                 ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
+        </div>
+      </div>
 
     </section>
 

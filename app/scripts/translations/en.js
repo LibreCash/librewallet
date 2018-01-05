@@ -799,6 +799,7 @@ HELP_SecCX_Desc_6               :  'If we were to encrypt these items, you would
 HELP_SecCX_Title                :  'Security - MyEtherWallet CX',
 HELP_Warning                    :  'If you created a wallet -or- downloaded the repo before **Dec. 31st, 2015**, please check your wallets &amp; download a new version of the repo. Click for details.',
 
+LBT_ratelimit					: 'Rate Limit',
 };
 
 module.exports = en;
