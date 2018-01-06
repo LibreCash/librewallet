@@ -3,6 +3,6 @@
 
     @@if (site === 'cx' ) {  @@include( './bankStatus-content.tpl', { "site": "cx" } )    }
     @@if (site === 'mew') {  @@include( './bankStatus-content.tpl', { "site": "mew" } )   }
-test - не выводится
+
 </main>
 <!-- / Bank Status Page -->

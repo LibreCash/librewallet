@@ -104,7 +104,7 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     name: "NAV_BankStatus",
     url: "bank-status",
     mew: true,
-    cx: false
+    cx: true
   }
   }
 
