@@ -151,7 +151,8 @@ nodes.nodeList = {
         'tokenList': require('./tokens/rinkebyTokens.json'),
         'abiList': require('./abiDefinitions/rinkebyAbi.json'),
         'service': 'Etherscan.io',
-        'lib': require('./nodeHelpers/etherscanRin')
+        'lib': require('./nodeHelpers/etherscanRin'),
+        'libre': require('./abiDefinitions/libreRinkebyAbi.json')
     },
     'rin_infura': {
         'name': 'Rinkeby',
