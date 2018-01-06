@@ -34,6 +34,7 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
         gasPrice: globalFuncs.urlGet('gasprice') == null ? null : globalFuncs.urlGet('gasprice'),
         donate: false,
         tokensymbol: globalFuncs.urlGet('tokensymbol') == null ? false : globalFuncs.urlGet('tokensymbol'),
+        rateLimit: 0
     }
 
 
@@ -88,6 +89,9 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
+        console.log("Hello",walletService.wallet.getAddressString());
+        $scope.tx.to = walletService.wallet.getAddressString();
+        console.log("End Hello",$scope.tx.to);
         $scope.wallet.setTokens();
         if ($scope.parentTxConfig) {
             var setTxObj = function() {

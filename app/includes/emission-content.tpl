@@ -5,7 +5,7 @@
   <!-- If unlocked with address only -->
   <article class="block" ng-show="wallet.type=='addressOnly'">
     <div class="row form-group">
-      <h4 translate="SEND_ViewOnly">
+      <h4 translate="LBT_buysell_LibreCash">
         You cannot send with only your address. You must use one of the other options to unlock your wallet in order to send.
       </h4>
       <h5 translate="X_HelpfulLinks">

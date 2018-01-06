@@ -101,7 +101,7 @@ var globalService = function($http, $httpParamSerializerJQLike) {
   },
   emission: {
     id: 13,
-    name: "Buy/Sell LibreCash",
+    name: "LBT_buysell_LibreCash",
     url: "emission-librecash",
     mew: true,
     cx: true
