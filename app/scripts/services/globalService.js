@@ -106,6 +106,13 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     mew: true,
     cx: true
   },
+  bankStatus: {
+    id: 14,
+    name: "NAV_BankStatus",
+    url: "bank-status",
+    mew: true,
+    cx: true
+  }
   }
 
   var currentTab = 0

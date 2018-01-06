@@ -407,6 +407,7 @@ MYWAL_Viewing                   :  'Viewing Wallet',
 MYWAL_WatchOnly                 :  'Your Watch-Only Accounts',
 
 NAV_AddWallet                   :  'Add Wallet',
+NAV_BankStatus                  :  'Bank Status',
 NAV_BulkGenerate                :  'Bulk Generate',
 NAV_CheckTxStatus               :  'Check TX Status',
 NAV_Contact                     :  'Contact',
