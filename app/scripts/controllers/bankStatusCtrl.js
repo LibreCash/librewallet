@@ -37,19 +37,73 @@ var bankStatusCtrl = function($scope) {
     };
 
     // ну и получаем инфу
-    var whatToGet = "relevancePeriod";
-    ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[whatToGet], [namehash(whatToGet)]) }, function(data) {
-        if (data.error || data.data == '0x') $scope.data0 = data;
-        else {
-            var outTypes = bankAbiRefactor[whatToGet].outputs.map(function(i) {
-                return i.type;
-            });
-            data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
-            $scope.data0 = data;
+    var varsObject = {
+        tokenAddress: {
+            name: "LibreCash Contract"
+        },
+        cryptoFiatRate: {
+            name: "Nominal Tokens Rate"
+        },
+        cryptoFiatRateBuy: {
+            name: "Buy Tokens Rate"
+        },
+        cryptoFiatRateSell: {
+            name: "Sell Tokens Rate"
+        },
+        buyFee: {
+            name: "Buy Fee"
+        },
+        sellFee: {
+            name: "Sell Fee"
+        },
+        getBuyOrdersCount: {
+            name: "Buy Orders Count"
+        },
+        getSellOrdersCount: {
+            name: "Sell Orders Count"
+        },
+        numEnabledOracles: {
+            name: "Enabled Oracle Count"
+        },
+        numReadyOracles: {
+            name: "Ready Oracle Count"
+        },
+        countOracles: {
+            name: "All Oracle Count"
+        },
+        relevancePeriod: {
+            name: "Emission Period in seconds"
+        },
+        queuePeriod: {
+            name: "Queue Updating max Period in seconds"
+        },
+        timeUpdateRequest: {
+            name: "Time update requests were sent (unix time)"
+        },
+        contractState: {
+            name: "State of the contract",
+            process: function(data) { return "111"; }
         }
-    });
+    }
 
-
+    for (var prop in varsObject) {
+        let dataVar = prop;
+        ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[dataVar], [namehash(dataVar)]) }, function(data) {
+            if (data.error || data.data == '0x') $scope[dataVar] = data;
+            else {
+                var outTypes = bankAbiRefactor[dataVar].outputs.map(function(i) {
+                    return i.type;
+                });
+                data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
+                if (varsObject[dataVar].process != null) {
+                    data.data = varsObject[dataVar].process(data);
+                    //
+                }
+                varsObject[dataVar].data = data;
+            }
+        });
+    } // for
+    $scope.contractData = varsObject;
 
     $scope.address = bankAddress;
     
