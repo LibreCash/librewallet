@@ -1,5 +1,5 @@
 'use strict';
-var bankStatusCtrl = function($scope) {
+var bankStatusCtrl = async function($scope) {
     let libreData = nodes.nodeList.rin_ethscan.libre;
     let bankAbi = libreData.libreBank.abi,
         bankAddress = libreData.libreBank.address;
@@ -37,7 +37,8 @@ var bankStatusCtrl = function($scope) {
     };
 
     // ну и получаем инфу
-    var varsObject = {
+    var oracles = {},
+    varsObject = {
         tokenAddress: {
             default: "LibreCash Contract",
             translate: "VAR_tokenAddress"
@@ -94,29 +95,83 @@ var bankStatusCtrl = function($scope) {
             }
         }
     }
+    $scope.contractData = varsObject;
+    $scope.address = bankAddress;
+    $scope.oracles = oracles;
 
-    for (var prop in varsObject) {
-        let dataVar = prop;
-        ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[dataVar], [namehash(dataVar)]) }, function(data) {
+    // getting oracles
+    function getBankData(bankAbiRefactor, varsObject, _var) {
+        ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [namehash(_var)]) }, function(data) {
             if (data.error || data.data == '0x') {
-                //if (!data.error)
-                varsObject[dataVar].data = data;
+                varsObject[_var].data = data;
             } else {
-                var outTypes = bankAbiRefactor[dataVar].outputs.map(function(i) {
+                var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
                     return i.type;
                 });
                 data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
-                if (varsObject[dataVar].process != null) {
-                    data.data = varsObject[dataVar].process(data.data);
-                    //
+                if (varsObject[_var].process != null) {
+                    data.data = varsObject[_var].process(data.data);
                 }
-                varsObject[dataVar].data = data;
+                varsObject[_var].data = data;
             }
         });
-    } // for
-    $scope.contractData = varsObject;
+    }
+    async function getBankDataAsync(bankAbiRefactor, _var, param) {
+        return new Promise((resolve, reject) => { 
+            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
+                if (data.error || data.data == '0x') {
+                    reject(data.message);
+                } else {
+                    var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
+                        return i.type;
+                    });
+                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
+                    resolve(data.data);
+                }
+            });
+        })
+    }
 
-    $scope.address = bankAddress;
-    
+    for (var prop in varsObject) {
+        let dataVar = prop;
+        getBankData(bankAbiRefactor, varsObject, dataVar);
+        
+    } // for
+    // getting oracles
+    function hex2a(hexx) {
+        var hex = hexx.toString();//force conversion
+        var str = '';
+        for (var i = 2; i < hex.length; i += 2) {
+            if (hex.substr(i, 2) !== "00") {
+                str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            }
+        }
+        return str;
+    }
+    const 
+        ORACLE_NAME = 0,
+        ORACLE_TYPE = 1,
+        ORACLE_UPDATE_TIME = 2,
+        ORACLE_ENABLED = 3,
+        ORACLE_WAITING = 4,
+        ORACLE_RATE = 5,
+        ORACLE_NEXT = 6;
+    let curOracle = await getBankDataAsync(bankAbiRefactor, "firstOracle", 0);
+    for (
+        let curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle);
+        ;
+        curOracle = curData[ORACLE_NEXT],
+        curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle)
+    ) {
+        oracles[curOracle] = {
+            name: hex2a(curData[ORACLE_NAME]),
+            type: hex2a(curData[ORACLE_TYPE]),
+            updateRate: curData[ORACLE_UPDATE_TIME],
+            enabled: curData[ORACLE_ENABLED],
+            waiting: curData[ORACLE_WAITING],
+            rate: /*oraclesPrice*/(curData[ORACLE_RATE])
+        };
+        if(+curData[ORACLE_NEXT] == 0) break;   
+    }    
 };
 module.exports = bankStatusCtrl;

@@ -9,6 +9,17 @@
                 <td>{{ info.data.error? info.data.message : info.data.data }}</td>
             </tr>
         </table>
+        <table class="table">
+            <tr ng-repeat="(address, info) in oracles">
+                <td>{{ address }}</td>
+                <td>{{ info.name }}</td>
+                <td>{{ info.type }}</td>
+                <td>{{ info.updateRate }}</td>
+                <td>{{ info.enabled }}</td>
+                <td>{{ info.waiting }}</td>
+                <td>{{ info.rate }}</td>
+            </tr>
+        </table>
     </div>
 </main>
 <!-- / Bank Status Page -->
