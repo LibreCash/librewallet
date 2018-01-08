@@ -39,50 +39,59 @@ var bankStatusCtrl = function($scope) {
     // ну и получаем инфу
     var varsObject = {
         tokenAddress: {
-            name: "LibreCash Contract"
+            default: "LibreCash Contract",
+            translate: "VAR_tokenAddress"
         },
         cryptoFiatRate: {
-            name: "Nominal Tokens Rate"
+            default: "Nominal Tokens Rate",
+            translate: "VAR_cryptoFiatRate"
         },
         cryptoFiatRateBuy: {
-            name: "Buy Tokens Rate"
+            default: "Buy Tokens Rate"
         },
         cryptoFiatRateSell: {
-            name: "Sell Tokens Rate"
+            default: "Sell Tokens Rate"
         },
         buyFee: {
-            name: "Buy Fee"
+            default: "Buy Fee"
         },
         sellFee: {
-            name: "Sell Fee"
+            default: "Sell Fee"
         },
         getBuyOrdersCount: {
-            name: "Buy Orders Count"
+            default: "Buy Orders Count"
         },
         getSellOrdersCount: {
-            name: "Sell Orders Count"
+            default: "Sell Orders Count"
         },
         numEnabledOracles: {
-            name: "Enabled Oracle Count"
+            default: "Enabled Oracle Count"
         },
         numReadyOracles: {
-            name: "Ready Oracle Count"
+            default: "Ready Oracle Count"
         },
         countOracles: {
-            name: "All Oracle Count"
+            default: "All Oracle Count"
         },
         relevancePeriod: {
-            name: "Emission Period in seconds"
+            default: "Emission Period in seconds"
         },
         queuePeriod: {
-            name: "Queue Updating max Period in seconds"
+            default: "Queue Updating max Period in seconds"
         },
         timeUpdateRequest: {
-            name: "Time update requests were sent (unix time)"
+            default: "Time update requests were sent (unix time)"
         },
         contractState: {
-            name: "State of the contract",
-            process: function(data) { return "111"; }
+            default: "State of the contract",
+            process: function(data) { 
+                var states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
+                try {
+                    return states[data];
+                } catch(e) {
+                    return e.message;
+                }
+            }
         }
     }
 
@@ -96,7 +105,7 @@ var bankStatusCtrl = function($scope) {
                 });
                 data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
                 if (varsObject[dataVar].process != null) {
-                    data.data = varsObject[dataVar].process(data);
+                    data.data = varsObject[dataVar].process(data.data);
                     //
                 }
                 varsObject[dataVar].data = data;
