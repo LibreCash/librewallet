@@ -98,8 +98,10 @@ var bankStatusCtrl = function($scope) {
     for (var prop in varsObject) {
         let dataVar = prop;
         ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[dataVar], [namehash(dataVar)]) }, function(data) {
-            if (data.error || data.data == '0x') $scope[dataVar] = data;
-            else {
+            if (data.error || data.data == '0x') {
+                //if (!data.error)
+                varsObject[dataVar].data = data;
+            } else {
                 var outTypes = bankAbiRefactor[dataVar].outputs.map(function(i) {
                     return i.type;
                 });
