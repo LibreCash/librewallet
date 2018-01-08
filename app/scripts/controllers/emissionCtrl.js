@@ -26,7 +26,9 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
     $scope.tx = {
         // if there is no gasLimit or gas key in the URI, use the default value. Otherwise use value of gas or gasLimit. gasLimit wins over gas if both present
         gasLimit: globalFuncs.urlGet('gaslimit') != null || globalFuncs.urlGet('gas') != null ? globalFuncs.urlGet('gaslimit') != null ? globalFuncs.urlGet('gaslimit') : globalFuncs.urlGet('gas') : globalFuncs.defaultTxGasLimit,
-        data: globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data'),
+        //data: "0x6e172af0000000000000000000000000",
+        data: "0x6e172af00000000000000000000000007e01da2fff1ac744e30d8e2164cdfb604c8bbe850000000000000000000000000000000000000000000000000000000000000000",
+        //globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data'),
         to: globalFuncs.urlGet('to') == null ? "" : globalFuncs.urlGet('to'),
         unit: "ether",
         value: globalFuncs.urlGet('value') == null ? "" : globalFuncs.urlGet('value'),
