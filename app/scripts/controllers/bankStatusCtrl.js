@@ -92,6 +92,7 @@ var bankStatusCtrl = function($scope) {
             if (data.error || data.data == '0x') $scope[dataVar] = data;
             else {
                 var outTypes = bankAbiRefactor[dataVar].outputs.map(function(i) {
+                    console.log(i.type);
                     return i.type;
                 });
                 data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
