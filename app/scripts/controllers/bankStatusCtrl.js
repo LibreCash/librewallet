@@ -3,6 +3,7 @@ var bankStatusCtrl = async function($scope) {
     let libreData = nodes.nodeList.rin_ethscan.libre;
     let bankAbi = libreData.libreBank.abi,
         bankAddress = libreData.libreBank.address;
+    $scope.ajaxReq = ajaxReq;
 
 
 // нужно рефакторнуть аби, чтобы оборащаться к нему, как сделано в ens
@@ -37,7 +38,15 @@ var bankStatusCtrl = async function($scope) {
     };
 
     // ну и получаем инфу
+    const rateMultiplier = 1000; // const from smart-contract
     var oracles = {},
+    normalizeRate = function(data) {
+        return data / rateMultiplier;
+    },
+    normalizeUnixTime = function(data) {
+        var date = new Date(data * 1000);
+        return "{0} {1}".replace("{0}", date.toLocaleDateString()).replace("{1}", date.toLocaleTimeString());
+    },
     varsObject = {
         tokenAddress: {
             default: "LibreCash Contract",
@@ -45,46 +54,69 @@ var bankStatusCtrl = async function($scope) {
         },
         cryptoFiatRate: {
             default: "Nominal Tokens Rate",
-            translate: "VAR_cryptoFiatRate"
+            translate: "VAR_cryptoFiatRate",
+            process: normalizeRate
         },
         cryptoFiatRateBuy: {
-            default: "Buy Tokens Rate"
+            default: "Buy Tokens Rate",
+            translate: "VAR_cryptoFiatRateBuy",
+            process: normalizeRate
         },
         cryptoFiatRateSell: {
-            default: "Sell Tokens Rate"
+            default: "Sell Tokens Rate",
+            translate: "VAR_cryptoFiatRateSell",
+            process: normalizeRate
         },
         buyFee: {
-            default: "Buy Fee"
+            default: "Buy Fee",
+            translate: "VAR_buyFee",
+            process: function(data) {
+                return "{0} %".replace("{0}", data / 100);
+            }
         },
         sellFee: {
-            default: "Sell Fee"
+            default: "Sell Fee",
+            translate: "VAR_sellFee",
+            process: function(data) {
+                return "{0} %".replace("{0}", data / 100);
+            }
         },
         getBuyOrdersCount: {
-            default: "Buy Orders Count"
+            default: "Buy Orders Count",
+            translate: "VAR_getBuyOrdersCount"
         },
         getSellOrdersCount: {
-            default: "Sell Orders Count"
+            default: "Sell Orders Count",
+            translate: "VAR_getSellOrdersCount"
         },
         numEnabledOracles: {
-            default: "Enabled Oracle Count"
+            default: "Enabled Oracle Count",
+            translate: "VAR_numEnabledOracles"
         },
         numReadyOracles: {
-            default: "Ready Oracle Count"
+            default: "Ready Oracle Count",
+            translate: "VAR_numReadyOracles"
         },
         countOracles: {
-            default: "All Oracle Count"
+            default: "All Oracle Count",
+            translate: "VAR_countOracles"
         },
         relevancePeriod: {
-            default: "Emission Period in seconds"
+            default: "Emission Period in seconds",
+            translate: "VAR_relevancePeriod"
         },
         queuePeriod: {
-            default: "Queue Updating max Period in seconds"
+            default: "Queue Updating max Period in seconds",
+            translate: "VAR_queuePeriod"
         },
         timeUpdateRequest: {
-            default: "Time update requests were sent (unix time)"
+            default: "Time update requests were sent",
+            translate: "VAR_timeUpdateRequest",
+            process: normalizeUnixTime
         },
         contractState: {
             default: "State of the contract",
+            translate: "VAR_contractState",
             process: function(data) { 
                 var states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
                 try {
@@ -166,10 +198,10 @@ var bankStatusCtrl = async function($scope) {
         oracles[curOracle] = {
             name: hex2a(curData[ORACLE_NAME]),
             type: hex2a(curData[ORACLE_TYPE]),
-            updateRate: curData[ORACLE_UPDATE_TIME],
+            updateTime: normalizeUnixTime(curData[ORACLE_UPDATE_TIME]),
             enabled: curData[ORACLE_ENABLED],
             waiting: curData[ORACLE_WAITING],
-            rate: /*oraclesPrice*/(curData[ORACLE_RATE])
+            rate: normalizeRate(curData[ORACLE_RATE])
         };
         if(+curData[ORACLE_NEXT] == 0) break;   
     }    

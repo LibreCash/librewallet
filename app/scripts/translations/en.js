@@ -564,6 +564,29 @@ TXFEE_Desc                      :  'The TX Fee is paid to miners for including y
 
 VAR_tokenAddress                :  'LibreCash Contract',
 VAR_cryptoFiatRate              :  'Nominal Tokens Rate',
+VAR_cryptoFiatRateBuy           :  'Buy Tokens Rate',
+VAR_cryptoFiatRateSell          :  'Sell Tokens Rate',
+VAR_buyFee                      :  'Buy Fee',
+VAR_sellFee                     :  'Sell Fee',
+VAR_getBuyOrdersCount           :  'Buy Orders Count',
+VAR_getSellOrdersCount          :  'Sell Orders Count',
+VAR_numEnabledOracles           :  'Enabled Oracle Count',
+VAR_numReadyOracles             :  'Ready Oracle Count',
+VAR_countOracles                :  'All Oracle Count',
+VAR_relevancePeriod             :  'Emission Period in seconds',
+VAR_queuePeriod                 :  'Queue Updating max Period in seconds',
+VAR_timeUpdateRequest           :  'Time update requests were sent',
+VAR_contractState               :  'State of the contract',
+
+BANKSTATUS_bankContractAddress  :  'Bank contract address',
+BANKSTATUS_contractStatus       :  'Contract Status',
+BANKSTATUS_oraclesStatus        :  'Oracles Status',
+BANKSTATUS_name                 :  'Name',
+BANKSTATUS_address              :  'Address',
+BANKSTATUS_type                 :  'Type',
+BANKSTATUS_updateTime           :  'Update Time',
+BANKSTATUS_rate                 :  'Rate',
+
 
 
 VIEWWALLET_HidePrivKey          :  '(hide)',
