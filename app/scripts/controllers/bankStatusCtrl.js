@@ -45,7 +45,7 @@ var bankStatusCtrl = async function($scope) {
     },
     normalizeUnixTime = function(data) {
         var date = new Date(data * 1000);
-        return "{0} {1}".replace("{0}", date.toLocaleDateString()).replace("{1}", date.toLocaleTimeString());
+        return date.toLocaleString();
     },
     varsObject = {
         tokenAddress: {
