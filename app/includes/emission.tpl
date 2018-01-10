@@ -15,8 +15,8 @@
   <article class="collapse-container">
     <div ng-click="wd = !wd">
       <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
-      <h1 translate="LBT_buysell_LibreCash">
-        Send Ether &amp; Tokens
+      <h1 translate="LBT_buyLibreCash">
+        Buy LibreCash
       </h1>
     </div>
     <div ng-show="!wd">

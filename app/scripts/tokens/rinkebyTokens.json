@@ -9,4 +9,10 @@
 "symbol":"LBT",
 "decimal":18,
 "type":"default"
+},
+{
+"address":"0x7f02432c1c127d3176ec07c2a83bb853fad07bc1",
+"symbol":"LIBRE",
+"decimal":18,
+"type":"default"
 }]

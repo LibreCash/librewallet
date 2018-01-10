@@ -55,8 +55,11 @@
 
 
     <!-- To Address -->
-    <div class="row form-group">
+    <!--div class="row form-group">
       <address-field placeholder="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8" var-name="tx.to"></address-field>
+    </div --><!-- the address is permanently librebank address -->
+    <div class="row">
+      LibreBank address: {{ tx.to }}. Please, check its legitimity. TODO: перевод прикрутить
     </div>
 
     <!-- Amount to Send -->
@@ -109,18 +112,6 @@
 
       </div>
 
-      <!-- Amount to Send - Load Token Balances
-      <a class="col-sm-1 send__load-tokens"
-         title="Load Token Balances"
-         ng-click="wallet.setTokens(); globalService.tokensLoaded=true"
-         ng-hide="globalService.tokensLoaded">
-          <img src="images/icon-load-tokens.svg" width="16" height="16" />
-          <p translate="SEND_LoadTokens">
-            Load Tokens
-          </p>
-      </a>
-      -->
-
       <!-- Amount to Send - Transfer Entire Balance -->
       <p class="col-xs-12" ng-hide="tx.readOnly">
         <a ng-click="transferAllBalance()">
@@ -133,7 +124,7 @@
       <!-- rateLimit -->
       <div class="row form-group">
         <div class="col-sm-11">
-          <label translate="LBT_ratelimit">
+          <label translate="LBT_rateLimit">
             Rate Limit:
           </label>
         </div>
@@ -143,7 +134,6 @@
                  class="form-control"
                  placeholder="0"
                  ng-model="tx.rateLimit"
-                 ng-disabled="tx.readOnly || checkTxReadOnly"
                  ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
         </div>
       </div>
@@ -168,104 +158,13 @@
         </label>
         <input type="text"
                class="form-control"
-               placeholder="21000"
+               placeholder="300000"
                ng-model="tx.gasLimit"
                ng-change="gasLimitChanged=true"
                ng-disabled="tx.readOnly || checkTxReadOnly"
                ng-class="Validator.isPositiveNumber(tx.gasLimit) ? 'is-valid' : 'is-invalid'" />
       </div>
     </section>
-
-    <!-- Advanced Option Panel -->
-    <a ng-click="showAdvance=true"
-       ng-show='globalService.currentTab==globalService.tabs.sendTransaction.id'>
-      <p class="strong" translate="TRANS_advanced">
-        + Advanced: Add Data
-      </p>
-    </a>
-
-
-
-    <div ng-show="showAdvance || checkTxPage">
-
-      <!-- Data -->
-      <section class="row form-group">
-        <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='ether'">
-          <span class="account-help-icon">
-            <img src="images/icon-help.svg" class="help-icon" />
-            <p class="account-help-text" translate="OFFLINE_Step2_Label_6b">
-              This is optional.
-            </p>
-          </span>
-
-          <label translate="TRANS_data"> Data: </label>
-
-          <input type="text"
-                 class="form-control"
-                 placeholder="0x6d79657468657277616c6c65742e636f6d20697320746865206265737421"
-                 ng-model="tx.data"
-                 ng-disabled="tx.readOnly || checkTxReadOnly"
-                 ng-class="Validator.isValidHex(tx.data) ? 'is-valid' : 'is-invalid'"/>
-
-        </div>
-      </section>
-
-
-      <!-- Nonce -->
-      <section class="row form-group" ng-show="checkTxPage">
-        <div class="col-sm-11 clearfix">
-
-          <a class="account-help-icon"
-             href="https://myetherwallet.github.io/knowledge-base/transactions/what-is-nonce.html"
-             target="_blank"
-             rel="noopener noreferrer">
-            <img src="images/icon-help.svg" class="help-icon" />
-            <p class="account-help-text" translate="NONCE_Desc"></p>
-          </a>
-
-          <label translate="OFFLINE_Step2_Label_5">
-            Nonce
-          </label>
-          <input type="text"
-                 class="form-control"
-                 placeholder="2"
-                 ng-model="tx.nonce"
-                 ng-disabled="checkTxReadOnly"
-                 ng-class="Validator.isPositiveNumber(tx.nonce) ? 'is-valid' : 'is-invalid'" />
-
-        </div>
-      </section>
-
-
-      <!-- Gas Price -->
-      <section class="row form-group" ng-show="checkTxPage">
-        <div class="col-sm-11 clearfix">
-          <a class="account-help-icon"
-             href="https://myetherwallet.github.io/knowledge-base/gas/what-is-gas-ethereum.html"
-             target="_blank"
-             rel="noopener noreferrer">
-                <img src="images/icon-help.svg" class="help-icon" />
-                <p class="account-help-text" translate="GAS_PRICE_Desc"></p>
-          </a>
-
-          <label translate="OFFLINE_Step2_Label_3">
-            Gas Price:
-          </label>
-          <input type="text"
-                 class="form-control"
-                 placeholder="50"
-                 ng-model="tx.gasPrice"
-                 ng-disabled="checkTxReadOnly"
-                 ng-class="Validator.isPositiveNumber(tx.gasPrice) ? 'is-valid' : 'is-invalid'" />
-
-        </div>
-      </section>
-
-    </div>
-    <!-- / Advanced Option Panel -->
-
-
-
 
 
     <div class="clearfix form-group">
@@ -288,14 +187,14 @@
     <div class="row form-group">
       <div class="col-xs-12 clearfix">
         <a class="btn btn-info btn-block"
-           ng-click="generateTx()"
+           ng-click="generateBuyLibreTx()"
            translate="SEND_generate">
               Generate Transaction
         </a>
       </div>
     </div>
 
-    <div class="row form-group" ng-show="rootScopeShowRawTx">
+    <div class="row form-group" ng-show="showRaw">
 
       <div class="col-sm-6">
         <label translate="SEND_raw">
@@ -313,10 +212,10 @@
 
     </div>
 
-    <div class="clearfix form-group" ng-show="rootScopeShowRawTx">
+    <div class="clearfix form-group" ng-show="showRaw">
       <a class="btn btn-primary btn-block col-sm-11"
          data-toggle="modal"
-         data-target="#sendTransaction"
+         data-target="#emission"
          translate="SEND_trans"
          ng-click="parseSignedTx( signedTx )">
              Send Transaction
