@@ -1,5 +1,8 @@
 <!-- Buy Libre Page -->
-<main class="tab-pane active" ng-if="globalService.currentTab==globalService.tabs.buyLibre.id" ng-controller='buyLibreCtrl' ng-cloak>
+<main class="tab-pane active"
+        ng-if="globalService.currentTab==globalService.tabs.buyLibre.id"
+        ng-controller='buyLibreCtrl'
+        ng-cloak>
 
   <!-- Header : todo turn into warning notification-->
   <div class="alert alert-info" ng-show="hasQueryString">

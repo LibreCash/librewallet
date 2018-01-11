@@ -1,14 +1,12 @@
 'use strict';
-var emissionCtrl = function($scope/*, $sce, walletService, $rootScope*/) {
+var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
-    console.log('emissionCtrl');
     var bankAddress = libreBank.address;
-    //$scope.address = bankAddress;
     var bankAbi = libreBank.abi;
     var bankAbiRefactor = {};    
     for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
 
-    /*    $scope.tx = {};
+    $scope.tx = {};
     $scope.signedTx;
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
@@ -82,7 +80,7 @@ var emissionCtrl = function($scope/*, $sce, walletService, $rootScope*/) {
         if ($scope.tx.sendMode != 'token') $scope.tokenTx.id = -1;
     }*/
 
-/*    var applyScope = function() {
+    var applyScope = function() {
         if (!$scope.$$phase) $scope.$apply();
     }
 
@@ -99,7 +97,6 @@ var emissionCtrl = function($scope/*, $sce, walletService, $rootScope*/) {
         return walletService.wallet.getAddressString();
     }, function() {
         if (walletService.wallet == null) return;
-        console.log('wallet watch', walletService.wallet.getAddressString());
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
@@ -145,7 +142,11 @@ var emissionCtrl = function($scope/*, $sce, walletService, $rootScope*/) {
             $scope.tx.data = globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data');
             $scope.tx.gasLimit = globalFuncs.defaultTxGasLimit;
         }
-        if (newValue.gasLimit == oldValue.gasLimit && $scope.wallet && $scope.Validator.isValidAddress($scope.tx.to) && $scope.Validator.isPositiveNumber($scope.tx.value) && $scope.Validator.isValidHex($scope.tx.data) && $scope.tx.sendMode != 'token') {
+        if (newValue.gasLimit == oldValue.gasLimit && $scope.wallet && 
+                        //$scope.Validator.isValidAddress($scope.tx.to) && 
+                        //$scope.Validator.isPositiveNumber($scope.tx.value) && 
+                        /*$scope.Validator.isValidHex($scope.tx.data) &&*/ 
+                        $scope.tx.sendMode != 'token') {
             if ($scope.estimateTimer) clearTimeout($scope.estimateTimer);
             $scope.estimateTimer = setTimeout(function() {
                 $scope.estimateGasLimit();
@@ -184,6 +185,7 @@ var emissionCtrl = function($scope/*, $sce, walletService, $rootScope*/) {
             from: $scope.wallet.getAddressString(),
             value: ethFuncs.sanitizeHex(ethFuncs.decimalToHex(etherUnits.toWei($scope.tx.value, $scope.tx.unit)))
         }
+        console.log($scope.tx.data);
         if ($scope.tx.data != "") estObj.data = ethFuncs.sanitizeHex($scope.tx.data);
         if ($scope.tx.sendMode == 'token') {
             estObj.to = $scope.wallet.tokenObjs[$scope.tokenTx.id].getContractAddress();
@@ -236,60 +238,101 @@ var emissionCtrl = function($scope/*, $sce, walletService, $rootScope*/) {
         return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
     };
 
+    async function getBankDataAsync(_var, param = "") {
+        return new Promise((resolve, reject) => { 
+            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
+                if (data.error || data.data == '0x') {
+                    if (data.data == '0x') {
+                        data.error = true;
+                        data.message = "Possible error with network or the bank contract";
+                    }
+                } else {
+                    var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
+                        return i.type;
+                    });
+                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
+                }
+                //console.log(data);
+                resolve(data);
+            });
+        })
+    }
+    var states = function(_data) { 
+        const _states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
+        try {
+            var stateName = _states[_data.data[0]];
+            _data.data.push(stateName);
+            return _data;
+        } catch(e) {
+            return {error: true, message: e.message};
+        }
+    },
+    normalizeRate = function(data) {
+        return data / rateMultiplier;
+    },
+    normalizeUnixTime = function(data) {
+        var date = new Date(data * 1000);
+        return date.toLocaleString();
+    },
+    normalizeUnixTimeObject = function(data) {
+        try {
+            var _time = normalizeUnixTime(data.data[0]);
+            data.data.push(_time);
+            return data;
+        } catch(e) {
+            return {error: true, message: e.message};
+        }
+    };
 
-    /*$scope.getBankState = function() {
-     //   const _var = "contractState";
-        const _var = "buyFee";
-        console.log(bankAbiRefactor[_var], [namehash(_var)]);
-        console.log(getDataString(bankAbiRefactor[_var], [namehash(_var)]),
-            getDataString(bankAbiRefactor[_var], [_var]),
-            getDataString(bankAbiRefactor[_var], []) );
+    var _state = await getBankDataAsync("contractState");
+    $scope.bankState = states(_state);
+
+    var _timeUpdateRequest = await getBankDataAsync("timeUpdateRequest");
+    var _queuePeriod = await getBankDataAsync("queuePeriod");
+
+    $scope.now = (+new Date) / 1000; // todo взять из блока
+    $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
+    $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
+    $scope.queuePeriod = _queuePeriod;
+
+    var getBankState = function() {
+        const _var = "contractState";
+
         ajaxReq.getEthCall({ 
             to: bankAddress, 
             data: getDataString(bankAbiRefactor[_var], [namehash(_var)]) 
         }, function(data) {
-            console.log(data);
             if (data.error || data.data == '0x') {
-                $scope.bankState = data;
+                if (data.data == '0x') {
+                    data.error = true;
+                    data.message = "Possible error with network or the bank contract";
+                }
             } else {
                 var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
                     return i.type;
                 });
-                console.log(outTypes);
-                data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
-                $scope.bankState = data;
+                data.data = states(ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0]);
             }
+            $scope.bankState = data;
         });
-    };*/
-    let dataVar = "contractState";
-    ajaxReq.getEthCall({
-        to: bankAddress,
-        data: getDataString(bankAbiRefactor[dataVar], [namehash(dataVar)])
-    }, function(data) {
-        if (data.error || data.data == '0x') console.log(data);
-        else {
-            var outTypes = bankAbiRefactor[dataVar].outputs.map(function(i) {
-                return i.type;
-            });
-            data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
-            console.log(data);
-        }
-    });
-    //getBankState();
+    };
 
-/*    $scope.generateBuyLibreTx = function() {
+
+    
+
+    $scope.generateBuyLibreTx = function() {
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
-            else if (!ethFuncs.validateHexString($scope.tx.data)) throw globalFuncs.errorMsgs[9];
+            //else if (!ethFuncs.validateHexString($scope.tx.data)) throw globalFuncs.errorMsgs[9];
             else if (!globalFuncs.isNumeric($scope.tx.gasLimit) || parseFloat($scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
-            $scope.tx.data = ethFuncs.sanitizeHex($scope.tx.data);
+            //$scope.tx.data = ethFuncs.sanitizeHex($scope.tx.data);
             ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
                 if (data.error) $scope.notifier.danger(data.msg);
                 data = data.data;
 
                 $scope.tx.data = getDataString(bankAbiRefactor["createBuyOrder"], 
                     [$scope.tx.rateLimit]);
-                //console.log($scope.tx.data);
+                console.log($scope.tx.data);
                 var txData = uiFuncs.getTxData($scope);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     //console.log("rawTx",rawTx);
@@ -368,7 +411,7 @@ var emissionCtrl = function($scope/*, $sce, walletService, $rootScope*/) {
       $scope.parsedSignedTx.data          = (txData.data=='0x'||txData.data==''||txData.data==null) ? '(none)' : ethFuncs.sanitizeHex(txData.data.toString('hex'))
 
 
-    }*/
+    }
 
 };
 module.exports = emissionCtrl;
