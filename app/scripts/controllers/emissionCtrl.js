@@ -35,7 +35,7 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
         gasLimit: globalFuncs.urlGet('gaslimit') != null || globalFuncs.urlGet('gas') != null ? globalFuncs.urlGet('gaslimit') != null ? globalFuncs.urlGet('gaslimit') : globalFuncs.urlGet('gas') : globalFuncs.defaultTxGasLimit,
         //data: "0x6e172af0000000000000000000000000",
         to: bankAddress,
-        data: "0x6e172af00000000000000000000000007e01da2fff1ac744e30d8e2164cdfb604c8bbe850000000000000000000000000000000000000000000000000000000000000000",
+        //data: "0x6e172af00000000000000000000000007e01da2fff1ac744e30d8e2164cdfb604c8bbe850000000000000000000000000000000000000000000000000000000000000000",
         //globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data'),
         to: globalFuncs.urlGet('to') == null ? "" : globalFuncs.urlGet('to'),
         unit: "ether",
@@ -131,6 +131,12 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
             $scope.wallet.setTokens();
         }
     });
+
+/*    $scope.$watch('wallet', function() {
+        console.log('wallet');
+
+        getBankState(bankAbiRefactor);
+    });*/
 
     $scope.$watch('tokenTx', function() {
         if ($scope.wallet && $scope.wallet.tokenObjs !== undefined && $scope.wallet.tokenObjs[$scope.tokenTx.id] !== undefined && $scope.Validator.isValidAddress($scope.tokenTx.to) && $scope.Validator.isPositiveNumber($scope.tokenTx.value)) {
@@ -241,6 +247,31 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
         return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
     };
 
+    $scope.getBankState = function() {
+     //   const _var = "contractState";
+        const _var = "buyFee";
+        console.log(bankAbiRefactor[_var], [namehash(_var)]);
+        console.log(getDataString(bankAbiRefactor[_var], [namehash(_var)]),
+            getDataString(bankAbiRefactor[_var], [_var]),
+            getDataString(bankAbiRefactor[_var], []) );
+        ajaxReq.getEthCall({ 
+            to: bankAddress, 
+            data: getDataString(bankAbiRefactor[_var], [namehash(_var)]) 
+        }, function(data) {
+            console.log(data);
+            if (data.error || data.data == '0x') {
+                $scope.bankState = data;
+            } else {
+                var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
+                    return i.type;
+                });
+                console.log(outTypes);
+                data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
+                $scope.bankState = data;
+            }
+        });
+    };
+
     $scope.generateBuyLibreTx = function() {
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
@@ -278,25 +309,21 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
         console.log("Hello");
         $scope.emissionModal.close();
         uiFuncs.sendTx($scope.signedTx, function(resp) {
-        if (!resp.isError) {
-            var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
-            var txHashLink = $scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
-            var emailBody = 'I%20was%20trying%20to..............%0A%0A%0A%0ABut%20I%27m%20confused%20because...............%0A%0A%0A%0A%0A%0ATo%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.tx.to + '%0AFrom%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.wallet.getAddressString() + '%0ATX%20Hash%3A%20https%3A%2F%2Fetherscan.io%2Ftx%2F' + resp.data + '%0AAmount%3A%20' + $scope.tx.value + '%20' + $scope.unitReadable + '%0ANode%3A%20' + $scope.ajaxReq.type + '%0AToken%20To%20Addr%3A%20' + $scope.tokenTx.to + '%0AToken%20Amount%3A%20' + $scope.tokenTx.value + '%20' + $scope.unitReadable + '%0AData%3A%20' + $scope.tx.data + '%0AGas%20Limit%3A%20' + $scope.tx.gasLimit + '%0AGas%20Price%3A%20' + $scope.tx.gasPrice;
-            var verifyTxBtn = $scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
-            var checkTxBtn = '<a class="btn btn-xs btn-info" href="' + checkTxLink + '" target="_blank" rel="noopener noreferrer"> Check TX Status </a>';
-            var emailBtn = '<a class="btn btn-xs btn-info " href="mailto:support@myetherwallet.com?Subject=Issue%20regarding%20my%20TX%20&Body=' + emailBody + '" target="_blank" rel="noopener noreferrer">Confused? Email Us.</a>';
-            var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
-            $scope.notifier.success(completeMsg, 0);
-            $scope.wallet.setBalance(applyScope);
-            if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
-        } else {
-            $scope.notifier.danger(resp.error);
-        }
-    });
-//        $scope.sendContractModal.close();
-//        uiFuncs.sendTx($scope.signedTx, function(resp) {
-//            console.log("resp",resp);
-//        });
+            if (!resp.isError) {
+                var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
+                var txHashLink = $scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
+                var emailBody = 'I%20was%20trying%20to..............%0A%0A%0A%0ABut%20I%27m%20confused%20because...............%0A%0A%0A%0A%0A%0ATo%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.tx.to + '%0AFrom%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.wallet.getAddressString() + '%0ATX%20Hash%3A%20https%3A%2F%2Fetherscan.io%2Ftx%2F' + resp.data + '%0AAmount%3A%20' + $scope.tx.value + '%20' + $scope.unitReadable + '%0ANode%3A%20' + $scope.ajaxReq.type + '%0AToken%20To%20Addr%3A%20' + $scope.tokenTx.to + '%0AToken%20Amount%3A%20' + $scope.tokenTx.value + '%20' + $scope.unitReadable + '%0AData%3A%20' + $scope.tx.data + '%0AGas%20Limit%3A%20' + $scope.tx.gasLimit + '%0AGas%20Price%3A%20' + $scope.tx.gasPrice;
+                var verifyTxBtn = $scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
+                var checkTxBtn = '<a class="btn btn-xs btn-info" href="' + checkTxLink + '" target="_blank" rel="noopener noreferrer"> Check TX Status </a>';
+                var emailBtn = '<a class="btn btn-xs btn-info " href="mailto:support@myetherwallet.com?Subject=Issue%20regarding%20my%20TX%20&Body=' + emailBody + '" target="_blank" rel="noopener noreferrer">Confused? Email Us.</a>';
+                var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
+                $scope.notifier.success(completeMsg, 0);
+                $scope.wallet.setBalance(applyScope);
+                if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
+            } else {
+                $scope.notifier.danger(resp.error);
+            }
+        });
     }
 
     $scope.transferAllBalance = function() {
@@ -337,18 +364,6 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
 
 
     }
-
-    let functionName = "createBuyOrder";
-    
-    /*
-    ajaxReq.getEthCall({ to: bankAddress, data: ens.prototype.getDataString(bankAbiRefactor[functionName], 
-        [ens.getNameHash(functionName)]) }, function(data) {
-        console.log(data);
-    });
-    */
-    let data = "0x6e172af00000000000000000000000007e01da2fff1ac744e30d8e2164cdfb604c8bbe850000000000000000000000000000000000000000000000000000000000000000";
-    //d = ethUtil.solidityCoder.decodeParam(SolidityTypeString, "0x6e172af0000000000000000000000000");
-    //console.log(d);
 
 };
 module.exports = emissionCtrl;

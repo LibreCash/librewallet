@@ -53,6 +53,8 @@
   <!-- If unlocked with PK -->
   <article class="block" ng-hide="wallet.type=='addressOnly'">
 
+{{ bankState }}
+<button ng-click="getBankState()">lll</button>
 
     <!-- To Address -->
     <!--div class="row form-group">
