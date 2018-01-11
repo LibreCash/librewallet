@@ -81,6 +81,7 @@ var bulkGenCtrl              = require('./controllers/bulkGenCtrl');
 var decryptWalletCtrl        = require('./controllers/decryptWalletCtrl');
 var viewWalletCtrl           = require('./controllers/viewWalletCtrl');
 var bankStatusCtrl           = require('./controllers/bankStatusCtrl')
+var buyLibreCtrl             = require('./controllers/buyLibreCtrl')
 var txStatusCtrl              = require('./controllers/txStatusCtrl');
 var sendTxCtrl               = require('./controllers/sendTxCtrl');
 var emissionCtrl             = require('./controllers/emissionCtrl');
@@ -137,6 +138,7 @@ app.controller('onboardingCtrl', ['$scope', onboardingCtrl]);
 app.controller('decryptWalletCtrl', ['$scope', '$sce', 'walletService', decryptWalletCtrl]);
 app.controller('viewWalletCtrl', ['$scope', 'walletService', viewWalletCtrl]);
 app.controller('bankStatusCtrl', ['$scope', bankStatusCtrl]);
+app.controller('buyLibreCtrl', ['$scope', buyLibreCtrl]);
 app.controller('txStatusCtrl', ['$scope', txStatusCtrl]);
 app.controller('sendTxCtrl', ['$scope', '$sce', 'walletService', '$rootScope', sendTxCtrl]);
 app.controller('emissionCtrl',['$scope', '$sce', 'walletService', '$rootScope', emissionCtrl]);

@@ -1,7 +1,6 @@
 <!-- Content -->
 <div class="col-sm-8">
 
-
   <!-- If unlocked with address only -->
   <article class="block" ng-show="wallet.type=='addressOnly'">
     <div class="row form-group">
@@ -52,9 +51,6 @@
 
   <!-- If unlocked with PK -->
   <article class="block" ng-hide="wallet.type=='addressOnly'">
-
-{{ bankState }}
-<button ng-click="getBankState()">lll</button>
 
     <!-- To Address -->
     <!--div class="row form-group">

@@ -1,25 +1,27 @@
 'use strict';
-var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
-    $scope.tx = {};
-    $scope.signedTx
+var emissionCtrl = function($scope/*, $sce, walletService, $rootScope*/) {
+    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
+    console.log('emissionCtrl');
+    var bankAddress = libreBank.address;
+    //$scope.address = bankAddress;
+    var bankAbi = libreBank.abi;
+    var bankAbiRefactor = {};    
+    for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
+
+    /*    $scope.tx = {};
+    $scope.signedTx;
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
     $scope.emissionModal = new Modal(document.getElementById('emission'));
     walletService.wallet = null;
     walletService.password = '';
     $scope.showAdvance = $rootScope.rootScopeShowRawTx = false;
-    $scope.dropdownEnabled = true;
+    $scope.dropdownEnabled = false;
     $scope.Validator = Validator;
     $scope.gasLimitChanged = false;
     $scope.tx.readOnly = globalFuncs.urlGet('readOnly') == null ? false : true;
     var currentTab = $scope.globalService.currentTab;
     var tabs = $scope.globalService.tabs;
-    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
-
-    var bankAddress = libreBank.address;
-    var bankAbi = libreBank.abi;
-    var bankAbiRefactor = {};    
-    for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
 
     $scope.tokenTx = {
         to: '',
@@ -48,7 +50,7 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
     }
 
 
-    $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
+/*    $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
         $scope.tx.sendMode = sendMode;
         $scope.unitReadable = '';
         if ( globalFuncs.urlGet('tokensymbol') != null ) {
@@ -61,9 +63,9 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
             $scope.tokenTx.id = tokenId;
         }
         $scope.dropdownAmount = false;
-    }
+    }*/
 
-    $scope.setTokenSendMode = function() {
+/*    $scope.setTokenSendMode = function() {
         if ($scope.tx.sendMode == 'token' && !$scope.tx.tokensymbol) {
             $scope.tx.tokensymbol = $scope.wallet.tokenObjs[0].symbol;
             $scope.wallet.tokenObjs[0].type = "custom";
@@ -78,14 +80,15 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
             }
         }
         if ($scope.tx.sendMode != 'token') $scope.tokenTx.id = -1;
-    }
+    }*/
 
-    var applyScope = function() {
+/*    var applyScope = function() {
         if (!$scope.$$phase) $scope.$apply();
     }
 
     var defaultInit = function() {
-        globalFuncs.urlGet('sendMode') == null ? $scope.setSendMode('ether') : $scope.setSendMode(globalFuncs.urlGet('sendMode'));
+//        globalFuncs.urlGet('sendMode') == null ? $scope.setSendMode('ether') : $scope.setSendMode(globalFuncs.urlGet('sendMode'));
+//        $scope.setSendMode('ether');
         $scope.gasLimitChanged = globalFuncs.urlGet('gaslimit') != null ? true : false;
         $scope.showAdvance = globalFuncs.urlGet('gaslimit') != null || globalFuncs.urlGet('gas') != null || globalFuncs.urlGet('data') != null;
         if (globalFuncs.urlGet('data') || globalFuncs.urlGet('value') || globalFuncs.urlGet('to') || globalFuncs.urlGet('gaslimit') || globalFuncs.urlGet('sendMode') || globalFuncs.urlGet('gas') || globalFuncs.urlGet('tokensymbol')) $scope.hasQueryString = true // if there is a query string, show an warning at top of page
@@ -96,17 +99,19 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
         return walletService.wallet.getAddressString();
     }, function() {
         if (walletService.wallet == null) return;
+        console.log('wallet watch', walletService.wallet.getAddressString());
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
         $scope.tx.to = bankAddress; //walletService.wallet.getAddressString();
-        $scope.wallet.setTokens();
+        //$scope.wallet.setTokens();
         if ($scope.parentTxConfig) {
             var setTxObj = function() {
                 $scope.addressDrtv.ensAddressField = $scope.parentTxConfig.to;
                 $scope.tx.value = $scope.parentTxConfig.value;
-                $scope.tx.sendMode = $scope.parentTxConfig.sendMode ? $scope.parentTxConfig.sendMode : 'ether';
-                $scope.tx.tokensymbol = $scope.parentTxConfig.tokensymbol ? $scope.parentTxConfig.tokensymbol : '';
+//                $scope.tx.sendMode = $scope.parentTxConfig.sendMode ? $scope.parentTxConfig.sendMode : 'ether';
+                $scope.tx.sendMode = 'ether';
+ //               $scope.tx.tokensymbol = $scope.parentTxConfig.tokensymbol ? $scope.parentTxConfig.tokensymbol : '';
                 $scope.tx.gasPrice = $scope.parentTxConfig.gasPrice ? $scope.parentTxConfig.gasPrice : null;
                 $scope.tx.nonce = $scope.parentTxConfig.nonce ? $scope.parentTxConfig.nonce : null;
                 $scope.tx.data = $scope.parentTxConfig.data ? $scope.parentTxConfig.data : $scope.tx.data;
@@ -120,36 +125,23 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
                 setTxObj();
             }, true);
         }
-        $scope.setTokenSendMode();
+//        $scope.setTokenSendMode();
         defaultInit();
     });
 
     $scope.$watch('ajaxReq.key', function() {
         if ($scope.wallet) {
-            $scope.setSendMode('ether');
+            //$scope.setSendMode('ether');
             $scope.wallet.setBalance(applyScope);
             $scope.wallet.setTokens();
         }
     });
 
-/*    $scope.$watch('wallet', function() {
-        console.log('wallet');
 
-        getBankState(bankAbiRefactor);
-    });*/
-
-    $scope.$watch('tokenTx', function() {
-        if ($scope.wallet && $scope.wallet.tokenObjs !== undefined && $scope.wallet.tokenObjs[$scope.tokenTx.id] !== undefined && $scope.Validator.isValidAddress($scope.tokenTx.to) && $scope.Validator.isPositiveNumber($scope.tokenTx.value)) {
-            if ($scope.estimateTimer) clearTimeout($scope.estimateTimer);
-            $scope.estimateTimer = setTimeout(function() {
-                $scope.estimateGasLimit();
-            }, 500);
-        }
-    }, true);
 
     $scope.$watch('tx', function(newValue, oldValue) {
         $rootScope.rootScopeShowRawTx = false;
-        if (oldValue.sendMode && oldValue.sendMode != newValue.sendMode && newValue.sendMode == 'ether') {
+        if (newValue.sendMode == 'ether') {
             $scope.tx.data = globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data');
             $scope.tx.gasLimit = globalFuncs.defaultTxGasLimit;
         }
@@ -159,10 +151,7 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
                 $scope.estimateGasLimit();
             }, 500);
         }
-        if ($scope.tx.sendMode == 'token') {
-            $scope.tokenTx.to = $scope.tx.to;
-            $scope.tokenTx.value = $scope.tx.value;
-        }
+
         if (newValue.to !== oldValue.to) {
             for (var i in $scope.customGas) {
                 if ($scope.tx.to.toLowerCase() == $scope.customGas[i].to.toLowerCase()) {
@@ -217,7 +206,7 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
     $scope.hasEnoughBalance = function() {
         if ($scope.wallet.balance == 'loading') return false;
         return isEnough($scope.tx.value, $scope.wallet.balance);
-    }
+    } /* */
 
     // далее три функции из ens
     var normalise = function(name) {
@@ -247,7 +236,8 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
         return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
     };
 
-    $scope.getBankState = function() {
+
+    /*$scope.getBankState = function() {
      //   const _var = "contractState";
         const _var = "buyFee";
         console.log(bankAbiRefactor[_var], [namehash(_var)]);
@@ -270,9 +260,24 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
                 $scope.bankState = data;
             }
         });
-    };
+    };*/
+    let dataVar = "contractState";
+    ajaxReq.getEthCall({
+        to: bankAddress,
+        data: getDataString(bankAbiRefactor[dataVar], [namehash(dataVar)])
+    }, function(data) {
+        if (data.error || data.data == '0x') console.log(data);
+        else {
+            var outTypes = bankAbiRefactor[dataVar].outputs.map(function(i) {
+                return i.type;
+            });
+            data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
+            console.log(data);
+        }
+    });
+    //getBankState();
 
-    $scope.generateBuyLibreTx = function() {
+/*    $scope.generateBuyLibreTx = function() {
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
             else if (!ethFuncs.validateHexString($scope.tx.data)) throw globalFuncs.errorMsgs[9];
@@ -319,7 +324,7 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
                 var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
                 $scope.notifier.success(completeMsg, 0);
                 $scope.wallet.setBalance(applyScope);
-                if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
+                //if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
             } else {
                 $scope.notifier.danger(resp.error);
             }
@@ -363,7 +368,7 @@ var emissionCtrl = function($scope, $sce, walletService, $rootScope) {
       $scope.parsedSignedTx.data          = (txData.data=='0x'||txData.data==''||txData.data==null) ? '(none)' : ethFuncs.sanitizeHex(txData.data.toString('hex'))
 
 
-    }
+    }*/
 
 };
 module.exports = emissionCtrl;
