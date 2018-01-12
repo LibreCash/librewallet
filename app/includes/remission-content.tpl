@@ -85,13 +85,13 @@
       </div>
 
       <!-- Amount to Send - Transfer Entire Balance -->
-      <p class="col-xs-12" ng-hide="tx.readOnly">
+      <!--p class="col-xs-12" ng-hide="tx.readOnly">
         <a ng-click="transferAllBalance()">
           <span class="strong" translate="LIBRE_sendAllTokens">
             Send All Tokens
           </span>
         </a>
-      </p>
+      </p-->
 
       <!-- rateLimit -->
         <div class="col-sm-11">

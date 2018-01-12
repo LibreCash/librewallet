@@ -304,6 +304,9 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         $scope.sellRate = data.error ? data.message : normalizeRate(data.data[0]);
         $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 0.9); // +10%
     },
+    processTokenCount = function(data) {
+        $scope.tokenCount = data.error ? data.message : normalizeRate(data.data[0]);
+    },
     normalizeUnixTime = function(data) {
         var date = new Date(data * 1000);
         return date.toLocaleString();
@@ -330,6 +333,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     $scope.queuePeriod = _queuePeriod;
 
     getBankDataProcess("cryptoFiatRateSell", processSellRate);
+    getBankDataProcess("cryptoFiatRateSell", processTokenCount);
 
     var getBankState = function() {
         const _var = "contractState";
@@ -365,7 +369,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
                 if (data.error) $scope.notifier.danger(data.msg);
                 data = data.data;
-                var tokenCount = $scope.tokenValue;
+                var tokenCount = $scope.tokenValue * tokenMultiplier;
                 $scope.tx.data = getDataString(bankAbiRefactor["createSellOrder"], 
                     [$scope.wallet.getAddressString(), tokenCount, $scope.tx.rateLimitReal]);
                 console.log($scope.tx.data);
