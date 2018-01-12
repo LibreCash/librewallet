@@ -67,8 +67,8 @@
 
     <!-- Amount to Send -->
       <div class="col-sm-11">
-        <label translate="SEND_amount">
-          Amount to Send:
+        <label translate="LIBRE_sellTokens">
+          Tokens to Sell:
         </label>
       </div>
 
@@ -77,40 +77,18 @@
           <input type="text"
                  class="form-control"
                  placeholder="{{ 'SEND_amount_short' | translate }}"
-                 ng-model="tx.value"
+                 ng-model="tokenValue"
                  ng-disabled="tx.readOnly || checkTxReadOnly"
-                 ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'"/>
+                 ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
 
-          <div class="input-group-btn">
-            <a style="min-width: 170px"
-               class="btn btn-default dropdown-toggle"
-               class="dropdown-toggle"
-               ng-click="wallet.setTokens(); globalService.tokensLoaded=true;dropdownAmount = !dropdownAmount"
-               ng-class="dropdownEnabled ? '' : 'disabled'">
-                <strong>
-                  {{unitReadable}}
-                  <i class="caret"></i>
-                </strong>
-            </a>
-            <!-- Amount to Send - Dropdown -->
-            <ul class="dropdown-menu dropdown-menu-right"
-                ng-show="dropdownAmount && !tx.readOnly">
-              <li>
-                <a ng-class="{true:'active'}[tx.sendMode=='ether']"
-                   ng-click="setSendMode('ether')">
-                     {{ajaxReq.type}}
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
 
       <!-- Amount to Send - Transfer Entire Balance -->
       <p class="col-xs-12" ng-hide="tx.readOnly">
         <a ng-click="transferAllBalance()">
-          <span class="strong" translate="SEND_TransferTotal">
-            Send Entire Balance
+          <span class="strong" translate="LIBRE_sendAllTokens">
+            Send All Tokens
           </span>
         </a>
       </p>
@@ -175,7 +153,7 @@
     <div class="row form-group">
       <div class="col-xs-12 clearfix">
         <a class="btn btn-info btn-block"
-           ng-click="generateBuyLibreTx()"
+           ng-click="generateSellLibreTx()"
            translate="SEND_generate">
               Generate Transaction
         </a>
@@ -203,7 +181,7 @@
     <div class="clearfix form-group" ng-show="showRaw">
       <a class="btn btn-primary btn-block col-sm-11"
          data-toggle="modal"
-         data-target="#emission"
+         data-target="#remission"
          translate="SEND_trans"
          ng-click="parseSignedTx( signedTx )">
              Send Transaction

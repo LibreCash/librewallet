@@ -2,38 +2,9 @@
       ng-if="globalService.currentTab==globalService.tabs.emission.id"
       ng-controller='emissionCtrl'
       ng-cloak >
-  <table class="table" ng-show="!(bankState.error || timeUpdateRequest.error || queuePeriod.error)" class="ng-hide">
-    <tr>
-      <td>Разрешена покупка</td>
-      <td>{{ bankState.data[0] == 3 || then < now ? "Да" : "Нет" }}</td>
-    </tr>
-    <tr>
-      <td>Статус контракта банка</td>
-      <td>{{ bankState.error ? bankState.message : bankState.data[1] }}</td>
-    </tr>
-    <tr>
-      <td>Последний запрос обновления курсов</td>
-      <td>{{ timeUpdateRequest.data[1] }}</td>
-    </tr>
-    <tr>
-      <td>Период разгребания очереди</td>
-      <td>{{ queuePeriod.data[0] }} <span>секунд</span></td>
-    </tr>
-  </table>
-  <table class="table" ng-show="bankState.error || timeUpdateRequest.error || queuePeriod.error" class="ng-hide">
-    <tr ng-show="bankState.error" ng-cloak>
-      <td>Ошибка получения статуса контракта</td>
-      <td>{{ bankState.message }}</td>
-    </tr>
-    <tr ng-show="timeUpdateRequest.error" ng-cloak>
-      <td>Ошибка получения переменной</td>
-      <td>{{ timeUpdateRequest.message }}</td>
-    </tr>
-    <tr ng-show="queuePeriod.error" ng-cloak>
-      <td>Ошибка получения переменной</td>
-      <td>{{ queuePeriod.message }}</td>
-    </tr>
-  </table>
+
+  @@include('./libreStatus.tpl')
+
   <!-- Header : todo turn into warning notification-->
   <div class="alert alert-info" ng-show="hasQueryString">
     <p translate="WARN_Send_Link">
@@ -46,7 +17,7 @@
   <article class="collapse-container">
     <div ng-click="wd = !wd">
       <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
-      <h1 translate="LBT_buyLibreCash">
+      <h1 translate="LIBRE_buyLibreCash">
         Buy LibreCash
       </h1>
     </div>

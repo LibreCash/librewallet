@@ -1,5 +1,5 @@
 'use strict';
-var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
+var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
@@ -8,14 +8,15 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
 
     $scope.buy = true; // activate buy tab
     $scope.tx = {};
+    $scope.tx.value = 0;
     $scope.signedTx;
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
-    $scope.emissionModal = new Modal(document.getElementById('emission'));
+    $scope.remissionModal = new Modal(document.getElementById('remission'));
     walletService.wallet = null;
     walletService.password = '';
     $scope.showAdvance = $rootScope.rootScopeShowRawTx = false;
-    $scope.dropdownEnabled = false;
+    $scope.dropdownEnabled = true;
     $scope.Validator = Validator;
     $scope.gasLimitChanged = false;
     $scope.tx.readOnly = globalFuncs.urlGet('readOnly') == null ? false : true;
@@ -97,10 +98,11 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
         $scope.tx.to = bankAddress; //walletService.wallet.getAddressString();//$scope.wallet.setTokens();
+        $scope.tx.value = 0;
         if ($scope.parentTxConfig) {
             var setTxObj = function() {
                 $scope.addressDrtv.ensAddressField = $scope.parentTxConfig.to;
-                $scope.tx.value = $scope.parentTxConfig.value;
+                $scope.tx.value = 0;
                 $scope.tx.sendMode = 'ether';
  //               $scope.tx.tokensymbol = $scope.parentTxConfig.tokensymbol ? $scope.parentTxConfig.tokensymbol : '';
                 $scope.tx.gasPrice = $scope.parentTxConfig.gasPrice ? $scope.parentTxConfig.gasPrice : null;
@@ -323,7 +325,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
 
     
 
-    $scope.generateBuyLibreTx = function() {
+    $scope.generateSellLibreTx = function() {
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
             //else if (!ethFuncs.validateHexString($scope.tx.data)) throw globalFuncs.errorMsgs[9];
@@ -332,9 +334,9 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
                 if (data.error) $scope.notifier.danger(data.msg);
                 data = data.data;
-
-                $scope.tx.data = getDataString(bankAbiRefactor["createBuyOrder"], 
-                    [$scope.wallet.getAddressString(), $scope.tx.rateLimit]);
+                var tokenCount = $scope.tokenValue;
+                $scope.tx.data = getDataString(bankAbiRefactor["createSellOrder"], 
+                    [$scope.wallet.getAddressString(), tokenCount, $scope.tx.rateLimit]);
                 console.log($scope.tx.data);
                 var txData = uiFuncs.getTxData($scope);
                 uiFuncs.generateTx(txData, function(rawTx) {
@@ -357,7 +359,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     }
 
     $scope.sendTx = function() {
-        $scope.emissionModal.close();
+        $scope.remissionModal.close();
         uiFuncs.sendTx($scope.signedTx, function(resp) {
             if (!resp.isError) {
                 var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
@@ -416,4 +418,4 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     }
 
 };
-module.exports = emissionCtrl;
+module.exports = remissionCtrl;

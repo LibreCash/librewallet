@@ -101,22 +101,22 @@ var globalService = function($http, $httpParamSerializerJQLike) {
   },
   emission: {
     id: 13,
-    name: "LBT_buysell_LibreCash",
+    name: "NAV_BuyLibre",
     url: "emission-librecash",
     mew: true,
     cx: true
   },
-  bankStatus: {
+  remission: {
     id: 14,
-    name: "NAV_BankStatus",
-    url: "bank-status",
+    name: "NAV_SellLibre",
+    url: "sell-libre",
     mew: true,
     cx: true
   },
-  buyLibre: {
+  bankStatus: {
     id: 15,
-    name: "NAV_BuyLibre",
-    url: "buy-libre",
+    name: "NAV_BankStatus",
+    url: "bank-status",
     mew: true,
     cx: true
   }

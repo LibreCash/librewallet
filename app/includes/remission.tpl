@@ -1,8 +1,9 @@
-<!-- Buy Libre Page -->
 <main class="tab-pane active"
-        ng-if="globalService.currentTab==globalService.tabs.buyLibre.id"
-        ng-controller='buyLibreCtrl'
-        ng-cloak>
+      ng-if="globalService.currentTab==globalService.tabs.remission.id"
+      ng-controller='remissionCtrl'
+      ng-cloak >
+
+  @@include('./libreStatus.tpl')
 
   <!-- Header : todo turn into warning notification-->
   <div class="alert alert-info" ng-show="hasQueryString">
@@ -16,8 +17,8 @@
   <article class="collapse-container">
     <div ng-click="wd = !wd">
       <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
-      <h1 translate="LBT_buyLibreCash">
-        Buy LibreCash
+      <h1 translate="LIBRE_sellLibreCash">
+        Sell LibreCash
       </h1>
     </div>
     <div ng-show="!wd">
@@ -29,11 +30,12 @@
 
   <!-- Send Tx Content -->
   <article class="row" ng-show="wallet!=null">
-    @@if (site === 'mew' ) { @@include( './emission-content.tpl', { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './emission-content.tpl', { "site": "cx"  } ) }
+    @@if (site === 'mew' ) { @@include( './remission-content.tpl', { "site": "mew" } ) }
+    @@if (site === 'cx'  ) { @@include( './remission-content.tpl', { "site": "cx"  } ) }
 
-    @@if (site === 'mew' ) { @@include( './emission-modal.tpl',   { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './emission-modal.tpl',   { "site": "cx"  } ) }
+    @@if (site === 'mew' ) { @@include( './remission-modal.tpl',   { "site": "mew" } ) }
+    @@if (site === 'cx'  ) { @@include( './remission-modal.tpl',   { "site": "cx"  } ) }
   </article>
+
+
 </main>
-<!-- / Buy Libre Page -->
