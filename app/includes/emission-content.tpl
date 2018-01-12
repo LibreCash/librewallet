@@ -60,7 +60,7 @@
   <article class="block" ng-hide="wallet.type=='addressOnly'" ng-show="buy">
     <!-- To Address -->
     <div class="row">
-      <span translate="LIBRE_addressText">LibreBank address</span>: {{ tx.to }}. <span translate="LIBRE_checkLegit"></span>Please, check its legitimity.</span>>
+      <span translate="LIBRE_addressText">LibreBank address</span>: {{ tx.to }}. <span translate="LIBRE_checkLegit">Please, check its legitimity.</span>
     </div>
 
     <section class="row form-group">
@@ -117,8 +117,8 @@
 
       <!-- rateLimit -->
         <div class="col-sm-11">
-          <label translate="LBT_rateLimit">
-            Rate Limit:
+          <label translate="LIBRE_maxPriceBuy">
+            Maximum Price to Buy:
           </label>
         </div>
 
@@ -128,6 +128,10 @@
                  placeholder="0"
                  ng-model="tx.rateLimit"
                  ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
+        </div>
+
+        <div class="col-sm-11">
+          <span translate="LIBRE_buyRate">Current buy price</span>: {{ buyRate }} <span>LIBRE/ETH</span>
         </div>
     </section>
 

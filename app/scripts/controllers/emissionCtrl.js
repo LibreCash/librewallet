@@ -6,6 +6,9 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     var bankAbiRefactor = {};    
     for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
 
+    const rateMultiplier = 1000; // todo перенести
+    const tokenMultiplier = 10^18; // todo перенести
+
     $scope.buy = true; // activate buy tab
     $scope.tx = {};
     $scope.signedTx;
@@ -42,7 +45,8 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         gasPrice: globalFuncs.urlGet('gasprice') == null ? null : globalFuncs.urlGet('gasprice'),
         donate: false,
         tokensymbol: globalFuncs.urlGet('tokensymbol') == null ? false : globalFuncs.urlGet('tokensymbol'),
-        rateLimit: 0
+        rateLimit: 0,
+        rateLimitReal: 0
     }
 
     $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
@@ -139,6 +143,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
 
     $scope.$watch('tx', function(newValue, oldValue) {
         $rootScope.rootScopeShowRawTx = false;
+        $scope.tx.rateLimitReal = Math.round($scope.tx.rateLimit * rateMultiplier);
         if (newValue.sendMode == 'ether') {
             $scope.tx.data = globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data');
             //$scope.tx.gasLimit = globalFuncs.defaultTxGasLimit;
@@ -241,6 +246,26 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
     };
 
+    function getBankDataProcess(_var, process, param = "") {
+        return new Promise((resolve, reject) => { 
+            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
+                if (data.error || data.data == '0x') {
+                    if (data.data == '0x') {
+                        data.error = true;
+                        data.message = "Possible error with network or the bank contract";
+                    }
+                } else {
+                    var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
+                        return i.type;
+                    });
+                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
+                }
+                process(data);
+                
+            });
+        })
+    }
+
     async function getBankDataAsync(_var, param = "") {
         return new Promise((resolve, reject) => { 
             ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
@@ -260,6 +285,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             });
         })
     }
+
     var states = function(_data) { 
         const _states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
         try {
@@ -272,6 +298,10 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     },
     normalizeRate = function(data) {
         return data / rateMultiplier;
+    },
+    processBuyRate = function(data) {
+        $scope.buyRate = data.error ? data.message : normalizeRate(data.data[0]);
+        $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 1.1); // -10%
     },
     normalizeUnixTime = function(data) {
         var date = new Date(data * 1000);
@@ -298,6 +328,8 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
     $scope.queuePeriod = _queuePeriod;
 
+    getBankDataProcess("cryptoFiatRateBuy", processBuyRate);
+ 
     var getBankState = function() {
         const _var = "contractState";
 
@@ -334,7 +366,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                 data = data.data;
 
                 $scope.tx.data = getDataString(bankAbiRefactor["createBuyOrder"], 
-                    [$scope.wallet.getAddressString(), $scope.tx.rateLimit]);
+                    [$scope.wallet.getAddressString(), $scope.tx.rateLimitReal]);
                 console.log($scope.tx.data);
                 var txData = uiFuncs.getTxData($scope);
                 uiFuncs.generateTx(txData, function(rawTx) {
