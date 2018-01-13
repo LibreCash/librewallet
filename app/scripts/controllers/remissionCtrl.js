@@ -1,13 +1,60 @@
 'use strict';
 var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
+    var states = function(_data) { 
+        const _states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
+        try {
+            var stateName = _states[_data.data[0]];
+            _data.data.push(stateName);
+            return _data;
+        } catch(e) {
+            return {error: true, message: e.message};
+        }
+    },
+    normalizeRate = function(data) {
+        return data / rateMultiplier;
+    },
+    processSellRate = function(data) {
+        $scope.sellRate = data.error ? data.message : normalizeRate(data.data[0]);
+        $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 0.9); // +10%
+    },
+    processTokenCount = function(data) {
+        $scope.tokenCount = data.error ? data.message : normalizeRate(data.data[0]);
+    },
+    normalizeUnixTime = function(data) {
+        var date = new Date(data * 1000);
+        return date.toLocaleString();
+    },
+    normalizeUnixTimeObject = function(data) {
+        try {
+            var _time = normalizeUnixTime(data.data[0]);
+            data.data.push(_time);
+            return data;
+        } catch(e) {
+            return {error: true, message: e.message};
+        }
+    },
+    setAllTokens = function(data) {
+        console.log(data);
+        $scope.allTokens = data;
+    };
+
+
+
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
     var bankAbiRefactor = {};    
     for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
 
+    var libreCash = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreCash");
+    var cashAddress = libreCash.address;
+    var cashAbi = libreCash.abi;
+    var cashAbiRefactor = {};    
+    for (var i = 0; i < cashAbi.length; i++) cashAbiRefactor[cashAbi[i].name] = cashAbi[i];
+
+
     const rateMultiplier = 1000; // todo перенести
-    const tokenMultiplier = 10^18; // todo перенести
+    const tokenMultiplier = Math.pow(10, 18); // todo перенести
 
     $scope.buy = true; // activate buy tab
     $scope.tx = {};
@@ -98,6 +145,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         return walletService.wallet.getAddressString();
     }, function() {
         if (walletService.wallet == null) return;
+        getCashDataProcess("balanceOf", setAllTokens, walletService.wallet.getAddressString());
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
@@ -248,8 +296,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
     };
 
-    function getBankDataProcess(_var, process, param = "") {
-        return new Promise((resolve, reject) => { 
+    function getDataProcess(address, abiRefactored, _var, process, param = "") {
+        return new Promise((resolve, reject) => {
             ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
                 if (data.error || data.data == '0x') {
                     if (data.data == '0x') {
@@ -263,66 +311,50 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                     data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
                 }
                 process(data);
-                
             });
         })
     }
 
-    async function getBankDataAsync(_var, param = "") {
+    function getBankDataProcess(_var, process, param = "") {
+        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, param = "");
+    }
+
+    function getCashDataProcess(_var, process, param = "") {
+        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, param = "");
+    }
+
+    async function getDataAsync(address, abiRefactored, _var, param = "") {
         return new Promise((resolve, reject) => { 
-            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
+            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], [param]) }, function(data) {
                 if (data.error || data.data == '0x') {
                     if (data.data == '0x') {
                         data.error = true;
                         data.message = "Possible error with network or the bank contract";
                     }
                 } else {
-                    var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
+                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
                         return i.type;
                     });
                     data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
                 }
-                //console.log(data);
                 resolve(data);
             });
         })
     }
-    var states = function(_data) { 
-        const _states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
-        try {
-            var stateName = _states[_data.data[0]];
-            _data.data.push(stateName);
-            return _data;
-        } catch(e) {
-            return {error: true, message: e.message};
-        }
-    },
-    normalizeRate = function(data) {
-        return data / rateMultiplier;
-    },
-    processSellRate = function(data) {
-        $scope.sellRate = data.error ? data.message : normalizeRate(data.data[0]);
-        $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 0.9); // +10%
-    },
-    processTokenCount = function(data) {
-        $scope.tokenCount = data.error ? data.message : normalizeRate(data.data[0]);
-    },
-    normalizeUnixTime = function(data) {
-        var date = new Date(data * 1000);
-        return date.toLocaleString();
-    },
-    normalizeUnixTimeObject = function(data) {
-        try {
-            var _time = normalizeUnixTime(data.data[0]);
-            data.data.push(_time);
-            return data;
-        } catch(e) {
-            return {error: true, message: e.message};
-        }
-    };
+
+    async function getBankDataAsync(_var, param = "") {
+        return getDataAsync(bankAddress, bankAbiRefactor, _var, param);
+    }
+
+    async function getCashDataAsync(_var, param = "") {
+        return getDataAsync(cashAddress, cashAbiRefactor, _var, param);
+    }
 
     var _state = await getBankDataAsync("contractState");
     $scope.bankState = states(_state);
+
+    //var _libreTokens = await getCashDataAsync("balanceOf", walletService.wallet.getAddressString());
+      //  $scope.allTokens = _libreTokens.data[0];
 
     var _timeUpdateRequest = await getBankDataAsync("timeUpdateRequest");
     var _queuePeriod = await getBankDataAsync("queuePeriod");

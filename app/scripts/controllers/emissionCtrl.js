@@ -7,7 +7,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
 
     const rateMultiplier = 1000; // todo перенести
-    const tokenMultiplier = 10^18; // todo перенести
+    const tokenMultiplier = Math.pow(10, 18); // todo перенести
 
     $scope.buy = true; // activate buy tab
     $scope.tx = {};
