@@ -407,6 +407,7 @@ MYWAL_Viewing                   :  'Viewing Wallet',
 MYWAL_WatchOnly                 :  'Your Watch-Only Accounts',
 
 NAV_AddWallet                   :  'Add Wallet',
+NAV_BankStatus                  :  'Bank Status',
 NAV_BulkGenerate                :  'Bulk Generate',
 NAV_CheckTxStatus               :  'Check TX Status',
 NAV_Contact                     :  'Contact',
@@ -560,6 +561,33 @@ tx_notFound_4                   :  'Please use the dropdown in the top-right & s
 tx_Summary                      :  'During times of high volume (like during ICOs) transactions can be pending for hours, if not days. This tool aims to give you the ability to find and "cancel" / replace these TXs. ** This is not typically something you can do. It should not be relied upon & will only work when the TX Pools are full. [Please, read about this tool here.](https://myetherwallet.github.io/knowledge-base/transactions/check-status-of-ethereum-transaction.html)**',
 
 TXFEE_Desc                      :  'The TX Fee is paid to miners for including your TX in a block. Is is the `gas limit` * `gas price`. [You can convert GWEI -> ETH here](https://www.myetherwallet.com/helpers.html)',
+
+VAR_tokenAddress                :  'LibreCash Contract',
+VAR_cryptoFiatRate              :  'Nominal Tokens Rate',
+VAR_cryptoFiatRateBuy           :  'Buy Tokens Rate',
+VAR_cryptoFiatRateSell          :  'Sell Tokens Rate',
+VAR_buyFee                      :  'Buy Fee',
+VAR_sellFee                     :  'Sell Fee',
+VAR_getBuyOrdersCount           :  'Buy Orders Count',
+VAR_getSellOrdersCount          :  'Sell Orders Count',
+VAR_numEnabledOracles           :  'Enabled Oracle Count',
+VAR_numReadyOracles             :  'Ready Oracle Count',
+VAR_countOracles                :  'All Oracle Count',
+VAR_relevancePeriod             :  'Emission Period in seconds',
+VAR_queuePeriod                 :  'Queue Updating max Period in seconds',
+VAR_timeUpdateRequest           :  'Time update requests were sent',
+VAR_contractState               :  'State of the contract',
+
+BANKSTATUS_bankContractAddress  :  'Bank contract address',
+BANKSTATUS_contractStatus       :  'Contract Status',
+BANKSTATUS_oraclesStatus        :  'Oracles Status',
+BANKSTATUS_name                 :  'Name',
+BANKSTATUS_address              :  'Address',
+BANKSTATUS_type                 :  'Type',
+BANKSTATUS_updateTime           :  'Update Time',
+BANKSTATUS_rate                 :  'Rate',
+
+
 
 VIEWWALLET_HidePrivKey          :  '(hide)',
 VIEWWALLET_ShowPrivKey          :  '(show)',

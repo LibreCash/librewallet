@@ -267,6 +267,7 @@ TXFEE_Desc                  : 'The TX Fee is paid to miners for including your T
 
 /* Navigation*/
 NAV_AddWallet               : 'Добавить кошелёк ',
+NAV_BankStatus              : 'Статус банка ',
 NAV_BulkGenerate            : 'Создать несколько кошельков ',
 NAV_Contact                 : 'Контакты ',
 NAV_Contracts               : 'контракт ',
@@ -469,6 +470,9 @@ MYWAL_Name                  : 'Имя кошелька ',
 MYWAL_Content_1             : 'Внимание! Вы собираетесь удалить кошелёк ',
 MYWAL_Content_2             : 'Убедитесь, что Вы **сохранили закрытый ключ или файл Keystore / JSON и пароль** от этого кошелька, прежде чем Вы удалите этот кошелёк. ',
 MYWAL_Content_3             : 'Если Вы планируете в будущем использовать этот кошелёк в MyEtherWallet CX, Вам надо будет вручную заново добавить его, указав закрытый ключ или файл JSON и пароль. ',
+
+VAR_tokenAddress            :  'Адрес контракта LibreCash',
+VAR_cryptoFiatRate          :  'Номинальный курс',
 
 /* View Wallet Details */
 VIEWWALLET_Subtitle         : 'Позволяет скачать закрытые ключи в различных форматах, а также повторно напечатать Ваши бумажные кошельки. Вам это понадобится, когда Вы захотите [импортировать Ваши счета в geth или Mist](http://ethereum.stackexchange.com/questions/465/how-to-import-a-plain-private-key-into-geth/). Для проверки баланса Ваших счетов мы рекомендуем использовать браузер блокчейна, например [etherscan.io](https://etherscan.io/). ',
