@@ -97,13 +97,13 @@
   <section class="container">
     @@if (site === 'mew' ) {
       <a class="brand" href="/" aria-label="Go to homepage">
-        <img src="images/logo-myetherwallet.svg"   height="64px" width="245px" alt="MyEtherWallet" />
+        <img src="images/logo-libre.svg"   height="64px" width="245px" alt="LibreWallet" />
         <p class="small visible-xs">3.11.1.7</p>
       </a>
     }
     @@if (site === 'cx'  ) {
       <a class="brand" href="/cx-wallet.html" aria-label="Go to homepage">
-        <img src="images/logo-myetherwalletcx.svg" height="64px" width="245px" alt="MyEtherWallet" />
+        <img src="images/logo-libre.svg" height="64px" width="245px" alt="LibreWallet" />
         <p class="small visible-xs">3.11.1.7</p>
       </a>
     }
