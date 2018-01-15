@@ -58,8 +58,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
     $scope.remissionModal = new Modal(document.getElementById('remission'));
-    walletService.wallet = null;
-    walletService.password = '';
+    //walletService.wallet = null;
+    //walletService.password = '';
     $scope.showAdvance = $rootScope.rootScopeShowRawTx = false;
     $scope.dropdownEnabled = true;
     $scope.Validator = Validator;
@@ -261,7 +261,39 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
     };
 
+    function getDataCommon(address, abiRefactored, _var, process, transactionParam, processParam) {
+        return new Promise((resolve, reject) => {
+            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], [transactionParam]) }, function(data) {
+                if (data.error || data.data == '0x') {
+                    if (data.data == '0x') {
+                        data.error = true;
+                        data.message = "Possible error with network or the bank contract";
+                    }
+                } else {
+                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
+                        return i.type;
+                    });
+                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
+                }
+                process(data, processParam);
+            });
+        })
+    }
+
     function getDataProcess(address, abiRefactored, _var, process, param = "") {
+        return getDataCommon(address, abiRefactored, _var, process, param, "");
+    }
+
+    function setScope(_value, _key) {
+        // todo error handling
+        $scope[_key] = _value.data[0];
+    }
+
+    function getDataScope(address, abiRefactored, _var, _key, param = "") {
+        return getDataCommon(address, abiRefactored, _var, setScope, param, _key);
+    }
+
+/*    function getDataProcess(address, abiRefactored, _var, process, param = "") {
         return new Promise((resolve, reject) => {
             ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], [param]) }, function(data) {
                 if (data.error || data.data == '0x') {
@@ -279,7 +311,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                 process(data);
             });
         })
-    }
+    }*/
 
     function getBankDataProcess(_var, process, param = "") {
         return getDataProcess(bankAddress, bankAbiRefactor, _var, process, param);
@@ -316,19 +348,33 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         return getDataAsync(cashAddress, cashAbiRefactor, _var, param);
     }
 
-    var _state = await getBankDataAsync("contractState");
-    $scope.bankState = states(_state);
+    async function getBankDataScope(_var, _key, param = "") {
+        return getDataScope(bankAddress, bankAbiRefactor, _var, _key, param);
+    }
 
-    //var _libreTokens = await getCashDataAsync("balanceOf", walletService.wallet.getAddressString());
-      //  $scope.allTokens = _libreTokens.data[0];
+    async function getCashDataScope(_var, _key, param = "") {
+        return getDataScope(cashAddress, cashAbiRefactor, _var, _key, param);
+    }
 
-    var _timeUpdateRequest = await getBankDataAsync("timeUpdateRequest");
-    var _queuePeriod = await getBankDataAsync("queuePeriod");
+    //var _state = await getBankDataAsync("contractState");
+    function setBankState() {
+        $scope.bankState = states(_state);
+    }
+    getBankDataProcess("contractState", function(data) {
+        $scope.bankState = states(data);
+    });
 
-    $scope.now = (+new Date) / 1000; // todo взять из блока
-    $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
-    $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
-    $scope.queuePeriod = _queuePeriod;
+    getBankDataProcess("timeUpdateRequest", async function(data) {
+        $scope.now = (+new Date) / 1000; // todo взять из блока
+        var _queuePeriod = await getBankDataAsync("queuePeriod");
+        $scope.queuePeriod = _queuePeriod;
+        $scope.then = +data.data[0] + +_queuePeriod.data[0];
+        $scope.timeUpdateRequest = normalizeUnixTimeObject(data);
+    });
+
+
+
+
 
     getBankDataProcess("cryptoFiatRateSell", processSellRate);
 

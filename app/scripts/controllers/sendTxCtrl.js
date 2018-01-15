@@ -5,8 +5,8 @@ var sendTxCtrl = function($scope, $sce, walletService, $rootScope) {
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
     $scope.sendTxModal = new Modal(document.getElementById('sendTransaction'));
-    walletService.wallet = null;
-    walletService.password = '';
+    //walletService.wallet = null;
+    //walletService.password = '';
     $scope.showAdvance = $rootScope.rootScopeShowRawTx = false;
     $scope.dropdownEnabled = true;
     $scope.Validator = Validator;

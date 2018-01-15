@@ -15,8 +15,8 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
     $scope.emissionModal = new Modal(document.getElementById('emission'));
-    walletService.wallet = null;
-    walletService.password = '';
+    //walletService.wallet = null;
+    //walletService.password = '';
     $scope.showAdvance = $rootScope.rootScopeShowRawTx = false;
     $scope.dropdownEnabled = false;
     $scope.Validator = Validator;
@@ -173,41 +173,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         }
     }, true);
 
-    /*$scope.estimateGasLimit = function() {
-        $scope.customGasMsg = ''
-        if ($scope.gasLimitChanged) return;
-        for (var i in $scope.customGas) {
-            if ($scope.tx.to.toLowerCase() == $scope.customGas[i].to.toLowerCase()) {
-                $scope.showAdvance = $scope.tx.data != '' || $scope.customGas[i].data != '' ? true : false;
-                $scope.tx.gasLimit = $scope.customGas[i].gasLimit;
-                if ($scope.customGas[i].data != '') $scope.tx.data = $scope.customGas[i].data;
-                $scope.customGasMsg = $scope.customGas[i].msg != '' ? $scope.customGas[i].msg : ''
-                return;
-            }
-        }
-        if (globalFuncs.lightMode) {
-            $scope.tx.gasLimit = globalFuncs.defaultTokenGasLimit;
-            return;
-        }
-        var estObj = {
-            to: $scope.tx.to,
-            from: $scope.wallet.getAddressString(),
-            value: ethFuncs.sanitizeHex(ethFuncs.decimalToHex(etherUnits.toWei($scope.tx.value, $scope.tx.unit)))
-        }
-        if ($scope.tx.data != "") estObj.data = ethFuncs.sanitizeHex($scope.tx.data);
-        if ($scope.tx.sendMode == 'token') {
-            estObj.to = $scope.wallet.tokenObjs[$scope.tokenTx.id].getContractAddress();
-            estObj.data = $scope.wallet.tokenObjs[$scope.tokenTx.id].getData($scope.tokenTx.to, $scope.tokenTx.value).data;
-            estObj.value = '0x00';
-        }
-        ethFuncs.estimateGas(estObj, function(data) {
 
-            if (!data.error) {
-                if (data.data == '-1') $scope.notifier.danger(globalFuncs.errorMsgs[21]);
-                $scope.tx.gasLimit = data.data;
-            } else $scope.notifier.danger(data.msg);
-        });
-    }*/
 
     var isEnough = function(valA, valB) {
         return new BigNumber(valA).lte(new BigNumber(valB));
@@ -317,16 +283,20 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         }
     };
 
-    var _state = await getBankDataAsync("contractState");
-    $scope.bankState = states(_state);
+    function setBankState() {
+        $scope.bankState = states(_state);
+    }
+    getBankDataProcess("contractState", function(data) {
+        $scope.bankState = states(data);
+    });
 
-    var _timeUpdateRequest = await getBankDataAsync("timeUpdateRequest");
-    var _queuePeriod = await getBankDataAsync("queuePeriod");
-
-    $scope.now = (+new Date) / 1000; // todo взять из блока
-    $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
-    $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
-    $scope.queuePeriod = _queuePeriod;
+    getBankDataProcess("timeUpdateRequest", async function(data) {
+        $scope.now = (+new Date) / 1000; // todo взять из блока
+        var _queuePeriod = await getBankDataAsync("queuePeriod");
+        $scope.queuePeriod = _queuePeriod;
+        $scope.then = +data.data[0] + +_queuePeriod.data[0];
+        $scope.timeUpdateRequest = normalizeUnixTimeObject(data);
+    });
 
     getBankDataProcess("cryptoFiatRateBuy", processBuyRate);
  
