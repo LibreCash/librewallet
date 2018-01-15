@@ -34,6 +34,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         }
     };
 
+    const TOKEN_DECIMALS = 18;
+
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
@@ -48,9 +50,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
 
 
     const rateMultiplier = 1000; // todo перенести
-    const tokenMultiplier = Math.pow(10, 18); // todo перенести
 
-    $scope.buy = true; // activate buy tab
+    //$scope.buy = true; // activate buy tab
     $scope.tx = {};
     $scope.tx.value = 0;
     $scope.signedTx;
@@ -136,7 +137,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
 
     var setAllTokens = function(data) {
         console.log(data);
-        //$scope.allTokens = data;
+        $scope.allTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
     }
 
     $scope.$watch(function() {
@@ -144,7 +145,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         return walletService.wallet.getAddressString();
     }, function() {
         if (walletService.wallet == null) return;
-        getCashDataScope("balanceOf", "allTokens", walletService.wallet.getAddressString());
+        console.log("wallet", walletService.wallet.getAddressString());
+        getCashDataProcess("balanceOf", setAllTokens, walletService.wallet.getAddressString());
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
@@ -222,42 +224,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         }
     }, true);
 
-    /*$scope.estimateGasLimit = function() {
-        $scope.customGasMsg = ''
-        if ($scope.gasLimitChanged) return;
-        for (var i in $scope.customGas) {
-            if ($scope.tx.to.toLowerCase() == $scope.customGas[i].to.toLowerCase()) {
-                $scope.showAdvance = $scope.tx.data != '' || $scope.customGas[i].data != '' ? true : false;
-                $scope.tx.gasLimit = $scope.customGas[i].gasLimit;
-                if ($scope.customGas[i].data != '') $scope.tx.data = $scope.customGas[i].data;
-                $scope.customGasMsg = $scope.customGas[i].msg != '' ? $scope.customGas[i].msg : ''
-                return;
-            }
-        }
-        if (globalFuncs.lightMode) {
-            $scope.tx.gasLimit = globalFuncs.defaultTokenGasLimit;
-            return;
-        }
-        var estObj = {
-            to: $scope.tx.to,
-            from: $scope.wallet.getAddressString(),
-            value: ethFuncs.sanitizeHex(ethFuncs.decimalToHex(etherUnits.toWei($scope.tx.value, $scope.tx.unit)))
-        }
-        if ($scope.tx.data != "") estObj.data = ethFuncs.sanitizeHex($scope.tx.data);
-        if ($scope.tx.sendMode == 'token') {
-            estObj.to = $scope.wallet.tokenObjs[$scope.tokenTx.id].getContractAddress();
-            estObj.data = $scope.wallet.tokenObjs[$scope.tokenTx.id].getData($scope.tokenTx.to, $scope.tokenTx.value).data;
-            estObj.value = '0x00';
-        }
-        ethFuncs.estimateGas(estObj, function(data) {
-
-            if (!data.error) {
-                if (data.data == '-1') $scope.notifier.danger(globalFuncs.errorMsgs[21]);
-                $scope.tx.gasLimit = data.data;
-            } else $scope.notifier.danger(data.msg);
-        });
-    }*/
-
     var isEnough = function(valA, valB) {
         return new BigNumber(valA).lte(new BigNumber(valB));
     }
@@ -297,14 +263,14 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
 
     function getDataProcess(address, abiRefactored, _var, process, param = "") {
         return new Promise((resolve, reject) => {
-            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
+            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], [param]) }, function(data) {
                 if (data.error || data.data == '0x') {
                     if (data.data == '0x') {
                         data.error = true;
                         data.message = "Possible error with network or the bank contract";
                     }
                 } else {
-                    var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
+                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
                         return i.type;
                     });
                     data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
@@ -315,36 +281,12 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         })
     }
 
-    function getDataScope(address, abiRefactored, _var, _scope, param = "") {
-        return new Promise((resolve, reject) => {
-            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
-                if (data.error || data.data == '0x') {
-                    if (data.data == '0x') {
-                        data.error = true;
-                        data.message = "Possible error with network or the bank contract";
-                    }
-                } else {
-                    var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
-                        return i.type;
-                    });
-                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
-                }
-                console.log(process);
-                scope[_scope] = data.data[0];
-            });
-        })
-    }
-
     function getBankDataProcess(_var, process, param = "") {
-        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, param = "");
+        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, param);
     }
 
     function getCashDataProcess(_var, process, param = "") {
-        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, param = "");
-    }
-
-    function getCashDataScope(_var, _scope, param = "") {
-        return getDataScope(cashAddress, cashAbiRefactor, _var, _scope, param = "");
+        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, param);
     }
 
     async function getDataAsync(address, abiRefactored, _var, param = "") {
@@ -365,12 +307,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             });
         })
     }
-
-    setTimeout(() => {
- //       getCashDataScope("decimals", "allTokens");
-//        getCashDataProcess("balanceOf", console.log, walletService.wallet.getAddressString());
-        //getBankDataProcess("cryptoFiatRateSell", console.log);
-       }, 50000);
 
     async function getBankDataAsync(_var, param = "") {
         return getDataAsync(bankAddress, bankAbiRefactor, _var, param);
@@ -430,7 +366,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
                 if (data.error) $scope.notifier.danger(data.msg);
                 data = data.data;
-                var tokenCount = $scope.tokenValue * tokenMultiplier;
+                var tokenCount = $scope.tokenValue * TOKEN_DECIMALS;
                 $scope.tx.data = getDataString(bankAbiRefactor["createSellOrder"], 
                     [$scope.wallet.getAddressString(), tokenCount, $scope.tx.rateLimitReal]);
                 console.log($scope.tx.data);
@@ -472,22 +408,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                 $scope.notifier.danger(resp.error);
             }
         });
-    }
-
-    $scope.transferAllBalance = function() {
-        if ($scope.tx.sendMode != 'token') {
-            uiFuncs.transferAllBalance($scope.wallet.getAddressString(), $scope.tx.gasLimit, function(resp) {
-                if (!resp.isError) {
-                    $scope.tx.unit = resp.unit;
-                    $scope.tx.value = resp.value;
-                } else {
-                    $rootScope.rootScopeShowRawTx = false;
-                    $scope.notifier.danger(resp.error);
-                }
-            });
-        } else {
-            $scope.tx.value = $scope.wallet.tokenObjs[$scope.tokenTx.id].getBalance();
-        }
     }
 
     $scope.parseSignedTx = function( signedTx ) {
