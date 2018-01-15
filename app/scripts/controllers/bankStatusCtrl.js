@@ -1,8 +1,8 @@
 'use strict';
 var bankStatusCtrl = async function($scope) {
-    let libreData = nodes.nodeList.rin_ethscan.libre;
-    let bankAbi = libreData.libreBank.abi,
-        bankAddress = libreData.libreBank.address;
+    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
+    var bankAddress = libreBank.address;
+    var bankAbi = libreBank.abi;
     $scope.ajaxReq = ajaxReq;
 
 

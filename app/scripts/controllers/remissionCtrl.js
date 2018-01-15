@@ -32,13 +32,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         } catch(e) {
             return {error: true, message: e.message};
         }
-    },
-    setAllTokens = function(data) {
-        console.log(data);
-        $scope.allTokens = data;
     };
-
-
 
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
@@ -138,14 +132,19 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         $scope.gasLimitChanged = globalFuncs.urlGet('gaslimit') != null ? true : false;
         $scope.showAdvance = globalFuncs.urlGet('gaslimit') != null || globalFuncs.urlGet('gas') != null || globalFuncs.urlGet('data') != null;
         if (globalFuncs.urlGet('data') || globalFuncs.urlGet('value') || globalFuncs.urlGet('to') || globalFuncs.urlGet('gaslimit') || globalFuncs.urlGet('sendMode') || globalFuncs.urlGet('gas') || globalFuncs.urlGet('tokensymbol')) $scope.hasQueryString = true // if there is a query string, show an warning at top of page
-
     }
+
+    var setAllTokens = function(data) {
+        console.log(data);
+        //$scope.allTokens = data;
+    }
+
     $scope.$watch(function() {
         if (walletService.wallet == null) return null;
         return walletService.wallet.getAddressString();
     }, function() {
         if (walletService.wallet == null) return;
-        getCashDataProcess("balanceOf", setAllTokens, walletService.wallet.getAddressString());
+        getCashDataScope("balanceOf", "allTokens", walletService.wallet.getAddressString());
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
@@ -310,7 +309,28 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                     });
                     data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
                 }
+                console.log(process);
                 process(data);
+            });
+        })
+    }
+
+    function getDataScope(address, abiRefactored, _var, _scope, param = "") {
+        return new Promise((resolve, reject) => {
+            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
+                if (data.error || data.data == '0x') {
+                    if (data.data == '0x') {
+                        data.error = true;
+                        data.message = "Possible error with network or the bank contract";
+                    }
+                } else {
+                    var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
+                        return i.type;
+                    });
+                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
+                }
+                console.log(process);
+                scope[_scope] = data.data[0];
             });
         })
     }
@@ -321,6 +341,10 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
 
     function getCashDataProcess(_var, process, param = "") {
         return getDataProcess(cashAddress, cashAbiRefactor, _var, process, param = "");
+    }
+
+    function getCashDataScope(_var, _scope, param = "") {
+        return getDataScope(cashAddress, cashAbiRefactor, _var, _scope, param = "");
     }
 
     async function getDataAsync(address, abiRefactored, _var, param = "") {
@@ -341,6 +365,12 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             });
         })
     }
+
+    setTimeout(() => {
+ //       getCashDataScope("decimals", "allTokens");
+//        getCashDataProcess("balanceOf", console.log, walletService.wallet.getAddressString());
+        //getBankDataProcess("cryptoFiatRateSell", console.log);
+       }, 50000);
 
     async function getBankDataAsync(_var, param = "") {
         return getDataAsync(bankAddress, bankAbiRefactor, _var, param);
@@ -365,7 +395,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     $scope.queuePeriod = _queuePeriod;
 
     getBankDataProcess("cryptoFiatRateSell", processSellRate);
-    getBankDataProcess("cryptoFiatRateSell", processTokenCount);
 
     var getBankState = function() {
         const _var = "contractState";
