@@ -1,8 +1,9 @@
 'use strict';
-var bankStatusCtrl = function($scope) {
+var bankStatusCtrl = async function($scope) {
     let libreData = nodes.nodeList.rin_ethscan.libre;
     let bankAbi = libreData.libreBank.abi,
         bankAddress = libreData.libreBank.address;
+    $scope.ajaxReq = ajaxReq;
 
 
 // нужно рефакторнуть аби, чтобы оборащаться к нему, как сделано в ens
@@ -37,75 +38,172 @@ var bankStatusCtrl = function($scope) {
     };
 
     // ну и получаем инфу
-    var varsObject = {
+    const rateMultiplier = 1000; // const from smart-contract
+    var oracles = {},
+    normalizeRate = function(data) {
+        return data / rateMultiplier;
+    },
+    normalizeUnixTime = function(data) {
+        var date = new Date(data * 1000);
+        return date.toLocaleString();
+    },
+    varsObject = {
         tokenAddress: {
-            name: "LibreCash Contract"
+            default: "LibreCash Contract",
+            translate: "VAR_tokenAddress"
         },
         cryptoFiatRate: {
-            name: "Nominal Tokens Rate"
+            default: "Nominal Tokens Rate",
+            translate: "VAR_cryptoFiatRate",
+            process: normalizeRate
         },
         cryptoFiatRateBuy: {
-            name: "Buy Tokens Rate"
+            default: "Buy Tokens Rate",
+            translate: "VAR_cryptoFiatRateBuy",
+            process: normalizeRate
         },
         cryptoFiatRateSell: {
-            name: "Sell Tokens Rate"
+            default: "Sell Tokens Rate",
+            translate: "VAR_cryptoFiatRateSell",
+            process: normalizeRate
         },
         buyFee: {
-            name: "Buy Fee"
+            default: "Buy Fee",
+            translate: "VAR_buyFee",
+            process: function(data) {
+                return "{0} %".replace("{0}", data / 100);
+            }
         },
         sellFee: {
-            name: "Sell Fee"
+            default: "Sell Fee",
+            translate: "VAR_sellFee",
+            process: function(data) {
+                return "{0} %".replace("{0}", data / 100);
+            }
         },
         getBuyOrdersCount: {
-            name: "Buy Orders Count"
+            default: "Buy Orders Count",
+            translate: "VAR_getBuyOrdersCount"
         },
         getSellOrdersCount: {
-            name: "Sell Orders Count"
+            default: "Sell Orders Count",
+            translate: "VAR_getSellOrdersCount"
         },
         numEnabledOracles: {
-            name: "Enabled Oracle Count"
+            default: "Enabled Oracle Count",
+            translate: "VAR_numEnabledOracles"
         },
         numReadyOracles: {
-            name: "Ready Oracle Count"
+            default: "Ready Oracle Count",
+            translate: "VAR_numReadyOracles"
         },
         countOracles: {
-            name: "All Oracle Count"
+            default: "All Oracle Count",
+            translate: "VAR_countOracles"
         },
         relevancePeriod: {
-            name: "Emission Period in seconds"
+            default: "Emission Period in seconds",
+            translate: "VAR_relevancePeriod"
         },
         queuePeriod: {
-            name: "Queue Updating max Period in seconds"
+            default: "Queue Updating max Period in seconds",
+            translate: "VAR_queuePeriod"
         },
         timeUpdateRequest: {
-            name: "Time update requests were sent (unix time)"
+            default: "Time update requests were sent",
+            translate: "VAR_timeUpdateRequest",
+            process: normalizeUnixTime
         },
         contractState: {
-            name: "State of the contract",
-            process: function(data) { return "111"; }
+            default: "State of the contract",
+            translate: "VAR_contractState",
+            process: function(data) { 
+                var states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
+                try {
+                    return states[data];
+                } catch(e) {
+                    return e.message;
+                }
+            }
         }
+    }
+    $scope.contractData = varsObject;
+    $scope.address = bankAddress;
+    $scope.oracles = oracles;
+
+    // getting oracles
+    function getBankData(bankAbiRefactor, varsObject, _var) {
+        ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [namehash(_var)]) }, function(data) {
+            if (data.error || data.data == '0x') {
+                varsObject[_var].data = data;
+            } else {
+                var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
+                    return i.type;
+                });
+                data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
+                if (varsObject[_var].process != null) {
+                    data.data = varsObject[_var].process(data.data);
+                }
+                varsObject[_var].data = data;
+            }
+        });
+    }
+    async function getBankDataAsync(bankAbiRefactor, _var, param) {
+        return new Promise((resolve, reject) => { 
+            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
+                if (data.error || data.data == '0x') {
+                    reject(data.message);
+                } else {
+                    var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
+                        return i.type;
+                    });
+                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
+                    resolve(data.data);
+                }
+            });
+        })
     }
 
     for (var prop in varsObject) {
         let dataVar = prop;
-        ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[dataVar], [namehash(dataVar)]) }, function(data) {
-            if (data.error || data.data == '0x') $scope[dataVar] = data;
-            else {
-                var outTypes = bankAbiRefactor[dataVar].outputs.map(function(i) {
-                    return i.type;
-                });
-                data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0];
-                if (varsObject[dataVar].process != null) {
-                    data.data = varsObject[dataVar].process(data);
-                    //
-                }
-                varsObject[dataVar].data = data;
-            }
-        });
+        getBankData(bankAbiRefactor, varsObject, dataVar);
+        
     } // for
-    $scope.contractData = varsObject;
-
-    $scope.address = bankAddress;
-    
+    // getting oracles
+    function hex2a(hexx) {
+        var hex = hexx.toString();//force conversion
+        var str = '';
+        for (var i = 2; i < hex.length; i += 2) {
+            if (hex.substr(i, 2) !== "00") {
+                str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            }
+        }
+        return str;
+    }
+    const 
+        ORACLE_NAME = 0,
+        ORACLE_TYPE = 1,
+        ORACLE_UPDATE_TIME = 2,
+        ORACLE_ENABLED = 3,
+        ORACLE_WAITING = 4,
+        ORACLE_RATE = 5,
+        ORACLE_NEXT = 6;
+    let curOracle = await getBankDataAsync(bankAbiRefactor, "firstOracle", 0);
+    for (
+        let curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle);
+        ;
+        curOracle = curData[ORACLE_NEXT],
+        curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle)
+    ) {
+        oracles[curOracle] = {
+            name: hex2a(curData[ORACLE_NAME]),
+            type: hex2a(curData[ORACLE_TYPE]),
+            updateTime: normalizeUnixTime(curData[ORACLE_UPDATE_TIME]),
+            enabled: curData[ORACLE_ENABLED],
+            waiting: curData[ORACLE_WAITING],
+            rate: normalizeRate(curData[ORACLE_RATE])
+        };
+        if(+curData[ORACLE_NEXT] == 0) break;   
+    }    
 };
 module.exports = bankStatusCtrl;

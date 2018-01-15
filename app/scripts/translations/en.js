@@ -583,6 +583,33 @@ tx_Summary                      :  'During times of high volume (like during ICO
 
 TXFEE_Desc                      :  'The TX Fee is paid to miners for including your TX in a block. Is is the `gas limit` * `gas price`. [You can convert GWEI -> ETH here](https://www.myetherwallet.com/helpers.html)',
 
+VAR_tokenAddress                :  'LibreCash Contract',
+VAR_cryptoFiatRate              :  'Nominal Tokens Rate',
+VAR_cryptoFiatRateBuy           :  'Buy Tokens Rate',
+VAR_cryptoFiatRateSell          :  'Sell Tokens Rate',
+VAR_buyFee                      :  'Buy Fee',
+VAR_sellFee                     :  'Sell Fee',
+VAR_getBuyOrdersCount           :  'Buy Orders Count',
+VAR_getSellOrdersCount          :  'Sell Orders Count',
+VAR_numEnabledOracles           :  'Enabled Oracle Count',
+VAR_numReadyOracles             :  'Ready Oracle Count',
+VAR_countOracles                :  'All Oracle Count',
+VAR_relevancePeriod             :  'Emission Period in seconds',
+VAR_queuePeriod                 :  'Queue Updating max Period in seconds',
+VAR_timeUpdateRequest           :  'Time update requests were sent',
+VAR_contractState               :  'State of the contract',
+
+BANKSTATUS_bankContractAddress  :  'Bank contract address',
+BANKSTATUS_contractStatus       :  'Contract Status',
+BANKSTATUS_oraclesStatus        :  'Oracles Status',
+BANKSTATUS_name                 :  'Name',
+BANKSTATUS_address              :  'Address',
+BANKSTATUS_type                 :  'Type',
+BANKSTATUS_updateTime           :  'Update Time',
+BANKSTATUS_rate                 :  'Rate',
+
+
+
 VIEWWALLET_HidePrivKey          :  '(hide)',
 VIEWWALLET_ShowPrivKey          :  '(show)',
 VIEWWALLET_Subtitle             :  'This allows you to download different versions of private keys and re-print your paper wallet. You may want to do this in order to [import your account into Geth/Mist](http://ethereum.stackexchange.com/questions/465/how-to-import-a-plain-private-key-into-geth/). If you want to check your balance, we recommend using a blockchain explorer like [etherscan.io](https://etherscan.io/).',
