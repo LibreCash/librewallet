@@ -450,6 +450,7 @@ LIBRE_buyRate                   :  'Current buy price',
 LIBRE_maxPriceBuy               :  'Maximum Price to Buy:',
 LIBRE_minPriceSell              :  'Minimum Price to Sell:',
 LIBRE_tokenBalance              :  'Balance',
+LIBRE_allowance                 :  'Allowed tokens for remission:',
 
 NODE_CTA                        :  'Save & Use Custom Node',
 NODE_Name                       :  'Node Name',

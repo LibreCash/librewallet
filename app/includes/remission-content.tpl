@@ -94,6 +94,14 @@
         </a>
       </p>
 
+      <p class="col-xs-12" ng-hide="tx.readOnly">
+        <span translate="LIBRE_allowance">
+          Allowed tokens for remission:
+        </span><span>
+          {{ allowedTokens | 3 }}
+        </span>
+      </p>
+
       <!-- rateLimit -->
         <div class="col-sm-11">
           <label translate="LIBRE_minPriceSell">

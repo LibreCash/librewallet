@@ -138,7 +138,11 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     var setAllTokens = function(data) {
         console.log(data);
         $scope.allTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
-    }
+    }, 
+    setAllowance = function(data) {
+        console.log("allowance", data);
+        $scope.allowedTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+    };
 
     $scope.$watch(function() {
         if (walletService.wallet == null) return null;
@@ -146,7 +150,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     }, function() {
         if (walletService.wallet == null) return;
         console.log("wallet", walletService.wallet.getAddressString());
-        getCashDataProcess("balanceOf", setAllTokens, walletService.wallet.getAddressString());
+        getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
+        getCashDataProcess("allowance", setAllowance, [walletService.wallet.getAddressString(), bankAddress]);
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
@@ -261,9 +266,9 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
     };
 
-    function getDataCommon(address, abiRefactored, _var, process, transactionParam, processParam) {
+    function getDataCommon(address, abiRefactored, _var, process, transactionParams, processParam) {
         return new Promise((resolve, reject) => {
-            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], [transactionParam]) }, function(data) {
+            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], transactionParams) }, function(data) {
                 if (data.error || data.data == '0x') {
                     if (data.data == '0x') {
                         data.error = true;
@@ -280,8 +285,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         })
     }
 
-    function getDataProcess(address, abiRefactored, _var, process, param = "") {
-        return getDataCommon(address, abiRefactored, _var, process, param, "");
+    function getDataProcess(address, abiRefactored, _var, process, params = []) {
+        return getDataCommon(address, abiRefactored, _var, process, params, "");
     }
 
     function setScope(_value, _key) {
@@ -289,8 +294,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         $scope[_key] = _value.data[0];
     }
 
-    function getDataScope(address, abiRefactored, _var, _key, param = "") {
-        return getDataCommon(address, abiRefactored, _var, setScope, param, _key);
+    function getDataScope(address, abiRefactored, _var, _key, params = []) {
+        return getDataCommon(address, abiRefactored, _var, setScope, params, _key);
     }
 
 /*    function getDataProcess(address, abiRefactored, _var, process, param = "") {
@@ -313,17 +318,17 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         })
     }*/
 
-    function getBankDataProcess(_var, process, param = "") {
-        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, param);
+    function getBankDataProcess(_var, process, params = []) {
+        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, params);
     }
 
-    function getCashDataProcess(_var, process, param = "") {
-        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, param);
+    function getCashDataProcess(_var, process, params = []) {
+        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, params);
     }
 
-    async function getDataAsync(address, abiRefactored, _var, param = "") {
+    async function getDataAsync(address, abiRefactored, _var, params = []) {
         return new Promise((resolve, reject) => { 
-            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], [param]) }, function(data) {
+            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], params) }, function(data) {
                 if (data.error || data.data == '0x') {
                     if (data.data == '0x') {
                         data.error = true;
@@ -340,20 +345,20 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         })
     }
 
-    async function getBankDataAsync(_var, param = "") {
-        return getDataAsync(bankAddress, bankAbiRefactor, _var, param);
+    async function getBankDataAsync(_var, params = []) {
+        return getDataAsync(bankAddress, bankAbiRefactor, _var, params);
     }
 
-    async function getCashDataAsync(_var, param = "") {
-        return getDataAsync(cashAddress, cashAbiRefactor, _var, param);
+    async function getCashDataAsync(_var, params = []) {
+        return getDataAsync(cashAddress, cashAbiRefactor, _var, params);
     }
 
-    async function getBankDataScope(_var, _key, param = "") {
-        return getDataScope(bankAddress, bankAbiRefactor, _var, _key, param);
+    async function getBankDataScope(_var, _key, params = []) {
+        return getDataScope(bankAddress, bankAbiRefactor, _var, _key, params);
     }
 
-    async function getCashDataScope(_var, _key, param = "") {
-        return getDataScope(cashAddress, cashAbiRefactor, _var, _key, param);
+    async function getCashDataScope(_var, _key, params = []) {
+        return getDataScope(cashAddress, cashAbiRefactor, _var, _key, params);
     }
 
     //var _state = await getBankDataAsync("contractState");
@@ -371,6 +376,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         $scope.then = +data.data[0] + +_queuePeriod.data[0];
         $scope.timeUpdateRequest = normalizeUnixTimeObject(data);
     });
+
 
 
 
