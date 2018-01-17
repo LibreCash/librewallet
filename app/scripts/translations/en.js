@@ -451,6 +451,7 @@ LIBRE_maxPriceBuy               :  'Maximum Price to Buy:',
 LIBRE_minPriceSell              :  'Minimum Price to Sell:',
 LIBRE_tokenBalance              :  'Balance',
 LIBRE_allowance                 :  'Allowed tokens for remission:',
+LIBRE_approve                   :  'Generate Approve Transaction',
 
 NODE_CTA                        :  'Save & Use Custom Node',
 NODE_Name                       :  'Node Name',

@@ -30,13 +30,13 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         id: -1
     };
     $scope.customGasMsg = '';
-    const EMISSION_DEFAULT_GAS = 200000; // actually about 150000 is used
+    const GAS_EMISSION = 300000;
 
     $scope.customGas = CustomGasMessages;
 
     $scope.tx = {
         // if there is no gasLimit or gas key in the URI, use the default value. Otherwise use value of gas or gasLimit. gasLimit wins over gas if both present
-        gasLimit: EMISSION_DEFAULT_GAS, //globalFuncs.urlGet('gaslimit') != null || globalFuncs.urlGet('gas') != null ? globalFuncs.urlGet('gaslimit') != null ? globalFuncs.urlGet('gaslimit') : globalFuncs.urlGet('gas') : globalFuncs.defaultTxGasLimit,
+        gasLimit: GAS_EMISSION, //globalFuncs.urlGet('gaslimit') != null || globalFuncs.urlGet('gas') != null ? globalFuncs.urlGet('gaslimit') != null ? globalFuncs.urlGet('gaslimit') : globalFuncs.urlGet('gas') : globalFuncs.defaultTxGasLimit,
         data: globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data'),
         to: bankAddress,
         unit: "ether",
@@ -333,19 +333,33 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             //$scope.tx.data = ethFuncs.sanitizeHex($scope.tx.data);
             ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
                 if (data.error) $scope.notifier.danger(data.msg);
-                data = data.data;
 
                 $scope.tx.data = getDataString(bankAbiRefactor["createBuyOrder"], 
                     [$scope.wallet.getAddressString(), $scope.tx.rateLimitReal]);
-                console.log($scope.tx.data);
                 var txData = uiFuncs.getTxData($scope);
+                txData.gasLimit = GAS_EMISSION;
                 uiFuncs.generateTx(txData, function(rawTx) {
                     //console.log("rawTx",rawTx);
                     if (!rawTx.isError) {
                         $scope.rawTx = rawTx.rawTx;
                         $scope.signedTx = rawTx.signedTx;
 
-                        $scope.showRaw = true;
+                        uiFuncs.sendTx($scope.signedTx, function(resp) {
+                            if (!resp.isError) {
+                                var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
+                                var txHashLink = $scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
+                                var emailBody = 'I%20was%20trying%20to..............%0A%0A%0A%0ABut%20I%27m%20confused%20because...............%0A%0A%0A%0A%0A%0ATo%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.tx.to + '%0AFrom%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.wallet.getAddressString() + '%0ATX%20Hash%3A%20https%3A%2F%2Fetherscan.io%2Ftx%2F' + resp.data + '%0AAmount%3A%20' + $scope.tx.value + '%20' + $scope.unitReadable + '%0ANode%3A%20' + $scope.ajaxReq.type + '%0AToken%20To%20Addr%3A%20' + $scope.tokenTx.to + '%0AToken%20Amount%3A%20' + $scope.tokenTx.value + '%20' + $scope.unitReadable + '%0AData%3A%20' + $scope.tx.data + '%0AGas%20Limit%3A%20' + $scope.tx.gasLimit + '%0AGas%20Price%3A%20' + $scope.tx.gasPrice;
+                                var verifyTxBtn = $scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
+                                var checkTxBtn = '<a class="btn btn-xs btn-info" href="' + checkTxLink + '" target="_blank" rel="noopener noreferrer"> Check TX Status </a>';
+                                var emailBtn = '<a class="btn btn-xs btn-info " href="mailto:support@myetherwallet.com?Subject=Issue%20regarding%20my%20TX%20&Body=' + emailBody + '" target="_blank" rel="noopener noreferrer">Confused? Email Us.</a>';
+                                var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
+                                $scope.notifier.success(completeMsg, 0);
+                                $scope.wallet.setBalance(applyScope);
+                                //if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
+                            } else {
+                                $scope.notifier.danger(resp.error);
+                            }
+                        });
                     } else {
                         $scope.showRaw = false;
                         $scope.notifier.danger(rawTx.error);

@@ -98,7 +98,7 @@
         <span translate="LIBRE_allowance">
           Allowed tokens for remission:
         </span><span>
-          {{ allowedTokens | 3 }}
+          {{ allowedTokens | number: 3 }}
         </span>
       </p>
 
@@ -122,28 +122,7 @@
         </div>
     </section>
 
-    <!-- Gas Limit -->
-    <section class="row form-group">
-      <div class="col-sm-11 clearfix">
-        <a class="account-help-icon"
-           href="https://myetherwallet.github.io/knowledge-base/gas/what-is-gas-ethereum.html"
-           target="_blank"
-           rel="noopener noreferrer">
-          <img src="images/icon-help.svg" class="help-icon" />
-          <p class="account-help-text" translate="GAS_LIMIT_Desc"></p>
-        </a>
-        <label translate="TRANS_gas">
-          Gas Limit:
-        </label>
-        <input type="text"
-               class="form-control"
-               placeholder="200000"
-               ng-model="tx.gasLimit"
-               ng-change="gasLimitChanged=true"
-               ng-disabled="tx.readOnly || checkTxReadOnly"
-               ng-class="Validator.isPositiveNumber(tx.gasLimit) ? 'is-valid' : 'is-invalid'" />
-      </div>
-    </section>
+
 
 
     <div class="clearfix form-group">
@@ -166,42 +145,23 @@
     <div class="row form-group">
       <div class="col-xs-12 clearfix">
         <a class="btn btn-info btn-block"
+           ng-click="generateApproveTx()"
+           translate="LIBRE_approve">
+              Generate Approve Transaction
+        </a>
+      </div>
+    </div>
+
+    <div class="row form-group">
+      <div class="col-xs-12 clearfix">
+        <a class="btn btn-info btn-block"
            ng-click="generateSellLibreTx()"
            translate="SEND_generate">
               Generate Transaction
         </a>
       </div>
     </div>
-
-    <div class="row form-group" ng-show="showRaw">
-
-      <div class="col-sm-6">
-        <label translate="SEND_raw">
-          Raw Transaction
-        </label>
-        <textarea class="form-control" rows="4" readonly>{{rawTx}}</textarea>
-      </div>
-
-      <div class="col-sm-6">
-        <label translate="SEND_signed">
-          Signed Transaction
-        </label>
-        <textarea class="form-control" rows="4" readonly>{{signedTx}}</textarea>
-      </div>
-
-    </div>
-
-    <div class="clearfix form-group" ng-show="showRaw">
-      <a class="btn btn-primary btn-block col-sm-11"
-         data-toggle="modal"
-         data-target="#remission"
-         translate="SEND_trans"
-         ng-click="parseSignedTx( signedTx )">
-             Send Transaction
-      </a>
-    </div>
-
-
+    
   </article>
 
 </div>
