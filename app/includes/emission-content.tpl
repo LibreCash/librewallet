@@ -47,15 +47,6 @@
     </div>
   </article>
 
-  <!--nav class="container nav-container">
-    <div class="nav-scroll">
-    <ul class="nav-inner">
-        <li class="nav-item {{ buy ? 'active' : '' }}" ng-click="buy=true; tx = tx"><a translate="BUYSELL_buyLibre">Buy Librecash</a></li>
-        <li class="nav-item {{ buy ? '' : 'active' }}" ng-click="buy=false; tx = txSell"><a translate="BUYSELL_sellLibre">Sell Librecash</a></li>
-    </ul>
-    </div>
-  </nav-->
-
   <!-- If unlocked with PK -->
   <article class="block" ng-hide="wallet.type=='addressOnly'" ng-show="buy">
     <!-- To Address -->
@@ -67,8 +58,8 @@
 
     <!-- Amount to Send -->
       <div class="col-sm-11">
-        <label translate="SEND_amount">
-          Amount to Send:
+        <label translate="LIBRE_sendAmount">
+          ETH to Send:
         </label>
       </div>
 
@@ -80,29 +71,15 @@
                  ng-model="tx.value"
                  ng-disabled="tx.readOnly || checkTxReadOnly"
                  ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'"/>
+            <div class="input-group-btn">
+              <a style="min-width: 170px"
+                 class="btn btn-default"
+                 ng-click="generateBuyLibreTx()"
+                 translate="LIBRE_buy">
+                    Buy
+              </a>
+            </div>
 
-          <div class="input-group-btn">
-            <a style="min-width: 170px"
-               class="btn btn-default dropdown-toggle"
-               class="dropdown-toggle"
-               ng-click="wallet.setTokens(); globalService.tokensLoaded=true;dropdownAmount = !dropdownAmount"
-               ng-class="dropdownEnabled ? '' : 'disabled'">
-                <strong>
-                  {{unitReadable}}
-                  <i class="caret"></i>
-                </strong>
-            </a>
-            <!-- Amount to Send - Dropdown -->
-            <ul class="dropdown-menu dropdown-menu-right"
-                ng-show="dropdownAmount && !tx.readOnly">
-              <li>
-                <a ng-class="{true:'active'}[tx.sendMode=='ether']"
-                   ng-click="setSendMode('ether')">
-                     {{ajaxReq.type}}
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
 
@@ -118,7 +95,7 @@
       <!-- rateLimit -->
         <div class="col-sm-11">
           <label translate="LIBRE_maxPriceBuy">
-            Maximum Price to Buy:
+            Maximum Buy Price
           </label>
         </div>
 
@@ -131,37 +108,9 @@
         </div>
 
         <div class="col-sm-11">
-          <span translate="LIBRE_buyRate">Current buy price</span>: {{ buyRate }} <span>LIBRE/ETH</span>
+          <span translate="LIBRE_buyRate">Last buy price</span>: {{ buyRate }} <span>LIBRE/ETH</span>
         </div>
     </section>
-
-
-    <div class="clearfix form-group">
-      <div class="well" ng-show="wallet!=null && customGasMsg!=''">
-        <p>
-          <span translate="SEND_CustomAddrMsg">
-            A message regarding
-          </span>
-          {{tx.to}}
-          <br />
-          <strong>
-            {{customGasMsg}}
-          </strong>
-        </p>
-      </div>
-    </div>
-
-
-
-    <div class="row form-group">
-      <div class="col-xs-12 clearfix">
-        <a class="btn btn-info btn-block"
-           ng-click="generateBuyLibreTx()"
-           translate="SEND_generate">
-              Generate Transaction
-        </a>
-      </div>
-    </div>
 
   </article>
 

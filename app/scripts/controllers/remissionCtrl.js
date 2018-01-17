@@ -44,6 +44,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
 
     var libreCash = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreCash");
     var cashAddress = libreCash.address;
+        $scope.cashAddress = cashAddress;
     var cashAbi = libreCash.abi;
     var cashAbiRefactor = {};    
     for (var i = 0; i < cashAbi.length; i++) cashAbiRefactor[cashAbi[i].name] = cashAbi[i];
@@ -378,11 +379,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         $scope.timeUpdateRequest = normalizeUnixTimeObject(data);
     });
 
-
-
-
-
-
     getBankDataProcess("cryptoFiatRateSell", processSellRate);
 
     var getBankState = function() {
@@ -417,7 +413,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
                 if (data.error) $scope.notifier.danger(data.msg);
                 //data = data.data;
-                var tokenCount = $scope.tokenValue * Math.pow(10, TOKEN_DECIMALS);
+                var tokenCount = $scope.tokensToAllow * Math.pow(10, TOKEN_DECIMALS);
                 if (clearApprove) tokenCount = 0;
                 $scope.tx.data = getDataString(cashAbiRefactor["approve"], 
                     [bankAddress, tokenCount]);

@@ -58,121 +58,132 @@
 
   <!-- If unlocked with PK -->
   <article class="block" ng-hide="wallet.type=='addressOnly'" ng-show="buy">
-    <!-- To Address -->
-    <div class="row">
-      <span translate="LIBRE_addressText">LibreBank address</span>: {{ tx.to }}. <span translate="LIBRE_checkLegit">Please, check its legitimity.</span>
-    </div>
 
     <section class="row form-group">
+    <!-- To Address -->
 
-    <!-- Amount to Send -->
       <div class="col-sm-11">
-        <label translate="LIBRE_sellTokens">
-          Tokens to Sell:
+          <strong translate="LIBRE_contracts">
+              Contracts
+          </strong>
+      </div>
+      <div class="col-sm-11">
+        <span>LibreBank</span>: {{ tx.to }}
+        <br/>
+        <span>LibreCash</span>: {{ cashAddress }}
+        <br/>
+        <span translate="LIBRE_checkLegit">Please, check its legitimity.</span>
+      </div>
+  
+      <div class="col-sm-11">
+        <label translate="LIBRE_balance">
+            Balance
         </label>
       </div>
+      <p class="col-xs-12">
+        <span translate="LIBRE_allowed">Allowed: </span><span>{{ allowedTokens | number: 3 }}</span>
+        <br/>
+        <span>All tokens: </span><span>{{ allTokens | number: 3 }}</span>
+      </p>
+      <div ng-show="allTokens == 0" class="col-sm-11">
+          <strong translate="LIBRE_noTokens">
+              No tokens on balance
+          </strong>
+      </div>
+      <div ng-hide="allTokens == 0">
+          <div class="col-sm-11" ng-hide="tx.readOnly">
+              <label translate="LIBRE_allowance">
+                  Allowance
+              </label>
+            </div>
+            <div class="col-sm-11">
+                <div class="input-group">
+                  <input type="text"
+                         class="form-control"
+                         placeholder="{{ allTokens | number: 3 }}"
+                         ng-model="tokensToAllow"
+                         ng-disabled="tx.readOnly || checkTxReadOnly"
+                         ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
+                  <div class="input-group-btn">
+                    <a style="min-width: 170px"
+                      class="btn btn-default"
+                      ng-click="generateApproveTx(false)">
+                      <strong translate="LIBRE_approve">
+                        Approve
+                      </strong>
+                    </a>
+                  </div>
+                
+                </div>
+              </div>
+              <p class="col-xs-12" ng-hide="tx.readOnly">
+                <a ng-click="tokensToAllow = allTokens">
+                  <span class="strong" translate="LIBRE_approveAll">
+                    Approve whole balance
+                  </span>
+                </a>
+              </p>
+      
+          <!-- Amount to Send -->
+            <div class="col-sm-11">
+              <label translate="LIBRE_sellTokens">
+                Tokens to Sell:
+              </label>
+            </div>
+      
+            <div class="col-sm-11">
+              <div class="input-group">
+                <input type="text"
+                       class="form-control"
+                       placeholder="{{ 'SEND_amount_short' | translate }}"
+                       ng-model="tokenValue"
+                       ng-disabled="tx.readOnly || checkTxReadOnly"
+                       ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
+                <div class="input-group-btn">
+                  <a style="min-width: 170px"
+                      class="btn btn-default"
+                      ng-click="generateSellLibreTx()">
+                      <strong translate="LIBRE_sell">
+                        Sell
+                      </strong>
+                  </a>
+                </div>
+              </div>
+            </div>
+      
+            <!-- Amount to Send - Transfer Entire Balance -->
+            <p class="col-xs-12" ng-hide="tx.readOnly">
+              
+              <a ng-click="tokenValue = allowedTokens">
+                <span class="strong" translate="LIBRE_sellAllApproved">
+                  Sell All Approved
+                </span>
+              </a>
+            </p>
+      
+      
+      
+            <!-- rateLimit -->
+              <div class="col-sm-11">
+                <label translate="LIBRE_minPriceSell">
+                  Minimum Sell Price
+                </label>
+              </div>
+      
+              <div class="col-sm-11">
+                <input type="text"
+                       class="form-control"
+                       placeholder="0"
+                       ng-model="tx.rateLimit"
+                       ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
+              </div>
+      
+      </div>
 
       <div class="col-sm-11">
-        <div class="input-group">
-          <input type="text"
-                 class="form-control"
-                 placeholder="{{ 'SEND_amount_short' | translate }}"
-                 ng-model="tokenValue"
-                 ng-disabled="tx.readOnly || checkTxReadOnly"
-                 ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
-
-        </div>
+        <span translate="LIBRE_sellRate">Last sell price</span>: {{ sellRate }} <span>LIBRE/ETH</span>
       </div>
-
-      <!-- Amount to Send - Transfer Entire Balance -->
-      <p class="col-xs-12" ng-hide="tx.readOnly">
-        <span translate="LIBRE_tokenBalance">Balance</span>: {{ allTokens | number: 3 }}
-        <a ng-click="tokenValue = allTokens">
-          <span class="strong" translate="LIBRE_sendAllTokens">
-            Sell All Tokens
-          </span>
-        </a>
-      </p>
-
-      <p class="col-xs-12" ng-hide="tx.readOnly">
-        <span translate="LIBRE_allowance">
-          Allowed tokens for remission:
-        </span><span>
-          {{ allowedTokens | number: 3 }}
-        </span>
-      </p>
-
-      <!-- rateLimit -->
-        <div class="col-sm-11">
-          <label translate="LIBRE_minPriceSell">
-            Minimum Price to Sell:
-          </label>
-        </div>
-
-        <div class="col-sm-11">
-          <input type="text"
-                 class="form-control"
-                 placeholder="0"
-                 ng-model="tx.rateLimit"
-                 ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
-        </div>
-
-        <div class="col-sm-11">
-          <span translate="LIBRE_sellRate">Current sell price</span>: {{ sellRate }} <span>LIBRE/ETH</span>
-        </div>
     </section>
-
-
-
-
-    <div class="clearfix form-group">
-      <div class="well" ng-show="wallet!=null && customGasMsg!=''">
-        <p>
-          <span translate="SEND_CustomAddrMsg">
-            A message regarding
-          </span>
-          {{tx.to}}
-          <br />
-          <strong>
-            {{customGasMsg}}
-          </strong>
-        </p>
-      </div>
-    </div>
-
-
-
-    <div class="row form-group">
-      <div class="col-xs-12 clearfix">
-        <a class="btn btn-info btn-block"
-           ng-click="generateApproveTx(false)"
-           ng-show="allowedTokens==0"
-           translate="LIBRE_approve">
-              Generate Approve Transaction
-        </a>
-      </div>
-    </div>
-
-    <div class="row form-group">
-      <div class="col-xs-12 clearfix">
-        <a class="btn btn-info btn-block"
-           ng-click="generateApproveTx(true)"
-           ng-hide="allowedTokens==0"
-           translate="LIBRE_approve0">
-              Set Approve to 0
-        </a>
-      </div>
-    </div>
-
-    <div class="row form-group">
-      <div class="col-xs-12 clearfix">
-        <a class="btn btn-info btn-block"
-           ng-click="generateSellLibreTx()"
-           translate="SEND_generate">
-              Generate Transaction
-        </a>
-      </div>
-    </div>
 
   </article>
 
