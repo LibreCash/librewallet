@@ -1,4 +1,4 @@
-<table class="table" ng-show="!(bankState.error || timeUpdateRequest.error || queuePeriod.error)" class="ng-hide">
+<!--table class="table" ng-show="!(bankState.error || timeUpdateRequest.error || queuePeriod.error)" class="ng-hide">
     <tr>
       <td translate="LIBRESTATUS_allowed">Orders allowed</td>
       <td>{{ bankState.data[0] == 3 || then < now ? "Да" : "Нет" }}</td>
@@ -29,4 +29,4 @@
       <td translate="LIBRESTATUS_errorVar">Error getting contract variable(s)</td>
       <td>{{ queuePeriod.message }}</td>
     </tr>
-  </table>
+  </table-->
