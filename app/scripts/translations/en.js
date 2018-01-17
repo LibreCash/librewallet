@@ -452,6 +452,7 @@ LIBRE_minPriceSell              :  'Minimum Price to Sell:',
 LIBRE_tokenBalance              :  'Balance',
 LIBRE_allowance                 :  'Allowed tokens for remission:',
 LIBRE_approve                   :  'Generate Approve Transaction',
+LIBRE_approve0                  :  'Set Approve to 0',
 
 NODE_CTA                        :  'Save & Use Custom Node',
 NODE_Name                       :  'Node Name',

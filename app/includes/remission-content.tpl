@@ -145,9 +145,21 @@
     <div class="row form-group">
       <div class="col-xs-12 clearfix">
         <a class="btn btn-info btn-block"
-           ng-click="generateApproveTx()"
+           ng-click="generateApproveTx(false)"
+           ng-show="allowedTokens==0"
            translate="LIBRE_approve">
               Generate Approve Transaction
+        </a>
+      </div>
+    </div>
+
+    <div class="row form-group">
+      <div class="col-xs-12 clearfix">
+        <a class="btn btn-info btn-block"
+           ng-click="generateApproveTx(true)"
+           ng-hide="allowedTokens==0"
+           translate="LIBRE_approve0">
+              Set Approve to 0
         </a>
       </div>
     </div>
@@ -161,7 +173,7 @@
         </a>
       </div>
     </div>
-    
+
   </article>
 
 </div>

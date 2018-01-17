@@ -408,7 +408,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     };
 
 
-    $scope.generateApproveTx = function() {
+    $scope.generateApproveTx = function(clearApprove) {
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
             //else if (!ethFuncs.validateHexString($scope.tx.data)) throw globalFuncs.errorMsgs[9];
@@ -418,6 +418,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                 if (data.error) $scope.notifier.danger(data.msg);
                 //data = data.data;
                 var tokenCount = $scope.tokenValue * Math.pow(10, TOKEN_DECIMALS);
+                if (clearApprove) tokenCount = 0;
                 $scope.tx.data = getDataString(cashAbiRefactor["approve"], 
                     [bankAddress, tokenCount]);
                 var txData = uiFuncs.getTxData($scope);
