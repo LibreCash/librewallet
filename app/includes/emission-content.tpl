@@ -49,13 +49,18 @@
 
   <!-- If unlocked with PK -->
   <article class="block" ng-hide="wallet.type=='addressOnly'" ng-show="buy">
-    <!-- To Address -->
-    <div class="row">
-      <span translate="LIBRE_addressText">LibreBank address</span>: {{ tx.to }}. <span translate="LIBRE_checkLegit">Please, check its legitimity.</span>
-    </div>
 
     <section class="row form-group">
-
+      <div class="col-sm-11">
+          <strong translate="LIBRE_contracts">
+              Contracts
+          </strong>
+      </div>
+      <div class="col-sm-11">
+        <span>LibreBank</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', tx.to) }}" target="_blank" rel="noopener noreferrer">{{ tx.to }}</a>
+        <br/>
+        <span translate="LIBRE_checkLegit">Please, check its legitimity.</span>
+      </div>
     <!-- Amount to Send -->
       <div class="col-sm-11">
         <label translate="LIBRE_sendAmount">
@@ -72,12 +77,19 @@
                  ng-disabled="tx.readOnly || checkTxReadOnly"
                  ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'"/>
             <div class="input-group-btn">
-              <a style="min-width: 170px"
-                 class="btn btn-default"
-                 ng-click="generateBuyLibreTx()"
-                 translate="LIBRE_buy">
+                <a style="min-width: 170px"
+                  class="btn btn-default"
+                  ng-click="generateBuyLibreTx()"
+                  ng-hide="buyPending"
+                  translate="LIBRE_buy">
                     Buy
               </a>
+              <a style="min-width: 170px"
+                class="btn btn-default"
+                ng-show="buyPending"
+                disabled>
+                    {{ txStatus }}
+            </a>
             </div>
 
         </div>

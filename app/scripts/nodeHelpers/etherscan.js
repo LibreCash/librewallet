@@ -38,6 +38,16 @@ etherscan.getTransaction = function(txHash, callback) {
         else callback({ error: false, msg: '', data: data.result });
     });
 }
+etherscan.getTransactionReceipt = function(txHash, callback) {
+    this.post({
+        module: 'proxy',
+        action: 'eth_getTransactionReceipt',
+        txhash: txHash,
+    }, function(data) {
+        if (data.error) callback({ error: true, msg: data.error.message, data: '' });
+        else callback({ error: false, msg: '', data: data.result });
+    });
+}
 etherscan.getTransactionData = function(addr, callback) {
     var response = { error: false, msg: '', data: { address: addr, balance: '', gasprice: '', nonce: '' } };
     var parentObj = this;

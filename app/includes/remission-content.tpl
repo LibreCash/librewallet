@@ -68,9 +68,9 @@
           </strong>
       </div>
       <div class="col-sm-11">
-        <span>LibreBank</span>: {{ tx.to }}
+        <span>LibreBank</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', tx.to) }}" target="_blank" rel="noopener noreferrer">{{ tx.to }}</a>
         <br/>
-        <span>LibreCash</span>: {{ cashAddress }}
+        <span>LibreCash</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', cashAddress) }}" target="_blank" rel="noopener noreferrer">{{ cashAddress }}</a>
         <br/>
         <span translate="LIBRE_checkLegit">Please, check its legitimity.</span>
       </div>
@@ -91,97 +91,124 @@
           </strong>
       </div>
       <div ng-hide="allTokens == 0">
-          <div class="col-sm-11" ng-hide="tx.readOnly">
-              <label translate="LIBRE_allowance">
-                  Allowance
-              </label>
+        <div class="col-sm-11" ng-hide="tx.readOnly">
+          <label translate="LIBRE_allowance">
+              Allowance
+          </label>
+        </div>
+        <div class="col-sm-11">
+          <div class="input-group">
+            <input type="text"
+                    class="form-control"
+                    placeholder="{{ allTokens | number: 3 }}"
+                    ng-model="tokensToAllow"
+                    ng-disabled="tx.readOnly || checkTxReadOnly"
+                    ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
+            <div class="input-group-btn">
+              <a style="min-width: 170px"
+                class="btn btn-default"
+                ng-click="generateApproveTx(false)">
+                <strong translate="LIBRE_approve">
+                  Approve
+                </strong>
+              </a>
             </div>
-            <div class="col-sm-11">
-                <div class="input-group">
-                  <input type="text"
-                         class="form-control"
-                         placeholder="{{ allTokens | number: 3 }}"
-                         ng-model="tokensToAllow"
-                         ng-disabled="tx.readOnly || checkTxReadOnly"
-                         ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
-                  <div class="input-group-btn">
-                    <a style="min-width: 170px"
-                      class="btn btn-default"
-                      ng-click="generateApproveTx(false)">
-                      <strong translate="LIBRE_approve">
-                        Approve
-                      </strong>
-                    </a>
-                  </div>
-                
-                </div>
-              </div>
-              <p class="col-xs-12" ng-hide="tx.readOnly">
-                <a ng-click="tokensToAllow = allTokens">
-                  <span class="strong" translate="LIBRE_approveAll">
-                    Approve whole balance
-                  </span>
-                </a>
-              </p>
+          
+          </div>
+        </div>
+        <p class="col-xs-12" ng-hide="tx.readOnly">
+          <a ng-click="tokensToAllow = allTokens">
+            <span class="strong" translate="LIBRE_approveAll">
+              Approve whole balance
+            </span>
+          </a>
+        </p>
       
           <!-- Amount to Send -->
-            <div class="col-sm-11">
-              <label translate="LIBRE_sellTokens">
-                Tokens to Sell:
-              </label>
-            </div>
+        <div class="col-sm-11">
+          <label translate="LIBRE_sellTokens">
+            Tokens to Sell:
+          </label>
+        </div>
       
-            <div class="col-sm-11">
-              <div class="input-group">
-                <input type="text"
-                       class="form-control"
-                       placeholder="{{ 'SEND_amount_short' | translate }}"
-                       ng-model="tokenValue"
-                       ng-disabled="tx.readOnly || checkTxReadOnly"
-                       ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
-                <div class="input-group-btn">
-                  <a style="min-width: 170px"
-                      class="btn btn-default"
-                      ng-click="generateSellLibreTx()">
-                      <strong translate="LIBRE_sell">
-                        Sell
-                      </strong>
-                  </a>
-                </div>
-              </div>
+        <div class="col-sm-11">
+          <div class="input-group">
+            <input type="text"
+                    class="form-control"
+                    placeholder="{{ 'SEND_amount_short' | translate }}"
+                    ng-model="tokenValue"
+                    ng-disabled="tx.readOnly || checkTxReadOnly"
+                    ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
+            <div class="input-group-btn">
+              <a style="min-width: 170px"
+                  class="btn btn-default"
+                  ng-click="generateSellLibreTx()">
+                  <strong translate="LIBRE_sell">
+                    Sell
+                  </strong>
+              </a>
             </div>
+          </div>
+        </div>
       
             <!-- Amount to Send - Transfer Entire Balance -->
-            <p class="col-xs-12" ng-hide="tx.readOnly">
-              
-              <a ng-click="tokenValue = allowedTokens">
-                <span class="strong" translate="LIBRE_sellAllApproved">
-                  Sell All Approved
-                </span>
-              </a>
-            </p>
+        <p class="col-xs-12" ng-hide="tx.readOnly">
+          
+          <a ng-click="tokenValue = allowedTokens">
+            <span class="strong" translate="LIBRE_sellAllApproved">
+              Sell All Approved
+            </span>
+          </a>
+        </p>
       
       
       
             <!-- rateLimit -->
-              <div class="col-sm-11">
-                <label translate="LIBRE_minPriceSell">
-                  Minimum Sell Price
-                </label>
-              </div>
-      
-              <div class="col-sm-11">
-                <input type="text"
-                       class="form-control"
-                       placeholder="0"
-                       ng-model="tx.rateLimit"
-                       ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
-              </div>
+        <div class="col-sm-11">
+          <label translate="LIBRE_minPriceSell">
+            Minimum Sell Price
+          </label>
+        </div>
+
+        <div class="col-sm-11">
+          <input type="text"
+                  class="form-control"
+                  placeholder="0"
+                  ng-model="tx.rateLimit"
+                  ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
+        </div>
       
       </div>
 
       <div class="col-sm-11">
         <span translate="LIBRE_sellRate">Last sell price</span>: {{ sellRate }} <span>LIBRE/ETH</span>
+      </div>
+      <div>
+        <div class="col-sm-11">
+          <span translate="LIBRE_withdrawInfo">You can withdraw your ETH after the remission round</span>
+        </div>
+        <div class="col-sm-11" ng-show="getBalance > 0">
+          <span translate="LIBRE_getEther">ETH to withdraw</span>
+          <div class="col-sm-11">
+              <div class="input-group">
+                <input type="text"
+                        class="form-control"
+                        placeholder="{{ getBalance }}"
+                        ng-model="getBalance"
+                        disabled
+                        ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
+                <div class="input-group-btn">
+                  <a style="min-width: 170px"
+                      class="btn btn-default"
+                      ng-click="generateWithdrawLibreTx()">
+                      <strong translate="LIBRE_withdraw">
+                        Withdraw
+                      </strong>
+                  </a>
+                </div>
+              </div>
+            </div>
+        </div>
       </div>
     </section>
 

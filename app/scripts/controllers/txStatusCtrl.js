@@ -80,6 +80,7 @@ var txStatusCtrl = function($scope) {
             ajaxReq.getTransaction(txInfo.hash, function(data) {
                 if (data.error) $scope.notifier.danger(data.msg);
                 else {
+                    console.log("tx", data);
                     txToObject(data.data);
                 }
             });

@@ -46,6 +46,15 @@ customNode.prototype.getTransaction = function(txHash, callback) {
         else callback({ error: false, msg: '', data: data.result });
     });
 }
+customNode.prototype.getTransactionReceipt = function(txHash, callback) {
+    this.post({
+        method: 'eth_getTransactionReceipt',
+        params: [txHash]
+    }, function(data) {
+        if (data.error) callback({ error: true, msg: data.error.message, data: '' });
+        else callback({ error: false, msg: '', data: data.result });
+    });
+}
 customNode.prototype.getTransactionData = function(addr, callback) {
     var response = { error: false, msg: '', data: { address: addr, balance: '', gasprice: '', nonce: '' } };
     var parentObj = this;
