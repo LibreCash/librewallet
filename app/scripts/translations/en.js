@@ -463,6 +463,7 @@ LIBRE_contracts                 :  'Contracts',
 LIBRE_withdrawInfo              :  'You can withdraw your ETH after the remission round',
 LIBRE_withdraw                  :  'Withdraw',
 LIBRE_getEther                  :  'ETH to withdraw',
+LIBRE_txPending                 :  'pending...',
 
 NODE_CTA                        :  'Save & Use Custom Node',
 NODE_Name                       :  'Node Name',

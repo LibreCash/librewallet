@@ -107,10 +107,18 @@
             <div class="input-group-btn">
               <a style="min-width: 170px"
                 class="btn btn-default"
+                ng-hide="approvePending"
                 ng-click="generateApproveTx(false)">
                 <strong translate="LIBRE_approve">
                   Approve
                 </strong>
+              </a>
+              <a style="min-width: 170px"
+                class="btn btn-default"
+                ng-show="approvePending"
+                disabled
+                translate="LIBRE_txPending">
+                    pending...
               </a>
             </div>
           
@@ -142,10 +150,18 @@
             <div class="input-group-btn">
               <a style="min-width: 170px"
                   class="btn btn-default"
+                  ng-hide="sellPending"
                   ng-click="generateSellLibreTx()">
                   <strong translate="LIBRE_sell">
                     Sell
                   </strong>
+              </a>
+              <a style="min-width: 170px"
+                class="btn btn-default"
+                ng-show="sellPending"
+                disabled
+                translate="LIBRE_txPending">
+                    pending...
               </a>
             </div>
           </div>

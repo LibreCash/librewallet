@@ -53,6 +53,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     const rateMultiplier = 1000; // todo перенести
 
     //$scope.buy = true; // activate buy tab
+    $scope.approvePending = false;
+    $scope.sellPending = false;
     $scope.tx = {};
     $scope.tx.value = 0;
     $scope.signedTx;
@@ -95,6 +97,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         rateLimitReal: 0
     }
 
+    // todo избавиться чисто
     $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
         $scope.tx.sendMode = sendMode;
         $scope.unitReadable = '';
@@ -301,26 +304,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         return getDataCommon(address, abiRefactored, _var, setScope, params, _key);
     }
 
-/*    function getDataProcess(address, abiRefactored, _var, process, param = "") {
-        return new Promise((resolve, reject) => {
-            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], [param]) }, function(data) {
-                if (data.error || data.data == '0x') {
-                    if (data.data == '0x') {
-                        data.error = true;
-                        data.message = "Possible error with network or the bank contract";
-                    }
-                } else {
-                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
-                        return i.type;
-                    });
-                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
-                }
-                console.log(process);
-                process(data);
-            });
-        })
-    }*/
-
     function getBankDataProcess(_var, process, params = []) {
         return getDataProcess(bankAddress, bankAbiRefactor, _var, process, params);
     }
@@ -442,7 +425,34 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                 var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
                                 $scope.notifier.success(completeMsg, 0);
                                 $scope.wallet.setBalance(applyScope);
-                                //if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
+    
+                                $scope.approvePending = true;
+                            
+                                var checkingTx = setInterval(() => {
+                                    if (!$scope.approvePending) {
+                                        clearInterval(checkingTx);
+                                        return;
+                                    }
+                                    ajaxReq.getTransactionReceipt(
+                                        resp.data,
+                                        (receipt) => {
+                                            if (receipt.error) {
+                                                $scope.notifier.danger(receipt.msg);
+                                                $scope.approvePending = false;
+                                            } else {
+                                                if (receipt.data != null) {
+                                                    let status = receipt.data.status;
+                                                    if (status == "0x1") {
+                                                        $scope.notifier.success("Approve ok! todo translate", 0);
+                                                    } else {
+                                                        $scope.notifier.success("Approve tx fail! todo translate and txid here", 0);
+                                                    }
+                                                    $scope.approvePending = false;
+                                                }
+                                            }
+                                        }
+                                    );
+                                }, 2000);
                             } else {
                                 $scope.notifier.danger(resp.error);
                             }
@@ -485,6 +495,34 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                 $scope.notifier.success(completeMsg, 0);
                                 
                                 $scope.wallet.setBalance(applyScope);
+
+                                $scope.sellPending = true;
+                            
+                                var checkingTx = setInterval(() => {
+                                    if (!$scope.sellPending) {
+                                        clearInterval(checkingTx);
+                                        return;
+                                    }
+                                    ajaxReq.getTransactionReceipt(
+                                        resp.data,
+                                        (receipt) => {
+                                            if (receipt.error) {
+                                                $scope.notifier.danger(receipt.msg);
+                                                $scope.sellPending = false;
+                                            } else {
+                                                if (receipt.data != null) {
+                                                    let status = receipt.data.status;
+                                                    if (status == "0x1") {
+                                                        $scope.notifier.success("Sell ok! todo translate", 0);
+                                                    } else {
+                                                        $scope.notifier.success("Sell tx fail! todo translate and txid here", 0);
+                                                    }
+                                                    $scope.sellPending = false;
+                                                }
+                                            }
+                                        }
+                                    );
+                                }, 2000);
                                 //if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
                             } else {
                                 $scope.notifier.danger(resp.error);

@@ -87,9 +87,10 @@
               <a style="min-width: 170px"
                 class="btn btn-default"
                 ng-show="buyPending"
-                disabled>
-                    {{ txStatus }}
-            </a>
+                disabled
+                translate="LIBRE_txPending">
+                    pending...
+              </a>
             </div>
 
         </div>
