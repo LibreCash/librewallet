@@ -4,8 +4,8 @@
         <nav class="container nav-container">
             <div class="nav-scroll">
             <ul class="nav-inner">
-                <li class="nav-item {{ showOracles ? '' : 'active' }}" ng-click="showOracles=!showOracles"><a href="#" translate="BANKSTATUS_contractStatus">Contract status</a></li>
-                <li class="nav-item {{ showOracles ? 'active' : '' }}" ng-click="showOracles=!showOracles"><a href="#" translate="BANKSTATUS_oraclesStatus">Oracles</a></li>
+                <li class="nav-item {{ showOracles ? '' : 'active' }}" ng-click="showOracles=!showOracles"><a translate="BANKSTATUS_contractStatus">Contract status</a></li>
+                <li class="nav-item {{ showOracles ? 'active' : '' }}" ng-click="showOracles=!showOracles"><a translate="BANKSTATUS_oraclesStatus">Oracles</a></li>
             </ul>
             </div>
         </nav>

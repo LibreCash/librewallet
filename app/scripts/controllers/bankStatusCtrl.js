@@ -17,17 +17,6 @@ var bankStatusCtrl = async function($scope) {
             throw e;
         }
     };
-    function namehash(name) {
-        name = ens.normalise(name);
-        var node = Buffer.alloc(32);
-        if (name && name != '') {
-            var labels = name.split(".");
-            for (var i = labels.length - 1; i >= 0; i--) {
-                node = ethUtil.sha3(Buffer.concat([node, ethUtil.sha3(labels[i])]));
-            }
-        }
-        return '0x' + node.toString('hex');
-    }
     var getDataString = function(func, inputs) {
         var fullFuncName = ethUtil.solidityUtils.transformToFullName(func);
         var funcSig = ethFuncs.getFunctionSignature(fullFuncName);
@@ -127,13 +116,13 @@ var bankStatusCtrl = async function($scope) {
             }
         }
     }
-    $scope.contractData = varsObject;
+    
     $scope.address = bankAddress;
     $scope.oracles = oracles;
 
     // getting oracles
     function getBankData(bankAbiRefactor, varsObject, _var) {
-        ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [namehash(_var)]) }, function(data) {
+        ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], []) }, function(data) {
             if (data.error || data.data == '0x') {
                 varsObject[_var].data = data;
             } else {
@@ -148,9 +137,10 @@ var bankStatusCtrl = async function($scope) {
             }
         });
     }
-    async function getBankDataAsync(bankAbiRefactor, _var, param) {
-        return new Promise((resolve, reject) => { 
-            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], [param]) }, function(data) {
+    async function getBankDataAsync(bankAbiRefactor, _var, params = []) {
+        return new Promise((resolve, reject) => {
+            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], params) }, function(data) {
+                data.varName = _var;
                 if (data.error || data.data == '0x') {
                     reject(data.message);
                 } else {
@@ -158,17 +148,36 @@ var bankStatusCtrl = async function($scope) {
                         return i.type;
                     });
                     data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
-                    resolve(data.data);
+                    resolve(data);
                 }
             });
         })
     }
 
-    for (var prop in varsObject) {
+/*    for (var prop in varsObject) {
         let dataVar = prop;
         getBankData(bankAbiRefactor, varsObject, dataVar);
         
+    } // for */
+    var bankPromises = [];
+    for (var prop in varsObject) {
+        let bankPromise = getBankDataAsync(bankAbiRefactor, prop);
+        bankPromises.push(bankPromise);
     } // for
+    Promise.all(bankPromises).then(bankData => {
+        bankData.forEach(data => {
+            if (varsObject[data.varName].process != null) {
+                data.data = varsObject[data.varName].process(data.data);
+            } else {
+                data.data = data.data[0];
+            }
+            varsObject[data.varName].data = data;
+            console.log(data);
+        });
+    }).catch(e => {
+        console.log(e);
+    });
+    $scope.contractData = varsObject;
     // getting oracles
     function hex2a(hexx) {
         var hex = hexx.toString();//force conversion
@@ -188,22 +197,27 @@ var bankStatusCtrl = async function($scope) {
         ORACLE_WAITING = 4,
         ORACLE_RATE = 5,
         ORACLE_NEXT = 6;
-    let curOracle = await getBankDataAsync(bankAbiRefactor, "firstOracle", 0);
+    let curOracle = await getBankDataAsync(bankAbiRefactor, "firstOracle");
+    /*let curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle.data);
+    curOracle.data[0] = curData.data[ORACLE_NEXT];
+    console.log(curOracle);
+        curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle.data);
+        console.log(curData);*/
     for (
-        let curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle);
+        let curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle.data);
         ;
-        curOracle = curData[ORACLE_NEXT],
-        curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle)
+        curOracle.data[0] = curData.data[ORACLE_NEXT],
+        curData = await getBankDataAsync(bankAbiRefactor, "getOracleData", curOracle.data)
     ) {
-        oracles[curOracle] = {
-            name: hex2a(curData[ORACLE_NAME]),
-            type: hex2a(curData[ORACLE_TYPE]),
-            updateTime: normalizeUnixTime(curData[ORACLE_UPDATE_TIME]),
-            enabled: curData[ORACLE_ENABLED],
-            waiting: curData[ORACLE_WAITING],
-            rate: normalizeRate(curData[ORACLE_RATE])
+        oracles[curOracle.data[0]] = {
+            name: hex2a(curData.data[ORACLE_NAME]),
+            type: hex2a(curData.data[ORACLE_TYPE]),
+            updateTime: normalizeUnixTime(curData.data[ORACLE_UPDATE_TIME]),
+            enabled: curData.data[ORACLE_ENABLED],
+            waiting: curData.data[ORACLE_WAITING],
+            rate: normalizeRate(curData.data[ORACLE_RATE])
         };
-        if(+curData[ORACLE_NEXT] == 0) break;   
-    }    
+        if(+curData.data[ORACLE_NEXT] == 0) break;   
+    }   
 };
 module.exports = bankStatusCtrl;
