@@ -492,6 +492,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                             clearInterval(checkingTx);
                                             return;
                                         }
+                                        if (isCheckingTx) return; // fixing doubling success messages
                                         ajaxReq.getTransactionReceipt(
                                             resp.data,
                                             (receipt) => {

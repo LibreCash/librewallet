@@ -200,7 +200,7 @@
         <div class="col-sm-11">
           <span translate="LIBRE_withdrawInfo">You can withdraw your ETH after the remission round</span>
         </div>
-        <div class="col-sm-11" ng-show="getBalance > 0">
+        <div class="col-sm-11">
           <span translate="LIBRE_getEther">ETH to withdraw</span>
           <div class="col-sm-11">
               <div class="input-group">
