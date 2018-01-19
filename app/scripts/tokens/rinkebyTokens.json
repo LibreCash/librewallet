@@ -11,8 +11,9 @@
 "type":"default"
 },
 {
-"address":"0x7f02432c1c127d3176ec07c2a83bb853fad07bc1",
-"symbol":"LIBRE",
+"address":"0x166fb3968d48602e922df6865764a51d1544271f",
+"symbol":"LCH",
 "decimal":18,
 "type":"default"
-}]
+}
+]
