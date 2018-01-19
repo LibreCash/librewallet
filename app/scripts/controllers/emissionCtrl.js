@@ -1,6 +1,6 @@
 'use strict';
 var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
-/*    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
+    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
     var bankAbiRefactor = {};    
@@ -350,6 +350,6 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                 $scope.notifier.danger(resp.error);
             }
         });
-    } /* */
+    }
 };
 module.exports = emissionCtrl;
