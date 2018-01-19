@@ -103,12 +103,12 @@
                     placeholder="{{ allTokens | number: 3 }}"
                     ng-model="tokensToAllow"
                     ng-disabled="tx.readOnly || checkTxReadOnly"
-                    ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
+                    ng-class="Validator.isPositiveNumber(tokensToAllow) ? 'is-valid' : 'is-invalid'"/>
             <div class="input-group-btn">
               <a style="min-width: 170px"
                 class="btn btn-default"
                 ng-hide="approvePending"
-                ng-click="generateApproveTx(false)">
+                ng-click="generateApproveTx()">
                 <strong translate="LIBRE_approve">
                   Approve
                 </strong>
@@ -140,31 +140,12 @@
         </div>
       
         <div class="col-sm-11">
-          <div class="input-group">
             <input type="text"
                     class="form-control"
                     placeholder="{{ 'SEND_amount_short' | translate }}"
                     ng-model="tokenValue"
                     ng-disabled="tx.readOnly || checkTxReadOnly"
                     ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
-            <div class="input-group-btn">
-              <a style="min-width: 170px"
-                  class="btn btn-default"
-                  ng-hide="sellPending"
-                  ng-click="generateSellLibreTx()">
-                  <strong translate="LIBRE_sell">
-                    Sell
-                  </strong>
-              </a>
-              <a style="min-width: 170px"
-                class="btn btn-default"
-                ng-show="sellPending"
-                disabled
-                translate="LIBRE_txPending">
-                    pending...
-              </a>
-            </div>
-          </div>
         </div>
       
             <!-- Amount to Send - Transfer Entire Balance -->
@@ -193,7 +174,23 @@
                   ng-model="tx.rateLimit"
                   ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
         </div>
-      
+        <div class="col-sm-8 offset-col-sm-2">
+            <a style="min-width: 170px"
+              class="btn btn-default"
+              ng-hide="sellPending"
+              ng-click="generateSellLibreTx()">
+              <strong translate="LIBRE_sell">
+                Sell
+              </strong>
+            </a>
+            <a style="min-width: 170px"
+              class="btn btn-default"
+              ng-show="sellPending"
+              disabled
+              translate="LIBRE_txPending">
+                  pending...
+            </a>
+        </div>
       </div>
 
       <div class="col-sm-11">

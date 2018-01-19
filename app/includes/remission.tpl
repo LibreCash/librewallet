@@ -29,13 +29,13 @@
 
 
   <!-- Send Tx Content -->
-  <article class="row" ng-show="wallet!=null">
+  <!--article class="row" ng-show="wallet!=null">
     @@if (site === 'mew' ) { @@include( './remission-content.tpl', { "site": "mew" } ) }
     @@if (site === 'cx'  ) { @@include( './remission-content.tpl', { "site": "cx"  } ) }
 
     @@if (site === 'mew' ) { @@include( './remission-modal.tpl',   { "site": "mew" } ) }
     @@if (site === 'cx'  ) { @@include( './remission-modal.tpl',   { "site": "cx"  } ) }
-  </article>
+  </article-->
 
 
 </main>

@@ -69,30 +69,12 @@
       </div>
 
       <div class="col-sm-11">
-        <div class="input-group">
-          <input type="text"
-                 class="form-control"
-                 placeholder="{{ 'SEND_amount_short' | translate }}"
-                 ng-model="tx.value"
-                 ng-disabled="tx.readOnly || checkTxReadOnly"
-                 ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'"/>
-            <div class="input-group-btn">
-                <a style="min-width: 170px"
-                  class="btn btn-default"
-                  ng-click="generateBuyLibreTx()"
-                  ng-hide="buyPending"
-                  translate="LIBRE_buy">
-                    Buy
-              </a>
-              <a style="min-width: 170px"
-                class="btn btn-default"
-                ng-show="buyPending"
-                disabled
-                translate="LIBRE_txPending">
-                    pending...
-              </a>
-            </div>
-
+        <input type="text"
+                class="form-control"
+                placeholder="{{ 'SEND_amount_short' | translate }}"
+                ng-model="tx.value"
+                ng-disabled="tx.readOnly || checkTxReadOnly"
+                ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'"/>
         </div>
       </div>
 
@@ -118,6 +100,23 @@
                  placeholder="0"
                  ng-model="tx.rateLimit"
                  ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
+        </div>
+
+          <div>
+            <a style="min-width: 170px"
+              class="btn btn-default"
+              ng-click="generateBuyLibreTx()"
+              ng-hide="buyPending"
+              translate="LIBRE_buy">
+                Buy
+          </a>
+          <a style="min-width: 170px"
+            class="btn btn-default"
+            ng-show="buyPending"
+            disabled
+            translate="LIBRE_txPending">
+                pending...
+          </a>
         </div>
 
         <div class="col-sm-11">

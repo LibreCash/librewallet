@@ -1,6 +1,6 @@
 'use strict';
 var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
-    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
+/*    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
     var bankAbiRefactor = {};    
@@ -9,7 +9,6 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     const rateMultiplier = 1000; // todo перенести
     const tokenMultiplier = Math.pow(10, 18); // todo перенести
 
-    //$scope.buy = true; // activate buy tab
     $scope.buyPending = false;
     $scope.tx = {};
     $scope.signedTx;
@@ -133,31 +132,11 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         }
     });
 
-    $scope.$watch('tokenTx', function() {
-        if ($scope.wallet && $scope.wallet.tokenObjs !== undefined && $scope.wallet.tokenObjs[$scope.tokenTx.id] !== undefined && $scope.Validator.isValidAddress($scope.tokenTx.to) && $scope.Validator.isPositiveNumber($scope.tokenTx.value)) {
-            if ($scope.estimateTimer) clearTimeout($scope.estimateTimer);
-            /*$scope.estimateTimer = setTimeout(function() {
-                $scope.estimateGasLimit();
-            }, 500);*/
-        }
-    }, true);
-
     $scope.$watch('tx', function(newValue, oldValue) {
         $rootScope.rootScopeShowRawTx = false;
         $scope.tx.rateLimitReal = Math.round($scope.tx.rateLimit * rateMultiplier);
         if (newValue.sendMode == 'ether') {
             $scope.tx.data = globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data');
-            //$scope.tx.gasLimit = globalFuncs.defaultTxGasLimit;
-        }
-        if (newValue.gasLimit == oldValue.gasLimit && $scope.wallet && 
-                        $scope.Validator.isValidAddress($scope.tx.to) && 
-                        $scope.Validator.isPositiveNumber($scope.tx.value) && 
-                        $scope.Validator.isValidHex($scope.tx.data) &&
-                        $scope.tx.sendMode != 'token') {
-            if ($scope.estimateTimer) clearTimeout($scope.estimateTimer);
-            /*$scope.estimateTimer = setTimeout(function() {
-                $scope.estimateGasLimit();
-            }, 500);*/
         }
         if ($scope.tx.sendMode == 'token') {
             $scope.tokenTx.to = $scope.tx.to;
@@ -181,9 +160,8 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     $scope.hasEnoughBalance = function() {
         if ($scope.wallet.balance == 'loading') return false;
         return isEnough($scope.tx.value, $scope.wallet.balance);
-    } /* */
+    }
 
-    // далее три функции из ens
     var normalise = function(name) {
         try {
             return uts46.toUnicode(name, { useStd3ASCII: true, transitional: false });
@@ -191,17 +169,6 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             throw e;
         }
     };
-    function namehash(name) {
-        name = ens.normalise(name);
-        var node = Buffer.alloc(32);
-        if (name && name != '') {
-            var labels = name.split(".");
-            for (var i = labels.length - 1; i >= 0; i--) {
-                node = ethUtil.sha3(Buffer.concat([node, ethUtil.sha3(labels[i])]));
-            }
-        }
-        return '0x' + node.toString('hex');
-    }
     var getDataString = function(func, inputs) {
         var fullFuncName = ethUtil.solidityUtils.transformToFullName(func);
         var funcSig = ethFuncs.getFunctionSignature(fullFuncName);
@@ -226,7 +193,6 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                     data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
                 }
                 process(data);
-                
             });
         })
     }
@@ -245,7 +211,6 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                     });
                     data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
                 }
-                //console.log(data);
                 resolve(data);
             });
         })
@@ -282,53 +247,32 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         }
     };
 
-    function setBankState() {
-        $scope.bankState = states(_state);
-    }
-    getBankDataProcess("contractState", function(data) {
-        $scope.bankState = states(data);
-    });
-
-    getBankDataProcess("timeUpdateRequest", async function(data) {
-        $scope.now = (+new Date) / 1000; // todo взять из блока
-        var _queuePeriod = await getBankDataAsync("queuePeriod");
-        $scope.queuePeriod = _queuePeriod;
-        $scope.then = +data.data[0] + +_queuePeriod.data[0];
-        $scope.timeUpdateRequest = normalizeUnixTimeObject(data);
-    });
-
-    getBankDataProcess("cryptoFiatRateBuy", processBuyRate);
- 
-    var getBankState = function() {
-        const _var = "contractState";
-
-        ajaxReq.getEthCall({ 
-            to: bankAddress, 
-            data: getDataString(bankAbiRefactor[_var], [namehash(_var)]) 
-        }, function(data) {
-            if (data.error || data.data == '0x') {
-                if (data.data == '0x') {
-                    data.error = true;
-                    data.message = "Possible error with network or the bank contract";
-                }
-            } else {
-                var outTypes = bankAbiRefactor[_var].outputs.map(function(i) {
-                    return i.type;
-                });
-                data.data = states(ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''))[0]);
-            }
-            $scope.bankState = data;
+    function updateContractData() {
+        getBankDataProcess("contractState", function(data) {
+            $scope.bankState = states(data);
         });
-    };
 
+        // todo разместить куда-нибудь и протестировать
+        Promise.all([
+            getBankDataAsync("timeUpdateRequest"),
+            getBankDataAsync("queuePeriod")
+        ]).then(values => {
+            //$scope.now = (+new Date) / 1000; // todo взять из блока
+            let _timeUpdateRequest = values[0],
+                _queuePeriod = values[1];
+            $scope.queuePeriod = _queuePeriod;
+            $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
+            $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
+        });
 
+        getBankDataProcess("cryptoFiatRateBuy", processBuyRate);
+    }
+    updateContractData();
 
     $scope.generateBuyLibreTx = function() {
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
-            //else if (!ethFuncs.validateHexString($scope.tx.data)) throw globalFuncs.errorMsgs[9];
             else if (!globalFuncs.isNumeric($scope.tx.gasLimit) || parseFloat($scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
-            //$scope.tx.data = ethFuncs.sanitizeHex($scope.tx.data);
             ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
                 if (data.error) $scope.notifier.danger(data.msg);
 
@@ -337,7 +281,6 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                 var txData = uiFuncs.getTxData($scope);
                 txData.gasLimit = GAS_EMISSION;
                 uiFuncs.generateTx(txData, function(rawTx) {
-                    //console.log("rawTx",rawTx);
                     if (!rawTx.isError) {
                         $scope.rawTx = rawTx.rawTx;
                         $scope.signedTx = rawTx.signedTx;
@@ -372,8 +315,9 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                                     let status = receipt.data.status;
                                                     if (status == "0x1") {
                                                         $scope.notifier.success("Buy ok! todo translate", 0);
+                                                        updateContractData();
                                                     } else {
-                                                        $scope.notifier.success("Buy tx fail! todo translate and txid here", 0);
+                                                        $scope.notifier.danger("Buy tx fail! todo translate and txid here", 0);
                                                     }
                                                     $scope.buyPending = false;
                                                 }
@@ -386,7 +330,6 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                             }
                         });
                     } else {
-                        $scope.showRaw = false;
                         $scope.notifier.danger(rawTx.error);
                     }
                     if (!$scope.$$phase) $scope.$apply();
@@ -398,43 +341,15 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     }
 
     $scope.transferAllBalance = function() {
-        if ($scope.tx.sendMode != 'token') {
-            uiFuncs.transferAllBalance($scope.wallet.getAddressString(), $scope.tx.gasLimit, function(resp) {
-                if (!resp.isError) {
-                    $scope.tx.unit = resp.unit;
-                    $scope.tx.value = resp.value;
-                } else {
-                    $rootScope.rootScopeShowRawTx = false;
-                    $scope.notifier.danger(resp.error);
-                }
-            });
-        } else {
-            $scope.tx.value = $scope.wallet.tokenObjs[$scope.tokenTx.id].getBalance();
-        }
-    }
-
-    $scope.parseSignedTx = function( signedTx ) {
-      if( signedTx.slice(0,2)=="0x" ) signedTx = signedTx.slice(2, signedTx.length )
-      $scope.parsedSignedTx = {}
-      var txData = new ethUtil.Tx(signedTx)
-      $scope.parsedSignedTx.gasPrice      = {}
-      $scope.parsedSignedTx.txFee         = {}
-      $scope.parsedSignedTx.balance       = $scope.wallet.getBalance()
-      $scope.parsedSignedTx.from          = ethFuncs.sanitizeHex(ethUtil.toChecksumAddress(txData.from.toString('hex')))
-      $scope.parsedSignedTx.to            = ethFuncs.sanitizeHex(ethUtil.toChecksumAddress(txData.to.toString('hex')))
-      $scope.parsedSignedTx.value         = (txData.value=='0x'||txData.value==''||txData.value==null) ? '0' : etherUnits.toEther(new BigNumber(ethFuncs.sanitizeHex(txData.value.toString('hex'))).toString(), 'wei' )
-      $scope.parsedSignedTx.gasLimit      = new BigNumber(ethFuncs.sanitizeHex(txData.gasLimit.toString('hex'))).toString()
-      $scope.parsedSignedTx.gasPrice.wei  = new BigNumber(ethFuncs.sanitizeHex(txData.gasPrice.toString('hex'))).toString()
-      $scope.parsedSignedTx.gasPrice.gwei = new BigNumber(ethFuncs.sanitizeHex(txData.gasPrice.toString('hex'))).div(etherUnits.getValueOfUnit('gwei')).toString()
-      $scope.parsedSignedTx.gasPrice.eth  = etherUnits.toEther(new BigNumber(ethFuncs.sanitizeHex(txData.gasPrice.toString('hex'))).toString(), 'wei' )
-      $scope.parsedSignedTx.txFee.wei     = new BigNumber(parseInt($scope.parsedSignedTx.gasLimit)).times(new BigNumber(parseInt($scope.parsedSignedTx.gasPrice.wei)))
-      $scope.parsedSignedTx.txFee.gwei    = new BigNumber($scope.parsedSignedTx.txFee.wei).div(etherUnits.getValueOfUnit('gwei')).toString()
-      $scope.parsedSignedTx.txFee.eth     = etherUnits.toEther( parseInt($scope.parsedSignedTx.txFee.wei), 'wei' ).toString()
-      $scope.parsedSignedTx.nonce         = (txData.nonce=='0x'||txData.nonce==''||txData.nonce==null) ? '0' : new BigNumber(ethFuncs.sanitizeHex(txData.nonce.toString('hex'))).toString()
-      $scope.parsedSignedTx.data          = (txData.data=='0x'||txData.data==''||txData.data==null) ? '(none)' : ethFuncs.sanitizeHex(txData.data.toString('hex'))
-
-
-    }
-
+        uiFuncs.transferAllBalance($scope.wallet.getAddressString(), $scope.tx.gasLimit, function(resp) {
+            if (!resp.isError) {
+                $scope.tx.unit = resp.unit;
+                $scope.tx.value = resp.value;
+            } else {
+                $rootScope.rootScopeShowRawTx = false;
+                $scope.notifier.danger(resp.error);
+            }
+        });
+    } /* */
 };
 module.exports = emissionCtrl;

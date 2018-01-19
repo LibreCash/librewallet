@@ -53,7 +53,7 @@
 
 
   <!-- Slider Thingy -->
-  <!-- Hardware Wallets >
+  <!-- Hardware Wallets -->
   <a href="https://myetherwallet.github.io/knowledge-base/getting-started/protecting-yourself-and-your-funds.html"
      ng-show="slide==1 || ajaxReq.type!=='ETH'"
      class="block swap--hw"
@@ -73,10 +73,10 @@
       <br />
       <img src="images/logo-trezor.svg" width="80" height="auto" class="swap__logo">
     </div>
-  </a-->
+  </a>
 
   <!-- Coinbase -->
-  <!--a href="https://buy.coinbase.com?code=a6e1bd98-6464-5552-84dd-b27f0388ac7d&address={{wallet.getChecksumAddressString()}}&crypto_currency=ETH&currency=USD"
+  <a href="https://buy.coinbase.com?code=a6e1bd98-6464-5552-84dd-b27f0388ac7d&address={{wallet.getChecksumAddressString()}}&crypto_currency=ETH&currency=USD"
      ng-show="ajaxReq.type=='ETH' && slide==2"
      class="block swap--usd"
      target="_blank" rel="noopener noreferrer">
@@ -89,14 +89,14 @@
       <img src="images/logo-coinbase.svg" width="64" height="auto" class="swap__logo">
       <p class="swap-flag--price">1 ETH ≈ <br /> {{wallet.usdPrice}} USD</p>
     </div>
-  </a-->
+  </a>
 
 
 
 
 
   <!-- Bity -->
-  <!--a ng-click="globalService.currentTab=globalService.tabs.swap.id"
+  <a ng-click="globalService.currentTab=globalService.tabs.swap.id"
      ng-show="ajaxReq.type=='ETH' && slide==3"
      class="block swap--btc"
      target="_blank" rel="noopener noreferrer">
@@ -110,7 +110,7 @@
       <img src="images/logo-bity-white.svg" width="60" height="auto" class="swap__logo">
       <p class="swap-flag--price">1 ETH ≈ <br /> {{wallet.btcPrice}} BTC</p>
     </div>
-  </a-->
+  </a>
 
   <div class="swap__nav" ng-show="ajaxReq.type=='ETH'">
     <a ng-click="slide=1"> &bull; </a>
@@ -122,7 +122,7 @@
 
 
   <!-- Token Balances -->
-  <div class="block token-balances" ng-cloak ng-if="globalService.currentTab!=globalService.tabs.emission.id && globalService.currentTab!=globalService.tabs.remission.id">
+  <div class="block token-balances">
     <h5 translate="sidebar_TokenBal">Token Balances</h5>
 
     <!-- Load Token Balances
