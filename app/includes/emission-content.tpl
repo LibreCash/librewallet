@@ -75,7 +75,6 @@
                 ng-model="tx.value"
                 ng-disabled="tx.readOnly || checkTxReadOnly"
                 ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'"/>
-        </div>
       </div>
 
       <!-- Amount to Send - Transfer Entire Balance -->

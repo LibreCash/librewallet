@@ -1,6 +1,6 @@
 'use strict';
 var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
-/*    var states = function(_data) { 
+    var states = function(_data) { 
         const _states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
         try {
             var stateName = _states[_data.data[0]];
@@ -569,6 +569,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
             $scope.notifier.danger(e);
         }
     }
-/* */
+
 };
 module.exports = remissionCtrl;
