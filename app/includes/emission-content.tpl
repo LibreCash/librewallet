@@ -75,7 +75,6 @@
                 ng-model="tx.value"
                 ng-disabled="tx.readOnly || checkTxReadOnly"
                 ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'"/>
-        </div>
       </div>
 
       <!-- Amount to Send - Transfer Entire Balance -->
@@ -102,8 +101,8 @@
                  ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
         </div>
 
-          <div>
-            <a style="min-width: 170px"
+        <div>
+          <a style="min-width: 170px"
               class="btn btn-default"
               ng-click="generateBuyLibreTx()"
               ng-hide="buyPending"
