@@ -487,7 +487,8 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                     
                                     $scope.wallet.setBalance(applyScope);
 
-                                    var checkingTx = setInterval(() => {
+                                    var isCheckingTx = false,
+                                      checkingTx = setInterval(() => {
                                         if (!$scope.sellPending) {
                                             clearInterval(checkingTx);
                                             return;
