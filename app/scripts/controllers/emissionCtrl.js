@@ -17,6 +17,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     $scope.emissionModal = new Modal(document.getElementById('emission'));
     //walletService.wallet = null;
     //walletService.password = '';
+    $scope.allTokens = '';
     $scope.showAdvance = $rootScope.rootScopeShowRawTx = false;
     $scope.dropdownEnabled = false;
     $scope.Validator = Validator;
@@ -97,6 +98,8 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         return walletService.wallet.getAddressString();
     }, function() {
         if (walletService.wallet == null) return;
+        $scope.allTokens = libreFuncs.balance(walletService);
+        console.log("start allTokens", $scope.allTokens);
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
