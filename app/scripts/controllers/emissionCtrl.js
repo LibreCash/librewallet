@@ -291,7 +291,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                 let _timeUpdateRequest = values[0],
                     _queuePeriod = values[1],
                     _contractState = values[2],
-                    _paused = values[3];
+                    _paused = values[3].data[0];
                 $scope.queuePeriod = _queuePeriod;
                 $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
                 $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
@@ -345,7 +345,8 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                 $scope.wallet.setBalance(applyScope);
                                 $scope.buyPending = true;
                             
-                                var checkingTx = setInterval(() => {
+                                var isCheckingTx = false,
+                                checkingTx = setInterval(() => {
                                     if (!$scope.buyPending) {
                                         clearInterval(checkingTx);
                                         return;

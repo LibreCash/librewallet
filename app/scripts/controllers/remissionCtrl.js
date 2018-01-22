@@ -375,7 +375,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
                 let _timeUpdateRequest = values[0],
                     _queuePeriod = values[1],
                     _contractState = values[2],
-                    _paused = values[3];
+                    _paused = values[3].data[0];
                 $scope.queuePeriod = _queuePeriod;
                 $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
                 $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
@@ -387,6 +387,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
                     return;
                 }
                 var allowedState = (!_paused) && ((_contractState.data[0] == 3) || (lastedTime >= _queuePeriod.data[0]));
+                console.log("paused", _paused, "state", _contractState.data[0], "ltime, per", lastedTime, _queuePeriod.data[0]);
                 if (allowedState)
                     callback();                
                 else
