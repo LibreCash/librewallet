@@ -17,6 +17,17 @@ etherscan.getCurrentBlock = function(callback) {
         else callback({ error: false, msg: '', data: new BigNumber(data.result).toString() });
     });
 }
+etherscan.getLatestBlockData = function(callback) {
+    this.post({
+        module: 'proxy',
+        action: 'eth_getBlockByNumber',
+        tag: 'latest',
+        boolean: true
+    }, function(data) {
+        if (data.error) callback({ error: true, msg: data.error.message, data: '' });
+        else callback({ error: false, msg: '', data: data.result });
+    });
+}
 etherscan.getBalance = function(addr, callback) {
     this.post({
         module: 'account',
@@ -32,6 +43,16 @@ etherscan.getTransaction = function(txHash, callback) {
     this.post({
         module: 'proxy',
         action: 'eth_getTransactionByHash',
+        txhash: txHash,
+    }, function(data) {
+        if (data.error) callback({ error: true, msg: data.error.message, data: '' });
+        else callback({ error: false, msg: '', data: data.result });
+    });
+}
+etherscan.getTransactionReceipt = function(txHash, callback) {
+    this.post({
+        module: 'proxy',
+        action: 'eth_getTransactionReceipt',
         txhash: txHash,
     }, function(data) {
         if (data.error) callback({ error: true, msg: data.error.message, data: '' });

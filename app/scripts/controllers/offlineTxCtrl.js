@@ -1,8 +1,8 @@
 'use strict';
 var offlineTxCtrl = function($scope, $sce, walletService) {
     $scope.ajaxReq = ajaxReq;
-    walletService.wallet = null;
-    walletService.password = '';
+    //walletService.wallet = null;
+    //walletService.password = '';
     $scope.unitReadable = ajaxReq.type;
     $scope.valueReadable = "";
     $scope.showAdvance = false;

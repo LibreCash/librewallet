@@ -8,9 +8,8 @@ var viewWalletCtrl = function($scope, walletService) {
     $scope.tokenVisibility = "hidden";
     $scope.pkeyVisible = false;
 
-    walletService.wallet = null;
-    walletService.password = '';
-    $scope.ajaxReq = ajaxReq;
+    //walletService.wallet = null;
+    //$scope.ajaxReq = ajaxReq;
     $scope.$watch(function() {
         if (walletService.wallet == null) return null;
         return walletService.wallet.getAddressString();
@@ -28,12 +27,12 @@ var viewWalletCtrl = function($scope, walletService) {
             $scope.encFileName = $scope.wallet.getV3Filename();
         }
         $scope.wallet.setBalance();
-        //$scope.wallet.setTokens();
+        $scope.wallet.setTokens();
     });
     $scope.$watch('ajaxReq.key', function() {
         if ($scope.wallet) {
             $scope.wallet.setBalance();
-            //$scope.wallet.setTokens();
+            $scope.wallet.setTokens();
         }
     });
 

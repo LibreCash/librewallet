@@ -10,6 +10,7 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
     $scope.customNode = { options: 'eth', name: '', url: '', port: '', httpBasicAuth: null, eip155: false, chainId: '' };
     $scope.customNodeCount = 0;
     $scope.nodeIsConnected = true;
+    $scope.gasPriceMsg = false;
     $scope.browserProtocol = window.location.protocol;
     var hval = window.location.hash;
     $scope.notifier = uiFuncs.notifier;
@@ -35,16 +36,21 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
     $scope.gasChanged = function() {
         globalFuncs.localStorage.setItem(gasPriceKey, $scope.gas.value);
         ethFuncs.gasAdjustment = $scope.gas.value;
+        $scope.gasPriceMsg = ethFuncs.gasAdjustment < 20 ? true : false
     }
     var setGasValues = function() {
         $scope.gas = {
-            curVal: 10,
-            value: globalFuncs.localStorage.getItem(gasPriceKey, null) ? parseInt(globalFuncs.localStorage.getItem(gasPriceKey)) : 10,
+            curVal: 20,
+            value: globalFuncs.localStorage.getItem(gasPriceKey, null) ? parseInt(globalFuncs.localStorage.getItem(gasPriceKey)) : 20,
             max: 60,
-            min: 0.1,
-            step: 0.1
+            min: 0.5,
+            step: 0.5
         }
+
+        var curNode = globalFuncs.localStorage.getItem('curNode', null);
+
         ethFuncs.gasAdjustment = $scope.gas.value;
+        $scope.gasPriceMsg = ethFuncs.gasAdjustment < 20 ? true : false
     }
     setGasValues();
     $scope.gasChanged();

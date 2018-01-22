@@ -3,4 +3,17 @@
 "symbol":"☼ PLASMA",
 "decimal":6,
 "type":"default"
-}]
+},
+{
+"address":"0x0F842591284b837db58A7Ae7EAD59c116F7a2234",
+"symbol":"LBT",
+"decimal":18,
+"type":"default"
+},
+{
+"address":"0x166fb3968d48602e922df6865764a51d1544271f",
+"symbol":"LCH",
+"decimal":18,
+"type":"default"
+}
+]

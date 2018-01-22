@@ -7,6 +7,18 @@
 // http://www.tokensalecalendar.com/
 
 module.exports = [{
+// MNT Token Sale
+to:         '0xA9877b1e05D035899131DBd1e403825166D09f92',
+gasLimit:   200000,
+data:       '',
+msg:        'MNT Token Sale - http://mnt.coinjoker.com'
+},{
+// DIVX Token Sale
+to:         '0x13f11C9905A08ca76e3e853bE63D4f0944326C72',
+gasLimit:   300000,
+data:       '0xb4427263',
+msg:        'DIVX Token Sale - www.diviproject.org'
+},{
 // NOX Token Sale
 to:         '0x4b0712de9b75bc68a566215acca876ea5e55c172',
 gasLimit:   114293,
@@ -25,6 +37,12 @@ gasLimit:   250000,
 data:       '',
 msg:        'STORM token sale: gamified micro-tasks - Earn anywhere, anytime, from any device. https://www.stormtoken.com, NOV 7, 2017'
 },{
+// RVL tokens
+to:         '0xDd64EF0c8a41d8a17F09ce2279D79b3397184A10',
+gasLimit:   200000,
+data:       '',
+msg:        'RVL token sale: PRE-ICO SUPER SALE, SHARING ECONOMY PIATTAFORM,  https://www.R-EVOLUTIONCOIN.COM.com, DIC 15, 2017'
+},{
 // Aigang (AIX) ICO Sale
 to:         ' 0xeA0c348A297084BFFbddad7f89216F24a2106E58',
 gasLimit:   300000,
@@ -32,10 +50,10 @@ data:       '',
 msg:        'Aigang token sale contract. Autonomous insurance network - fully automated insurance for IoT devices and a platform for insurance innovation built around data: https://aigang.network . Ends 12/15/2017'
 },{
 // Confideal (CDL)
-to:         '0x22A97c80D7e0a9Ae616737E3B8b531248f4ef91d',
+to:         '0x17681500757628C7AA56d7E6546E119f94Dd9479',
 gasLimit:   170000,
 data:       '',
-msg:        'Confideal token sale. Confideal is a platform for making deals. https://confideal.io, NOV 2-22, 2017'
+msg:        'Confideal token sale. Confideal is a platform for making deals. https://confideal.io, ends Jan 31, 2018'
 },{
 // Flixxo (FLIXX)
 to:         '0x876359dCb1745073909CC810311EC3f119e8D5E8',
@@ -163,6 +181,12 @@ gasLimit:   200000,
 data:       '',
 msg:        'Mitrav ICO Sale. Thank you for your support!'
 },{
+// WinBitcoin (WBC) ICO Sale
+to:         '0xA5DD8cDe486436F0Cfd62652952E1fcEC5A61CAe',
+gasLimit:   300000,
+data:       '',
+msg:        'WinBitcoin ICO Sale. Thank you for your support!'
+},{
 // BMCHAIN ICO
 to:         '0x19d7a9ad3b49252fd2ef640d0e43dfd651168499',
 gasLimit:   100000,
@@ -194,10 +218,10 @@ data:       '',
 msg:        'Game Token Sale'
 },{
 // Skrilla Token Sale
-to:         '0x4c382F8E09615AC86E08CE58266CC227e7d4D913',
-gasLimit:   200000,
+to:         '0x16662f73df3e79e54c6c5938b4313f92c524c120',
+gasLimit:   150000,
 data:       '',
-msg:        'Get SKR! Thanks for your support and remember only get the contract address from tokensale.skrilla.com'
+msg:        'Private Sale started, Public Sale from December 19th, 2017 to January 1st, 2018. First Lending program with instant payout to Payoneer prepaid card! JOIN NOW: https://ibiscoin.co'
 },{
 // Rebellious Token
 to:         '0x5f53f7a8075614b699baad0bc2c899f4bad8fbbf',
@@ -210,4 +234,46 @@ to:         '0xd5E3036d5CE7eC222379D16f6ffC38C38c55BF7f',
 gasLimit:   200000,
 data:       '',
 msg:        'Ethereum High HIG is a robust and feather-light cryptocurrency designed to hedge the risk of your portfolio'
+},{
+// PIXEL Token Sale (PIXEL)
+to:         '0x7e7DC49715816d1f5712A1d7dFf083e4F9E588B6',
+gasLimit:   200000,
+data:       '',
+msg:        'PIXEL token sale contract. VR club franchise with neurointerfaces: https://vr-pixel.com. Ends 05.12.2017. Thank you for participating!'
+},{
+to:         '0x2a3Aa9ECA41E720Ed46B5A70D6C37EfA47f768Ac',
+gasLimit:   200000,
+data:       '',
+msg:        'REAL CHAIN TOKEN!'
+},{
+// Artex Token Sale (ARX)
+to:         '0x7705FaA34B16EB6d77Dfc7812be2367ba6B0248e',
+gasLimit:   200000,
+data:       '',
+msg:        'Artex - Art Provenance Blockchain. Official site https://artex.global'
+},
+{
+// Sirin Token Sale (SRN)
+to:         '0x29AfA3443f752eb29d814d9042Fd88A4a2dc0F1e',
+gasLimit:   200000,
+data:       '',
+msg:        'SIRIN LABS official crowdsale address. Official website https://sirinlabs.com'
+},{
+// TRV Token Sale
+to:         '0xA671f2914Ba0e73979FFc47cD350801d1714b18f',
+gasLimit:   150000,
+data:       '',
+msg:        'TRV Ongoing Sale.'
+},{
+// Bitlle Token Sale (BTL)
+to:         '0x92685E93956537c25Bb75D5d47fca4266dd628B8',
+gasLimit:   200000,
+data:       '',
+msg:        'Bitlle Token. Official website https://bitlle.com'
+},{
+// EDU Token Sale (LiveEdu.tv)
+to:         '0x2097175d0abb8258f2468E3487F8db776E29D076',
+gasLimit:   200000,
+data:       '',
+msg:        'LiveEdu EDU token sale. Official website: https://tokensale.liveedu.tv/'
 }]

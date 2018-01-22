@@ -55,7 +55,7 @@
   "url"   : "https://myetherwallet.com",
   "contactType" : "customer service"
 }],
-"logo" : "{{base_url}}images/myetherwallet-logo.png",
+"logo" : "https://www.myetherwallet.com/images/myetherwallet-logo.png",
 "description": "MyEtherWallet.com is a free, open-source, client-side interface for generating Ethereum wallets &amp; more. Interact with the Ethereum blockchain easily &amp; securely.",
 "sameAs" : [
   "https://www.myetherwallet.com/",
@@ -75,21 +75,41 @@
 
 <header class="{{curNode.name}} {{curNode.service}} {{curNode.service}} nav-index-{{gService.currentTab}}" aria-label="header" ng-controller='tabsCtrl' >
 
-<section class="bg-gradient header-branding">
+@@if (site === 'mew' ) {
+  <div class="small announcement annoucement-danger">
+    <div class="container">
+      DON'T GET PHISHED, please! 🎣 Thank you! 🤗
+      <br />
+      1. BOOKMARK <a href="https://www.myetherwallet.com"> MYETHERWALLET.COM </a>
+      <span class="hidden-xs">
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        2. INSTALL <a href="https://chrome.google.com/webstore/detail/etheraddresslookup/pdknmigbbbhmllnmgdfalmedcmcefdfn" target="_blank" rel="noopener noreferrer">EAL</a>
+        or
+        <a href="https://myetherwallet.github.io/knowledge-base/migration/moving-from-private-key-to-metamask.html" target="_blank" rel="noopener noreferrer">MetaMask</a>
+        or
+        <a href="https://chrome.google.com/webstore/detail/cryptonite-by-metacert/keghdcpemohlojlglbiegihkljkgnige" target="_blank" rel="noopener noreferrer">Cryptonite</a>
+      </span>
+    </div>
+  </div>
+}
+
+<section class="bg-gradient-libre header-branding">
   <section class="container">
     @@if (site === 'mew' ) {
       <a class="brand" href="/" aria-label="Go to homepage">
-        <img src="images/logo-myetherwallet.svg"   height="64px" width="245px" alt="MyEtherWallet" />
+        <img src="images/logo-libre.svg"   height="64px" width="245px" alt="LibreWallet" />
+        <p class="small visible-xs">3.11.1.7</p>
       </a>
     }
     @@if (site === 'cx'  ) {
       <a class="brand" href="/cx-wallet.html" aria-label="Go to homepage">
-        <img src="images/logo-myetherwalletcx.svg" height="64px" width="245px" alt="MyEtherWallet" />
+        <img src="images/logo-libre.svg" height="64px" width="245px" alt="LibreWallet" />
+        <p class="small visible-xs">3.11.1.7</p>
       </a>
     }
     <div class="tagline">
 
-    <span>3.10.8.0</span>
+    <span class="hidden-xs">3.11.1.7</span>
 
     <span class="dropdown dropdown-lang" ng-cloak>
       <a tabindex="0"  aria-haspopup="true" aria-expanded="false" aria-label="change language. current language {{curLang}}" class="dropdown-toggle  btn btn-white" ng-click="dropdown = !dropdown">{{curLang}}<i class="caret"></i></a>
@@ -125,35 +145,68 @@
 
     <span class="dropdown dropdown-gas" ng-cloak>
       <a tabindex="0" aria-haspopup="true" aria-label="adjust gas price" class="dropdown-toggle  btn btn-white" ng-click="dropdownGasPrice = !dropdownGasPrice">
-        <span translate="OFFLINE_Step2_Label_3">Gas Price</span>: {{gas.value}} Gwei
-        <i class="caret"></i>
+        <span translate="OFFLINE_Step2_Label_3">Gas Price</span>:
+          {{gas.value}} Gwei
+          <i class="caret"></i>
       </a>
       <ul class="dropdown-menu" ng-show="dropdownGasPrice">
         <div class="header--gas">
-          <span translate="OFFLINE_Step2_Label_3">Gas Price</span>: {{gas.value}} Gwei
+          <span translate="OFFLINE_Step2_Label_3">Gas Price</span>:
+          {{gas.value}} Gwei
           <input type="range" ng-model="gas.value" min="{{gas.min}}" max="{{gas.max}}" step="{{gas.step}}" ng-change="gasChanged()"/>
-          <p class="small col-xs-4 text-left">Not So Fast</p>
-          <p class="small col-xs-4 text-center">Fast</p>
-          <p class="small col-xs-4 text-right">Fast AF</p>
+          <p class="small col-xs-4 text-left"> <!--translate="GAS_Price_1"-->
+            Really, really slow
+          </p>
+          <p class="small col-xs-4 text-center"> <!--translate="GAS_Price_2"-->
+            Maybe Fast?
+          </p>
+          <p class="small col-xs-4 text-right"> <!--translate="GAS_Price_3"-->
+            Fast
+          </p>
+          <br />
           <p class="small" style="white-space:normal;font-weight:300;margin: 2rem 0 0;" translate="GAS_PRICE_Desc"></p>
-          <a class="small" translate="x_ReadMore" href="https://myetherwallet.github.io/knowledge-base/gas/what-is-gas-ethereum.html" target="_blank" rel="noopener noreferrer"></a>
+          <a class="small"
+             translate="x_ReadMore"
+             href="https://myetherwallet.github.io/knowledge-base/gas/what-is-gas-ethereum.html"
+             target="_blank"
+             rel="noopener noreferrer"></a>
         </div>
       </ul>
+      <p class="dropdown-gas__msg"
+         ng-show="gasPriceMsg"
+         ng-hide="ajaxReq.type!='ETH'">
+        The network is really full right now. Check
+        <a href="https://ethgasstation.info/"
+           target="_blank" rel="noopener noreferrer">Eth Gas Station</a>
+        for gas price to use.
+      </p>
     </span>
 
     <!-- Warning: The separators you see on the frontend are in styles/etherwallet-custom.less. If you add / change a node, you have to adjust these. Ping tayvano if you're not a CSS wizard -->
     <span class="dropdown dropdown-node" ng-cloak>
-      <a tabindex="0" aria-haspopup="true" aria-label="change node. current node {{curNode.name}} node by {{curNode.service}}" class="dropdown-toggle  btn btn-white" ng-click="dropdownNode = !dropdownNode">
-        Network: {{curNode.name}} <small>({{curNode.service}})</small>
-        <i class="caret"></i>
+      <a tabindex="0"
+         aria-haspopup="true"
+         aria-label="change node. current node {{curNode.name}} node by {{curNode.service}}"
+         class="dropdown-toggle  btn btn-white"
+         ng-click="dropdownNode = !dropdownNode">
+           <span translate="X_Network">Network:</span>
+           {{curNode.name}}
+           <small>({{curNode.service}})</small>
+           <i class="caret"></i>
       </a>
       <ul class="dropdown-menu" ng-show="dropdownNode">
-        <li ng-repeat="(key, value) in nodeList"><a ng-class="{true:'active'}[curNode == key]" ng-click="changeNode(key)">
-          {{value.name}}
-          <small> ({{value.service}}) </small>
-          <img ng-show="value.service=='Custom'" src="images/icon-remove.svg" class="node-remove" title="Remove Custom Node" ng-click="removeNodeFromLocal(value.name)"/>
-        </a></li>
-        <li><a ng-click="customNodeModal.open(); dropdownNode = !dropdownNode;"> Add Custom Node </a></li>
+        <li ng-repeat="(key, value) in nodeList">
+          <a ng-class="{true:'active'}[curNode == key]" ng-click="changeNode(key)">
+            {{value.name}}
+            <small> ({{value.service}}) </small>
+            <img ng-show="value.service=='Custom'" src="images/icon-remove.svg" class="node-remove" title="Remove Custom Node" ng-click="removeNodeFromLocal(value.name)"/>
+          </a>
+        </li>
+        <li>
+          <a ng-click="customNodeModal.open(); dropdownNode = !dropdownNode;" translate="X_Network_Custom">
+            Add Custom Network / Node
+          </a>
+        </li>
       </ul>
     </span>
 
@@ -166,15 +219,31 @@
   <div class="nav-scroll">
     <ul class="nav-inner">
       @@if (site === 'mew' ) {
-      <li ng-repeat="tab in tabNames track by $index" class="nav-item {{tab.name}}" ng-class="{active: $index==gService.currentTab}" ng-show="tab.mew" ng-click="tabClick($index)"> <a tabindex="0" aria-label="nav item: {{tab.name | translate}}" translate="{{tab.name}}"></a></li>
+      <li ng-repeat="tab in tabNames track by $index" \
+          class="nav-item {{tab.name}}" \
+          ng-class="{active: $index==gService.currentTab}"
+          ng-show="tab.mew"
+          ng-click="tabClick($index)">
+            <a tabindex="0" aria-label="nav item: {{tab.name | translate}}" translate="{{tab.name}}"></a>
+      </li>
       }
       @@if (site === 'cx' ) {
-      <li ng-repeat="tab in tabNames track by $index" class="nav-item {{tab.name}}" ng-class="{active: $index==gService.currentTab}" ng-show="tab.cx" ng-click="tabClick($index)"> <a tabindex="0" aria-label="nav item: {{tab.name | translate}}" translate="{{tab.name}}"></a></li>
+      <li ng-repeat="tab in tabNames track by $index" \
+          class="nav-item {{tab.name}}" \
+          ng-class="{active: $index==gService.currentTab}"
+          ng-show="tab.cx"
+          ng-click="tabClick($index)">
+            <a tabindex="0" aria-label="nav item: {{tab.name | translate}}" translate="{{tab.name}}"></a>
+      </li>
       }
-      <li class="nav-item help"><a href="https://myetherwallet.github.io/knowledge-base/" target="_blank" rel="noopener noreferrer">Help</a></li>
     </ul>
   </div>
-  <a aria-hidden="true" ng-show="showRightArrow" class="nav-arrow-right" ng-click="scrollRight(100);" ng-mouseover="scrollHoverIn(false,2);" ng-mouseleave="scrollHoverOut()">&#187;</a>
+  <a aria-hidden="true"
+     ng-show="showRightArrow"
+     class="nav-arrow-right"
+     ng-click="scrollRight(100);"
+     ng-mouseover="scrollHoverIn(false,2);"
+     ng-mouseleave="scrollHoverOut()">&#187;</a>
 </nav>
 
 @@if (site === 'mew' ) { @@include( './header-node-modal.tpl', { "site": "mew" } ) }
