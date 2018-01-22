@@ -101,7 +101,11 @@
                  ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
         </div>
 
-        <div>
+        <div class="col-sm-11">
+          <span translate="LIBRE_buyRate">Last buy price</span>: {{ buyRate }} <span>LIBRE/ETH</span>
+        </div>
+
+        <div class="col-sm-4">
           <a style="min-width: 170px"
               class="btn btn-default"
               ng-click="generateBuyLibreTx()"
@@ -116,10 +120,6 @@
             translate="LIBRE_txPending">
                 pending...
           </a>
-        </div>
-
-        <div class="col-sm-11">
-          <span translate="LIBRE_buyRate">Last buy price</span>: {{ buyRate }} <span>LIBRE/ETH</span>
         </div>
     </section>
 
