@@ -1,5 +1,5 @@
 'use strict';
-var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
+var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $translate) {
     var states = function(_data) { 
         const _states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
         try {
@@ -360,7 +360,60 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     }
     updateContractData();
 
-    $scope.generateApproveTx = async function() {
+    //        var ethBalance = await getBankDataAsync("getBalanceEther");
+    //        console.log("balance", ethBalance);
+    async function statusAllowsOrders(callback) {
+        ajaxReq.getLatestBlockData(async function(data) {
+            var lastBlockTime = parseInt(data.data.timestamp, 16);
+            await Promise.all([
+                getBankDataAsync("timeUpdateRequest"),
+                getBankDataAsync("queuePeriod"),
+                getBankDataAsync("contractState"),
+                getBankDataAsync("paused")
+            ]).then(values => {
+                let _timeUpdateRequest = values[0],
+                    _queuePeriod = values[1],
+                    _contractState = values[2],
+                    _paused = values[3];
+                $scope.queuePeriod = _queuePeriod;
+                $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
+                $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
+                var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
+                // allowing orders condition:
+                // state == ORDER_CREATION (3) || lastedTime >= _queuePeriod
+                if ((_contractState.error) && (_queuePeriod.error)) {
+                    $scope.notifier.danger("Getting contract data error");
+                    return;
+                }
+                var allowedState = (!_paused) && ((_contractState.data[0] == 3) || (lastedTime >= _queuePeriod.data[0]));
+                if (allowedState)
+                    callback();                
+                else
+                    $scope.notifier.danger("Order creation isn't allowed now. Please look at the status page. Todo translate and add links");
+            });
+        });
+    }
+
+    async function ifNotPaused(callback) {
+        getBankDataAsync("paused").then(value => {
+            if (value.error) {
+                $scope.notifier.danger("Error getting data from contract");
+                return;
+            }
+            var _paused = value.data[0];
+            console.log(_paused);
+            if (!_paused)
+                callback();                
+            else
+                $scope.notifier.danger("LibreBank contract is paused right now");
+        });
+    }
+    
+    $scope.generateApproveTx = function() {
+        ifNotPaused(callbackApproveTx);
+    }
+
+    var callbackApproveTx = async function() {
         $scope.approvePending = true;
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
@@ -457,6 +510,12 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     }
 
     $scope.generateSellLibreTx = function() {
+        statusAllowsOrders(callbackSellLibreTx);
+    }
+
+    //console.log(await $translate("SUCCESS_1"));
+
+    var callbackSellLibreTx = function() {
         $scope.sellPending = true;
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
@@ -494,6 +553,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                             return;
                                         }
                                         if (isCheckingTx) return; // fixing doubling success messages
+                                        isCheckingTx = true;
                                         ajaxReq.getTransactionReceipt(
                                             resp.data,
                                             (receipt) => {
@@ -512,6 +572,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                                         $scope.sellPending = false;
                                                     }
                                                 }
+                                                isCheckingTx = false;
                                             }
                                         );
                                     }, 2000);

@@ -269,7 +269,43 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     }
     updateContractData();
 
+    async function statusAllowsOrders(callback) {
+        ajaxReq.getLatestBlockData(async function(data) {
+            var lastBlockTime = parseInt(data.data.timestamp, 16);
+            await Promise.all([
+                getBankDataAsync("timeUpdateRequest"),
+                getBankDataAsync("queuePeriod"),
+                getBankDataAsync("contractState"),
+                getBankDataAsync("paused")
+            ]).then(values => {
+                let _timeUpdateRequest = values[0],
+                    _queuePeriod = values[1],
+                    _contractState = values[2],
+                    _paused = values[3];
+                $scope.queuePeriod = _queuePeriod;
+                $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
+                $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
+                var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
+                // allowing orders condition:
+                // state == ORDER_CREATION (3) || lastedTime >= _queuePeriod
+                if ((_contractState.error) && (_queuePeriod.error)) {
+                    $scope.notifier.danger("Getting contract data error");
+                    return;
+                }
+                var allowedState = (!_paused) && ((_contractState.data[0] == 3) || (lastedTime >= _queuePeriod.data[0]));
+                if (allowedState)
+                    callback();                
+                else
+                    $scope.notifier.danger("Order creation isn't allowed now. Please look at the status page. Todo translate and add links");
+            });
+        });
+    }
+
     $scope.generateBuyLibreTx = function() {
+        statusAllowsOrders(callbackBuyLibreTx);
+    }
+
+    var callbackBuyLibreTx = function() {
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
             else if (!globalFuncs.isNumeric($scope.tx.gasLimit) || parseFloat($scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
@@ -304,6 +340,8 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                         clearInterval(checkingTx);
                                         return;
                                     }
+                                    if (isCheckingTx) return; // fixing doubling success messages
+                                    isCheckingTx = true;
                                     ajaxReq.getTransactionReceipt(
                                         resp.data,
                                         (receipt) => {
@@ -322,6 +360,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
                                                     $scope.buyPending = false;
                                                 }
                                             }
+                                            isCheckingTx = false;
                                         }
                                     );
                                 }, 2000);
