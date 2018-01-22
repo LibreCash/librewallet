@@ -1,5 +1,7 @@
 'use strict';
 var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
+    const TOKEN_DECIMALS = 18;
+
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
@@ -17,7 +19,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     $scope.emissionModal = new Modal(document.getElementById('emission'));
     //walletService.wallet = null;
     //walletService.password = '';
-    $scope.allTokens = '';
+    $scope.allTokens = 'Loading';
     $scope.showAdvance = $rootScope.rootScopeShowRawTx = false;
     $scope.dropdownEnabled = false;
     $scope.Validator = Validator;
@@ -93,14 +95,19 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
         if (globalFuncs.urlGet('data') || globalFuncs.urlGet('value') || globalFuncs.urlGet('to') || globalFuncs.urlGet('gaslimit') || globalFuncs.urlGet('sendMode') || globalFuncs.urlGet('gas') || globalFuncs.urlGet('tokensymbol')) $scope.hasQueryString = true // if there is a query string, show an warning at top of page
 
     }
+
+    var setAllTokens = function(data) {
+        console.log(data);
+        $scope.allTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+    };
+
     $scope.$watch(function() {
         if (walletService.wallet == null) return null;
         return walletService.wallet.getAddressString();
     }, function() {
         if (walletService.wallet == null) return;
-        $scope.allTokens = libreFuncs.balance(walletService);
-        console.log("start allTokens", $scope.allTokens);
         $scope.wallet = walletService.wallet;
+        libreFuncs.getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
         $scope.tx.to = bankAddress; //walletService.wallet.getAddressString();//$scope.wallet.setTokens();

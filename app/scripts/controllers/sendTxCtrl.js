@@ -1,7 +1,9 @@
 'use strict';
 var sendTxCtrl = function($scope, $sce, walletService, $rootScope) {
+    const TOKEN_DECIMALS = 18;
     $scope.tx = {};
-    $scope.signedTx
+    $scope.signedTx;
+    $scope.allTokens = 'Loading';
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
     $scope.sendTxModal = new Modal(document.getElementById('sendTransaction'));
@@ -36,6 +38,10 @@ var sendTxCtrl = function($scope, $sce, walletService, $rootScope) {
         tokensymbol: globalFuncs.urlGet('tokensymbol') == null ? false : globalFuncs.urlGet('tokensymbol'),
     }
 
+    var setAllTokens = function(data) {
+        console.log(data);
+        $scope.allTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+    };
 
     $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
         $scope.tx.sendMode = sendMode;
@@ -86,6 +92,7 @@ var sendTxCtrl = function($scope, $sce, walletService, $rootScope) {
     }, function() {
         if (walletService.wallet == null) return;
         $scope.wallet = walletService.wallet;
+        libreFuncs.getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
         $scope.wallet.setTokens();

@@ -2,7 +2,7 @@
 const TOKEN_DECIMALS = 18;
 
 var walletService,
-    allTokens = 0;
+    allTokens = '';
 var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
 var bankAddress = libreBank.address;
 var bankAbi = libreBank.abi;
@@ -70,10 +70,12 @@ function getCashDataProcess(_var, process, params = []) {
     return getDataProcess(cashAddress, cashAbiRefactor, _var, process, params);
 }
 
-exports.balance = function(_walletService) {
+exports.balance = async function(_walletService) {
     walletService = _walletService;
     if (walletService.wallet != null) {
-        getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
+        await getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
     }
-    return allTokens;
+    console.log("allTokens",allTokens);
 }
+
+exports.getCashDataProcess = getCashDataProcess;

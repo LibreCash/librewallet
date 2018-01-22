@@ -35,6 +35,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     };
 
     const TOKEN_DECIMALS = 18;
+    $scope.allTokens = 'Loading';
 
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
