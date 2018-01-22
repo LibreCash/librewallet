@@ -54,6 +54,8 @@ window.ens                   = ens;
 var domainsale               = require('./domainsale');
 window.domainsale            = domainsale;
 var translate                = require('./translations/translate.js');
+var libreFuncs               = require('./libreFuncs');
+window.libreFuncs            = libreFuncs;
 if (IS_CX) {
   var cxFuncs                = require('./cxFuncs');
   window.cxFuncs             = cxFuncs;
