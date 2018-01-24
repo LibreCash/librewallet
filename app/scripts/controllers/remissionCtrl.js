@@ -1,5 +1,16 @@
 'use strict';
-var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $translate) {
+var remissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope, $translate) {
+    var bankAddress = libreService.bank.address,
+        cashAddress = libreService.token.address,
+        bankAbiRefactor = libreService.bank.abi,
+        cashAbiRefactor = libreService.token.abi,
+        getBankDataAsync = libreService.methods.getBankDataAsync,
+        getCashDataAsync = libreService.methods.getCashDataAsync,
+        getBankDataProcess = libreService.methods.getBankDataProcess,
+        getCashDataProcess = libreService.methods.getCashDataProcess,
+        normalizeUnixTime = libreService.methods.normalizeUnixTime,
+        getDataString = libreService.methods.getDataString;
+
     var states = function(_data) { 
         const _states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
         try {
@@ -34,7 +45,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
         }
     };
 
-    const TOKEN_DECIMALS = 18;
     $scope.allTokens = 'Loading';
 
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
@@ -143,12 +153,11 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
     }
 
     var setAllTokens = function(data) {
-        console.log(data);
-        $scope.allTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+        $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     }, 
     setAllowance = function(data) {
         //console.log("allowance", data);
-        $scope.allowedTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+        $scope.allowedTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     };
 
     function updateBalanceAndAllowance() {
@@ -161,9 +170,9 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
         if (walletService.wallet == null) return null;
         return walletService.wallet.getAddressString();
     }, function() {
-        if (walletService.wallet == null) return;
+        if (walletService.wallet == null) return; 
+        updateContractData();
         updateBalanceAndAllowance();
-        console.log("wallet", walletService.wallet.getAddressString());
         $scope.wallet = walletService.wallet;
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
@@ -208,6 +217,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
 
     $scope.$watch('tx', function(newValue, oldValue) {
         $rootScope.rootScopeShowRawTx = false;
+        updateContractData();
         $scope.tx.rateLimitReal = Math.round($scope.tx.rateLimit * rateMultiplier);
         if (newValue.sendMode == 'ether') {
             $scope.tx.data = globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data');
@@ -249,120 +259,25 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
             throw e;
         }
     };
-    var getDataString = function(func, inputs) {
-        var fullFuncName = ethUtil.solidityUtils.transformToFullName(func);
-        var funcSig = ethFuncs.getFunctionSignature(fullFuncName);
-        var typeName = ethUtil.solidityUtils.extractTypeName(fullFuncName);
-        var types = typeName.split(',');
-        types = types[0] == "" ? [] : types;
-        return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
-    };
 
-    function getDataCommon(address, abiRefactored, _var, process, transactionParams, processParam) {
-        return new Promise((resolve, reject) => {
-            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], transactionParams) }, function(data) {
-                if (data.error || data.data == '0x') {
-                    if (data.data == '0x') {
-                        data.error = true;
-                        data.message = "Possible error with network or the bank contract";
-                    }
-                } else {
-                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
-                        return i.type;
-                    });
-                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
-                }
-                process(data, processParam);
-            });
-        })
-    }
 
-    function getDataProcess(address, abiRefactored, _var, process, params = []) {
-        return getDataCommon(address, abiRefactored, _var, process, params, "");
-    }
 
-    function setScope(_value, _key) {
-        // todo error handling
-        $scope[_key] = _value.data[0];
-    }
-
-    function getDataScope(address, abiRefactored, _var, _key, params = []) {
-        return getDataCommon(address, abiRefactored, _var, setScope, params, _key);
-    }
-
-    function getBankDataProcess(_var, process, params = []) {
-        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, params);
-    }
-
-    function getCashDataProcess(_var, process, params = []) {
-        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, params);
-    }
-
-    async function getDataAsync(address, abiRefactored, _var, params = []) {
-        return new Promise((resolve, reject) => { 
-            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], params) }, function(data) {
-                if (data.error || data.data == '0x') {
-                    if (data.data == '0x') {
-                        data.error = true;
-                        data.message = "Possible error with network or the bank contract";
-                    }
-                } else {
-                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
-                        return i.type;
-                    });
-                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
-                }
-                resolve(data);
-            });
-        })
-    }
-
-    async function getBankDataAsync(_var, params = []) {
-        return getDataAsync(bankAddress, bankAbiRefactor, _var, params);
-    }
-
-    async function getCashDataAsync(_var, params = []) {
-        return getDataAsync(cashAddress, cashAbiRefactor, _var, params);
-    }
-
-    async function getBankDataScope(_var, _key, params = []) {
-        return getDataScope(bankAddress, bankAbiRefactor, _var, _key, params);
-    }
-
-    async function getCashDataScope(_var, _key, params = []) {
-        return getDataScope(cashAddress, cashAbiRefactor, _var, _key, params);
-    }
 
     function updateContractData() {
-        if (walletService.wallet != null)
+        if (walletService.wallet != null) {
             updateBalanceAndAllowance();
+            getBankDataProcess("getBalanceEther", function(data) {
+                $scope.getBalance = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+            });
+        }
         getBankDataProcess("contractState", function(data) {
             $scope.bankState = states(data);
         });
 
-        // todo разместить куда-нибудь и протестировать
-        Promise.all([
-            getBankDataAsync("timeUpdateRequest"),
-            getBankDataAsync("queuePeriod")
-        ]).then(values => {
-            //$scope.now = (+new Date) / 1000; // todo взять из блока
-            let _timeUpdateRequest = values[0],
-                _queuePeriod = values[1];
-            $scope.queuePeriod = _queuePeriod;
-            $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
-            $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
-        });
-
         getBankDataProcess("cryptoFiatRateSell", processSellRate);
-        getBankDataProcess("getBalanceEther", function(data) {
-            $scope.getBalance = data.data[0];
-            console.log("gbe", data);
-        });
     }
     updateContractData();
 
-    //        var ethBalance = await getBankDataAsync("getBalanceEther");
-    //        console.log("balance", ethBalance);
     async function statusAllowsOrders(callback) {
         ajaxReq.getLatestBlockData(async function(data) {
             var lastBlockTime = parseInt(data.data.timestamp, 16);
@@ -387,7 +302,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
                     return;
                 }
                 var allowedState = (!_paused) && ((_contractState.data[0] == 3) || (lastedTime >= _queuePeriod.data[0]));
-                console.log("paused", _paused, "state", _contractState.data[0], "ltime, per", lastedTime, _queuePeriod.data[0]);
                 if (allowedState)
                     callback();                
                 else
@@ -403,7 +317,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
                 return;
             }
             var _paused = value.data[0];
-            console.log(_paused);
             if (!_paused)
                 callback();                
             else
@@ -430,7 +343,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
                     if (data.error) {
                         throw(data.msg);
                     }
-                    var tokensToAllowCount = $scope.tokensToAllow * Math.pow(10, TOKEN_DECIMALS);
+                    var tokensToAllowCount = $scope.tokensToAllow * Math.pow(10, libreService.coeff.tokenDecimals);
                     if (allowance == tokensToAllowCount) {
                         throw("Allowance is equal to the value you want to set");
                     } else if (tokensToAllowCount < allowance) {
@@ -526,7 +439,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
                 try {
                     if (data.error)
                         throw(data.msg);
-                    var tokenCount = $scope.tokenValue * Math.pow(10, TOKEN_DECIMALS);
+                    var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals);
                     $scope.tx.data = getDataString(bankAbiRefactor["createSellOrder"], 
                         [$scope.wallet.getAddressString(), tokenCount, $scope.tx.rateLimitReal]);
                     var txData = uiFuncs.getTxData($scope);
@@ -597,43 +510,84 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
     }
 
     $scope.generateWithdrawLibreTx = function() {
+        ifNotPaused(callbackWithdrawLibreTx);
+    }
+
+    var callbackWithdrawLibreTx = function() {
+        $scope.withdrawPending = true;
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
             else if (!globalFuncs.isNumeric($scope.tx.gasLimit) || parseFloat($scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
             ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
-                if (data.error) $scope.notifier.danger(data.msg);
-                $scope.tx.data = getDataString(bankAbiRefactor["getEther"], []);
-                $scope.gasLimit = GAS_WITHDRAW;
-                var txData = uiFuncs.getTxData($scope);
+                try {
+                    if (data.error) $scope.notifier.danger(data.msg);
+                    $scope.tx.data = getDataString(bankAbiRefactor["getEther"], []);
+                    $scope.gasLimit = GAS_WITHDRAW;
+                    var txData = uiFuncs.getTxData($scope);
 
-                uiFuncs.generateTx(txData, function(rawTx) {
-                    if (!rawTx.isError) {
-                        $scope.rawTx = rawTx.rawTx;
-                        $scope.signedTx = rawTx.signedTx;
-                        uiFuncs.sendTx($scope.signedTx, function(resp) {
-                            if (!resp.isError) {
-                                var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
-                                var txHashLink = $scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
-                                var emailBody = 'I%20was%20trying%20to..............%0A%0A%0A%0ABut%20I%27m%20confused%20because...............%0A%0A%0A%0A%0A%0ATo%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.tx.to + '%0AFrom%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.wallet.getAddressString() + '%0ATX%20Hash%3A%20https%3A%2F%2Fetherscan.io%2Ftx%2F' + resp.data + '%0AAmount%3A%20' + $scope.tx.value + '%20' + $scope.unitReadable + '%0ANode%3A%20' + $scope.ajaxReq.type + '%0AToken%20To%20Addr%3A%20' + $scope.tokenTx.to + '%0AToken%20Amount%3A%20' + $scope.tokenTx.value + '%20' + $scope.unitReadable + '%0AData%3A%20' + $scope.tx.data + '%0AGas%20Limit%3A%20' + $scope.tx.gasLimit + '%0AGas%20Price%3A%20' + $scope.tx.gasPrice;
-                                var verifyTxBtn = $scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
-                                var checkTxBtn = '<a class="btn btn-xs btn-info" href="' + checkTxLink + '" target="_blank" rel="noopener noreferrer"> Check TX Status </a>';
-                                var emailBtn = '<a class="btn btn-xs btn-info " href="mailto:support@myetherwallet.com?Subject=Issue%20regarding%20my%20TX%20&Body=' + emailBody + '" target="_blank" rel="noopener noreferrer">Confused? Email Us.</a>';
-                                var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
-                                $scope.notifier.success(completeMsg, 0);
-                                
-                                $scope.wallet.setBalance(applyScope);
-                            } else {
-                                $scope.notifier.danger(resp.error);
-                            }
-                        });
-                    }
-            
-                });
+                    uiFuncs.generateTx(txData, function(rawTx) {
+                        if (!rawTx.isError) {
+                            $scope.rawTx = rawTx.rawTx;
+                            $scope.signedTx = rawTx.signedTx;
+                            uiFuncs.sendTx($scope.signedTx, function(resp) {
+                                if (!resp.isError) {
+                                    var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
+                                    var txHashLink = $scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
+                                    var emailBody = 'I%20was%20trying%20to..............%0A%0A%0A%0ABut%20I%27m%20confused%20because...............%0A%0A%0A%0A%0A%0ATo%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.tx.to + '%0AFrom%20Address%3A%20https%3A%2F%2Fetherscan.io%2Faddress%2F' + $scope.wallet.getAddressString() + '%0ATX%20Hash%3A%20https%3A%2F%2Fetherscan.io%2Ftx%2F' + resp.data + '%0AAmount%3A%20' + $scope.tx.value + '%20' + $scope.unitReadable + '%0ANode%3A%20' + $scope.ajaxReq.type + '%0AToken%20To%20Addr%3A%20' + $scope.tokenTx.to + '%0AToken%20Amount%3A%20' + $scope.tokenTx.value + '%20' + $scope.unitReadable + '%0AData%3A%20' + $scope.tx.data + '%0AGas%20Limit%3A%20' + $scope.tx.gasLimit + '%0AGas%20Price%3A%20' + $scope.tx.gasPrice;
+                                    var verifyTxBtn = $scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
+                                    var checkTxBtn = '<a class="btn btn-xs btn-info" href="' + checkTxLink + '" target="_blank" rel="noopener noreferrer"> Check TX Status </a>';
+                                    var emailBtn = '<a class="btn btn-xs btn-info " href="mailto:support@myetherwallet.com?Subject=Issue%20regarding%20my%20TX%20&Body=' + emailBody + '" target="_blank" rel="noopener noreferrer">Confused? Email Us.</a>';
+                                    var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
+                                    $scope.notifier.success(completeMsg, 0);
+                                    
+                                    $scope.wallet.setBalance(applyScope);
+
+                                    var isCheckingTx = false,
+                                    checkingTx = setInterval(() => {
+                                        if (!$scope.withdrawPending) {
+                                            clearInterval(checkingTx);
+                                            return;
+                                        }
+                                        if (isCheckingTx) return; // fixing doubling success messages
+                                        isCheckingTx = true;
+                                        ajaxReq.getTransactionReceipt(
+                                            resp.data,
+                                            (receipt) => {
+                                                if (receipt.error) {
+                                                    $scope.notifier.danger(receipt.msg);
+                                                    $scope.withdrawPending = false;
+                                                } else {
+                                                    if (receipt.data != null) {
+                                                        let status = receipt.data.status;
+                                                        if (status == "0x1") {
+                                                            $scope.notifier.success("Withdraw ok! todo translate", 0);
+                                                            updateContractData();
+                                                        } else {
+                                                            $scope.notifier.danger("Withdraw tx fail! todo translate and txid here", 0);
+                                                        }
+                                                        $scope.withdrawPending = false;
+                                                    }
+                                                }
+                                                isCheckingTx = false;
+                                            }
+                                        );
+                                    }, 2000);
+                                } else {
+                                    $scope.notifier.danger(resp.error);
+                                    $scope.withdrawPending = false;
+                                }
+                            });
+                        }                
+                    });
+                } catch (e) {
+                    $scope.notifier.danger(e);
+                    $scope.withdrawPending = false;
+                }
             });
         } catch (e) {
             $scope.notifier.danger(e);
+            $scope.withdrawPending = false;
         }
     }
-
 };
 module.exports = remissionCtrl;
