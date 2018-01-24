@@ -143,7 +143,6 @@ var bankStatusCtrl = async function($scope) {
                 to: bankAddress,
                 data: getDataString(bankAbiRefactor[_var], params)
             }, function(data) {
-                console.log("data.data encoded", data.data);
                 data.varName = _var;
                 if (data.error || data.data == '0x') {
                     reject(data.message);

@@ -104,7 +104,7 @@ var myOrdersCtrl = async function($scope, $sce, walletService, $rootScope) {
 
     $scope.$watch('ajaxReq.key', function() {
         if ($scope.wallet) {
-            $scope.setSendMode('ether');
+            //$scope.setSendMode('ether');
             $scope.wallet.setBalance(applyScope);
             $scope.wallet.setTokens();
         }
@@ -294,11 +294,12 @@ var myOrdersCtrl = async function($scope, $sce, walletService, $rootScope) {
                 ordersData.forEach(_order => {
                     let _id = _order.params[0],
                         curOrder = $scope.orders.find(order => order.id == _id);
-                        // data[0] is sender, no need
-                        curOrder.recipient = _order.data[1],
-                        curOrder.amount = _order.data[2] / Math.pow(10, TOKEN_DECIMALS),
-                        curOrder.timestamp = normalizeUnixTime(_order.data[3]),
-                        curOrder.rateLimit = _order.data[4] / rateMultiplier;
+                    // data[0] is sender, no need
+                    curOrder.recipient = _order.data[1];
+                    curOrder.amount = _order.data[2] / Math.pow(10, TOKEN_DECIMALS);
+                    curOrder.timestamp = normalizeUnixTime(_order.data[3]);
+                    curOrder.rateLimit = _order.data[4] / rateMultiplier;
+                    $scope.$apply();
                 });
                 console.log(ordersData);
             });

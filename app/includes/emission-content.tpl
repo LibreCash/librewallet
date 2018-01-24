@@ -109,16 +109,8 @@
           <a style="min-width: 170px"
               class="btn btn-default"
               ng-click="generateBuyLibreTx()"
-              ng-hide="buyPending"
-              translate="LIBRE_buy">
-                Buy
-          </a>
-          <a style="min-width: 170px"
-            class="btn btn-default"
-            ng-show="buyPending"
-            disabled
-            translate="LIBRE_txPending">
-                pending...
+              ng-disabled="buyPending">
+                {{ buyPending ? LIBRE_txPending : LIBRE_buy }}
           </a>
         </div>
     </section>
