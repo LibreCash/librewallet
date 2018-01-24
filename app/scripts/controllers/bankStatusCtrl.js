@@ -4,6 +4,14 @@ var bankStatusCtrl = async function($scope) {
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
     $scope.ajaxReq = ajaxReq;
+    var balanceBank = 0 ;
+
+    ajaxReq.getBalance(bankAddress,function(data) {
+        console.log("Hello");
+        if (data.error) balanceBank = data.msg;
+        else balanceBank = etherUnits.toEther(data.data.balance, 'wei')
+        console.log("balance",balanceBank);
+    });
 
 
 // нужно рефакторнуть аби, чтобы оборащаться к нему, как сделано в ens
@@ -45,7 +53,7 @@ var bankStatusCtrl = async function($scope) {
             default: "Reserve Balance",
             translate: "VAR_reserveBalance",
             process: function(data) {
-                return "{0} %".replace("{0}", data / 100);
+                return `${data/100} % (${balanceBank} ether)`;
             }
         },
 /*        cryptoFiatRate: {
