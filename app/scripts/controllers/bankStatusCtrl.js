@@ -41,6 +41,13 @@ var bankStatusCtrl = async function($scope) {
             default: "LibreCash Contract",
             translate: "VAR_tokenAddress"
         },
+        getReservePercent: {
+            default: "Reserve Balance",
+            translate: "VAR_reserveBalance",
+            process: function(data) {
+                return "{0} %".replace("{0}", data / 100);
+            }
+        },
 /*        cryptoFiatRate: {
             default: "Nominal Tokens Rate",
             translate: "VAR_cryptoFiatRate",
