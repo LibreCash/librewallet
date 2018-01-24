@@ -276,7 +276,7 @@ var myOrdersCtrl = async function($scope, $sce, walletService, $rootScope) {
                 $scope.anyOrders = true;
             buyOrdersData.forEach(
                 orderID => {
-                    let orderData = {id: orderID, type: "Buy"};
+                    let orderData = {id: orderID, type: "Buy", currency: "ETH"};
                     let orderPromise = getBankDataAsync("getBuyOrder", [orderID]);
                     promises.push(orderPromise);
                     $scope.orders.push(orderData);
@@ -284,7 +284,7 @@ var myOrdersCtrl = async function($scope, $sce, walletService, $rootScope) {
             );
             sellOrdersData.forEach(
                 orderID => {
-                    let orderData = {id: orderID, type: "Sell"};
+                    let orderData = {id: orderID, type: "Sell", currency: "LCH"};
                     let orderPromise = getBankDataAsync("getSellOrder", [orderID]);
                     promises.push(orderPromise);
                     $scope.orders.push(orderData);

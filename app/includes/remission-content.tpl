@@ -107,18 +107,11 @@
             <div class="input-group-btn">
               <a style="min-width: 170px"
                 class="btn btn-default"
-                ng-hide="approvePending"
+                ng-disabled="approvePending"
                 ng-click="generateApproveTx()">
-                <strong translate="LIBRE_approve">
-                  Approve
+                <strong>
+                  {{ approvePending ? 'LIBRE_txPending' : 'LIBRE_approve' | translate }}
                 </strong>
-              </a>
-              <a style="min-width: 170px"
-                class="btn btn-default"
-                ng-show="approvePending"
-                disabled
-                translate="LIBRE_txPending">
-                    pending...
               </a>
             </div>
           
@@ -177,18 +170,11 @@
         <div class="col-sm-8 offset-col-sm-2">
             <a style="min-width: 170px"
               class="btn btn-default"
-              ng-hide="sellPending"
+              ng-disabled="sellPending"
               ng-click="generateSellLibreTx()">
-              <strong translate="LIBRE_sell">
-                Sell
+              <strong>
+                {{ sellPending ? 'LIBRE_txPending' : 'LIBRE_sell' | translate }}
               </strong>
-            </a>
-            <a style="min-width: 170px"
-              class="btn btn-default"
-              ng-show="sellPending"
-              disabled
-              translate="LIBRE_txPending">
-                  pending...
             </a>
         </div>
       </div>
@@ -213,18 +199,11 @@
               <div class="input-group-btn">
                 <a style="min-width: 170px"
                     class="btn btn-default"
-                    ng-hide="withdrawPending"
+                    ng-disabled="withdrawPending"
                     ng-click="generateWithdrawLibreTx()">
-                    <strong translate="LIBRE_withdraw">
-                      Withdraw
+                    <strong>
+                        {{ withdrawPending ? 'LIBRE_txPending' : 'LIBRE_withdraw' | translate }}
                     </strong>
-                </a>
-                <a style="min-width: 170px"
-                  class="btn btn-default"
-                  ng-show="withdrawPending"
-                  disabled
-                  translate="LIBRE_txPending">
-                      pending...
                 </a>
               </div>
             </div>

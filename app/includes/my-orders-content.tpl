@@ -12,7 +12,7 @@
         <td>{{ info.type }}</td>
         <td><a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', info.recipient) }}" target="_blank"
             rel="noopener noreferrer">{{ info.recipient | limitTo: 15 }}&hellip;</a></td>
-        <td>{{ info.amount }}</td>
+        <td>{{ info.amount }} {{ info.currency }}</td>
         <td>{{ info.timestamp }}</td>
         <td>{{ info.rateLimit }}</td>
     </tr>

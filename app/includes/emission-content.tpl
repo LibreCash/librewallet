@@ -110,7 +110,7 @@
               class="btn btn-default"
               ng-click="generateBuyLibreTx()"
               ng-disabled="buyPending">
-                {{ buyPending ? LIBRE_txPending : LIBRE_buy }}
+                {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
           </a>
         </div>
     </section>
