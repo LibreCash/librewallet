@@ -160,7 +160,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
         if (walletService.wallet == null) return null;
         return walletService.wallet.getAddressString();
     }, function() {
-        if (walletService.wallet == null) return;
+        if (walletService.wallet == null) return; 
         updateContractData();
         updateBalanceAndAllowance();
         $scope.wallet = walletService.wallet;

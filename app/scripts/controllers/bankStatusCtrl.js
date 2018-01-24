@@ -139,7 +139,11 @@ var bankStatusCtrl = async function($scope) {
     }
     async function getBankDataAsync(bankAbiRefactor, _var, params = []) {
         return new Promise((resolve, reject) => {
-            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], params) }, function(data) {
+            ajaxReq.getEthCall({
+                to: bankAddress,
+                data: getDataString(bankAbiRefactor[_var], params)
+            }, function(data) {
+                console.log("data.data encoded", data.data);
                 data.varName = _var;
                 if (data.error || data.data == '0x') {
                     reject(data.message);
@@ -177,6 +181,11 @@ var bankStatusCtrl = async function($scope) {
     }).catch(e => {
         console.log(e);
     });
+
+    getBankDataAsync(bankAbiRefactor, "getMyOrders").then(function(myOrders) {
+        console.log(myOrders);
+    });
+
     $scope.contractData = varsObject;
     // getting oracles
     function hex2a(hexx) {
