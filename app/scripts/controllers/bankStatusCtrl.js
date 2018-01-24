@@ -41,11 +41,11 @@ var bankStatusCtrl = async function($scope) {
             default: "LibreCash Contract",
             translate: "VAR_tokenAddress"
         },
-        cryptoFiatRate: {
+/*        cryptoFiatRate: {
             default: "Nominal Tokens Rate",
             translate: "VAR_cryptoFiatRate",
             process: normalizeRate
-        },
+        },*/
         cryptoFiatRateBuy: {
             default: "Buy Tokens Rate",
             translate: "VAR_cryptoFiatRateBuy",
@@ -179,10 +179,6 @@ var bankStatusCtrl = async function($scope) {
         });
     }).catch(e => {
         console.log(e);
-    });
-
-    getBankDataAsync(bankAbiRefactor, "getMyOrders").then(function(myOrders) {
-        console.log(myOrders);
     });
 
     $scope.contractData = varsObject;
