@@ -1,12 +1,11 @@
 'use strict';
 var myOrdersCtrl = async function($scope, $sce, walletService, libreService, $rootScope) {
-    console.log(libreService);
     var bankAddress = libreService.bank.address,
         cashAddress = libreService.token.address,
         bankAbiRefactor = libreService.bank.abi,
         cashAbiRefactor = libreService.token.abi,
         getBankDataAsync = libreService.methods.getBankDataAsync,
-        normalizeUnixTime = libreService.methods.normalizeUnixTime;;
+        normalizeUnixTime = libreService.methods.normalizeUnixTime;
 
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;

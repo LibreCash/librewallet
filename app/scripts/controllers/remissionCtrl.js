@@ -1,5 +1,16 @@
 'use strict';
-var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $translate) {
+var remissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope, $translate) {
+    var bankAddress = libreService.bank.address,
+        cashAddress = libreService.token.address,
+        bankAbiRefactor = libreService.bank.abi,
+        cashAbiRefactor = libreService.token.abi,
+        getBankDataAsync = libreService.methods.getBankDataAsync,
+        getCashDataAsync = libreService.methods.getCashDataAsync,
+        getBankDataProcess = libreService.methods.getBankDataProcess,
+        getCashDataProcess = libreService.methods.getCashDataProcess,
+        normalizeUnixTime = libreService.methods.normalizeUnixTime,
+        getDataString = libreService.methods.getDataString;
+
     var states = function(_data) { 
         const _states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
         try {
@@ -34,7 +45,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
         }
     };
 
-    const TOKEN_DECIMALS = 18;
     $scope.allTokens = 'Loading';
 
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
@@ -143,11 +153,11 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
     }
 
     var setAllTokens = function(data) {
-        $scope.allTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+        $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     }, 
     setAllowance = function(data) {
         //console.log("allowance", data);
-        $scope.allowedTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+        $scope.allowedTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     };
 
     function updateBalanceAndAllowance() {
@@ -249,99 +259,15 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
             throw e;
         }
     };
-    var getDataString = function(func, inputs) {
-        var fullFuncName = ethUtil.solidityUtils.transformToFullName(func);
-        var funcSig = ethFuncs.getFunctionSignature(fullFuncName);
-        var typeName = ethUtil.solidityUtils.extractTypeName(fullFuncName);
-        var types = typeName.split(',');
-        types = types[0] == "" ? [] : types;
-        return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
-    };
 
-    function getDataCommon(address, abiRefactored, _var, process, transactionParams, processParam) {
-        return new Promise((resolve, reject) => {
-            ajaxReq.getEthCall({
-                from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
-                to: address,
-                data: getDataString(abiRefactored[_var], transactionParams)
-            }, function(data) {
-                if (data.error || data.data == '0x') {
-                    if (data.data == '0x') {
-                        data.error = true;
-                        data.message = "Possible error with network or the bank contract";
-                    }
-                } else {
-                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
-                        return i.type;
-                    });
-                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
-                }
-                process(data, processParam);
-            });
-        })
-    }
 
-    function getDataProcess(address, abiRefactored, _var, process, params = []) {
-        return getDataCommon(address, abiRefactored, _var, process, params, "");
-    }
 
-    function setScope(_value, _key) {
-        // todo error handling
-        $scope[_key] = _value.data[0];
-    }
-
-    function getDataScope(address, abiRefactored, _var, _key, params = []) {
-        return getDataCommon(address, abiRefactored, _var, setScope, params, _key);
-    }
-
-    function getBankDataProcess(_var, process, params = []) {
-        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, params);
-    }
-
-    function getCashDataProcess(_var, process, params = []) {
-        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, params);
-    }
-
-    async function getDataAsync(address, abiRefactored, _var, params = []) {
-        return new Promise((resolve, reject) => { 
-            ajaxReq.getEthCall({ to: address, data: getDataString(abiRefactored[_var], params) }, function(data) {
-                if (data.error || data.data == '0x') {
-                    if (data.data == '0x') {
-                        data.error = true;
-                        data.message = "Possible error with network or the bank contract";
-                    }
-                } else {
-                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
-                        return i.type;
-                    });
-                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
-                }
-                resolve(data);
-            });
-        })
-    }
-
-    async function getBankDataAsync(_var, params = []) {
-        return getDataAsync(bankAddress, bankAbiRefactor, _var, params);
-    }
-
-    async function getCashDataAsync(_var, params = []) {
-        return getDataAsync(cashAddress, cashAbiRefactor, _var, params);
-    }
-
-    async function getBankDataScope(_var, _key, params = []) {
-        return getDataScope(bankAddress, bankAbiRefactor, _var, _key, params);
-    }
-
-    async function getCashDataScope(_var, _key, params = []) {
-        return getDataScope(cashAddress, cashAbiRefactor, _var, _key, params);
-    }
 
     function updateContractData() {
         if (walletService.wallet != null) {
             updateBalanceAndAllowance();
             getBankDataProcess("getBalanceEther", function(data) {
-                $scope.getBalance = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+                $scope.getBalance = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
             });
         }
         getBankDataProcess("contractState", function(data) {
@@ -352,8 +278,6 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
     }
     updateContractData();
 
-    //        var ethBalance = await getBankDataAsync("getBalanceEther");
-    //        console.log("balance", ethBalance);
     async function statusAllowsOrders(callback) {
         ajaxReq.getLatestBlockData(async function(data) {
             var lastBlockTime = parseInt(data.data.timestamp, 16);
@@ -419,7 +343,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
                     if (data.error) {
                         throw(data.msg);
                     }
-                    var tokensToAllowCount = $scope.tokensToAllow * Math.pow(10, TOKEN_DECIMALS);
+                    var tokensToAllowCount = $scope.tokensToAllow * Math.pow(10, libreService.coeff.tokenDecimals);
                     if (allowance == tokensToAllowCount) {
                         throw("Allowance is equal to the value you want to set");
                     } else if (tokensToAllowCount < allowance) {
@@ -515,7 +439,7 @@ var remissionCtrl = async function($scope, $sce, walletService, $rootScope, $tra
                 try {
                     if (data.error)
                         throw(data.msg);
-                    var tokenCount = $scope.tokenValue * Math.pow(10, TOKEN_DECIMALS);
+                    var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals);
                     $scope.tx.data = getDataString(bankAbiRefactor["createSellOrder"], 
                         [$scope.wallet.getAddressString(), tokenCount, $scope.tx.rateLimitReal]);
                     var txData = uiFuncs.getTxData($scope);

@@ -52,11 +52,11 @@ var libreService = function(walletService) {
     }
 
     function getBankDataProcess(_var, process, params = []) {
-        return libreService.methods.getDataProcess(bankAddress, bankAbiRefactor, _var, process, params);
+        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, params);
     }
 
     function getCashDataProcess(_var, process, params = []) {
-        return libreService.methods.getDataProcess(cashAddress, cashAbiRefactor, _var, process, params);
+        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, params);
     }
 
     async function getDataAsync(address, abiRefactored, _var, params = []) {
@@ -91,6 +91,22 @@ var libreService = function(walletService) {
         return getDataAsync(cashAddress, cashAbiRefactor, _var, params);
     }
 
+    function setScope(_scope, _value, _key) {
+        _scope[_key] = _value.data[0];
+    }
+
+    function getDataScope(_scope, address, abiRefactored, _var, _key, params = []) {
+        return getDataCommon(_scope, address, abiRefactored, _var, setScope, params, _key);
+    }
+
+    async function getBankDataScope(_scope, _var, _key, params = []) {
+        return getDataScope(_scope, bankAddress, bankAbiRefactor, _var, _key, params);
+    }
+
+    async function getCashDataScope(_scope, _var, _key, params = []) {
+        return getDataScope(_scope, cashAddress, cashAbiRefactor, _var, _key, params);
+    }
+
     var normalizeUnixTime = function(data) {
         var date = new Date(data * 1000);
         return date.toLocaleString();
@@ -110,10 +126,13 @@ var libreService = function(walletService) {
             tokenDecimals: TOKEN_DECIMALS
         },
         methods: {
+            getDataString: getDataString,
             getBankDataProcess: getBankDataProcess,
             getCashDataProcess: getCashDataProcess,
             getBankDataAsync: getBankDataAsync,
             getCashDataAsync: getCashDataAsync,
+            getBankDataScope: getBankDataScope,
+            getCashDataScope: getCashDataScope,
             normalizeUnixTime: normalizeUnixTime
         }
 
