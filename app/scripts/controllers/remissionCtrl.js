@@ -9,31 +9,17 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
         getBankDataProcess = libreService.methods.getBankDataProcess,
         getCashDataProcess = libreService.methods.getCashDataProcess,
         normalizeUnixTime = libreService.methods.normalizeUnixTime,
-        getDataString = libreService.methods.getDataString;
+        getDataString = libreService.methods.getDataString,
+        fillStateData = libreService.methods.fillStateData,
+        normalizeRate = libreService.methods.normalizeRate,
+        rateMultiplier = libreService.coeffs.rateMultiplier;
 
-    var states = function(_data) { 
-        const _states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
-        try {
-            var stateName = _states[_data.data[0]];
-            _data.data.push(stateName);
-            return _data;
-        } catch(e) {
-            return {error: true, message: e.message};
-        }
-    },
-    normalizeRate = function(data) {
-        return data / rateMultiplier;
-    },
-    processSellRate = function(data) {
+    var processSellRate = function(data) {
         $scope.sellRate = data.error ? data.message : normalizeRate(data.data[0]);
         $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 0.9); // +10%
     },
     processTokenCount = function(data) {
         $scope.tokenCount = data.error ? data.message : normalizeRate(data.data[0]);
-    },
-    normalizeUnixTime = function(data) {
-        var date = new Date(data * 1000);
-        return date.toLocaleString();
     },
     normalizeUnixTimeObject = function(data) {
         try {
@@ -47,23 +33,8 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
 
     $scope.allTokens = 'Loading';
 
-    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
-    var bankAddress = libreBank.address;
-    var bankAbi = libreBank.abi;
-    var bankAbiRefactor = {};    
-    for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
+    $scope.cashAddress = cashAddress;
 
-    var libreCash = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreCash");
-    var cashAddress = libreCash.address;
-        $scope.cashAddress = cashAddress;
-    var cashAbi = libreCash.abi;
-    var cashAbiRefactor = {};    
-    for (var i = 0; i < cashAbi.length; i++) cashAbiRefactor[cashAbi[i].name] = cashAbi[i];
-
-
-    const rateMultiplier = 1000; // todo перенести
-
-    //$scope.buy = true; // activate buy tab
     $scope.approvePending = false;
     $scope.sellPending = false;
     $scope.tx = {};
@@ -271,7 +242,7 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
             });
         }
         getBankDataProcess("contractState", function(data) {
-            $scope.bankState = states(data);
+            $scope.bankState = fillStateData(data);
         });
 
         getBankDataProcess("cryptoFiatRateSell", processSellRate);

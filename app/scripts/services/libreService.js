@@ -110,6 +110,36 @@ var libreService = function(walletService) {
     var normalizeUnixTime = function(data) {
         var date = new Date(data * 1000);
         return date.toLocaleString();
+    },
+    normalizeRate = function(data) {
+        return data / RATE_MULTIPLIER;
+    },
+    hexToString = function(_hex) {
+        var hex = _hex.toString();//force conversion
+        var str = '';
+        for (var i = 2; i < hex.length; i += 2) {
+            if (hex.substr(i, 2) !== "00") {
+                str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            }
+        }
+        return str;
+    },
+    getStateName = function(data) { 
+        var states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
+        try {
+            return states[data];
+        } catch(e) {
+            return e.message;
+        }
+    },
+    fillStateData = function(_data) { 
+        try {
+            var stateName = getStateName(_data.data[0]);
+            _data.data.push(stateName);
+            return _data;
+        } catch(e) {
+            return {error: true, message: e.message};
+        }
     }
 
     return {
@@ -133,7 +163,10 @@ var libreService = function(walletService) {
             getCashDataAsync: getCashDataAsync,
             getBankDataScope: getBankDataScope,
             getCashDataScope: getCashDataScope,
-            normalizeUnixTime: normalizeUnixTime
+            normalizeUnixTime: normalizeUnixTime,
+            normalizeRate: normalizeRate,
+            hexToString: hexToString,
+            getStateName: getStateName
         }
 
     }
