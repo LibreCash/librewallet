@@ -190,7 +190,6 @@ var libreService = function(walletService) {
                                     clearInterval(checkingTx);
                                     return;
                                 }
-                                console.log(_scope[pendingVarName]);
                                 if (isCheckingTx) return; // fixing doubling success messages
                                 isCheckingTx = true;
                                 ajaxReq.getTransactionReceipt(resp.data, async (receipt) => {
@@ -199,11 +198,9 @@ var libreService = function(walletService) {
                                         _scope.notifier.danger(receipt.msg);
                                     } else {
                                         if (receipt.data == null) {
-                                            console.log("null receipt");
                                             isCheckingTx = false;
                                             return; // next interval
                                         }
-                                        console.log("not null receipt");
                                         _scope[pendingVarName] = false;
                                         if (receipt.data.status == "0x1") {
                                             _scope.notifier.success(await translator("LIBRE" + opPrefix + "_txOk"), 0);

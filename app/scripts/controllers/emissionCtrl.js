@@ -1,5 +1,5 @@
 'use strict';
-var emissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope) {
+var emissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     var bankAddress = libreService.bank.address,
         bankAbiRefactor = libreService.bank.abi,
         getBankDataAsync = libreService.methods.getBankDataAsync,
@@ -11,7 +11,8 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
         hexToString = libreService.methods.hexToString,
         getStateName = libreService.methods.getStateName,
         rateMultiplier = libreService.coeff.rateMultiplier,
-        gasEmission = libreService.coeff.gasEmission;
+        gasEmission = libreService.coeff.gasEmission,
+        universalTxCallback = libreService.methods.universalTxCallback;
 
 
     $scope.buyPending = false;
@@ -48,8 +49,7 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
         gasPrice: null,
         donate: false,
         tokensymbol: false,
-        rateLimit: 0,
-        rateLimitReal: 0
+        rateLimit: 0
     }
 
     $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
@@ -126,7 +126,6 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
 
     $scope.$watch('tx', function(newValue, oldValue) {
         $rootScope.rootScopeShowRawTx = false;
-        $scope.tx.rateLimitReal = Math.round($scope.tx.rateLimit * rateMultiplier);
         if (newValue.sendMode == 'ether') {
             $scope.tx.data = globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data');
         }
@@ -227,7 +226,19 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
     }
 
     var callbackBuyLibreTx = function() {
-        $scope.buyPending = true;
+        let rateLimit = Math.round($scope.tx.rateLimit * rateMultiplier);
+        console.log(rateLimit);
+        $scope.tx.data = getDataString(bankAbiRefactor["createBuyOrder"],
+            [$scope.wallet.getAddressString(), rateLimit]);
+
+        $scope.tx.to = bankAddress;
+        $scope.tx.gasLimit = gasEmission;
+
+        universalTxCallback($scope, "buyPending", "BUY", $translate, updateContractData);
+    }
+
+    var oldcallbackBuyLibreTx = function() {
+            $scope.buyPending = true;
         try {
             if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
             else if (!globalFuncs.isNumeric($scope.tx.gasLimit) || parseFloat($scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];

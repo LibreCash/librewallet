@@ -141,7 +141,7 @@ app.controller('viewWalletCtrl', ['$scope', 'walletService', viewWalletCtrl]);
 app.controller('bankStatusCtrl', ['$scope', 'libreService', bankStatusCtrl]);
 app.controller('txStatusCtrl', ['$scope', txStatusCtrl]);
 app.controller('sendTxCtrl', ['$scope', '$sce', 'walletService', 'libreService', '$rootScope', sendTxCtrl]);
-app.controller('emissionCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', emissionCtrl]);
+app.controller('emissionCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', '$translate', emissionCtrl]);
 app.controller('remissionCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', '$translate', remissionCtrl]);
 app.controller('myOrdersCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', myOrdersCtrl]);
 app.controller('swapCtrl', ['$scope', '$sce', 'walletService', swapCtrl]);

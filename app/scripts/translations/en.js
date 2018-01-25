@@ -482,7 +482,7 @@ LIBRESELL_txFail                :  'The sell transaction failed',
 LIBREWITHDRAW_txOk              :  'The withdraw transaction confirmed',
 LIBREWITHDRAW_txFail            :  'The withdraw transaction failed',
 LIBREBUY_txOk                   :  'The buy transaction confirmed',
-LIBREBUY_txOk                   :  'The buy transaction failed',
+LIBREBUY_txFail                 :  'The buy transaction failed',
 
 NODE_CTA                        :  'Save & Use Custom Node',
 NODE_Name                       :  'Node Name',
