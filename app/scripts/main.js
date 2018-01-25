@@ -54,8 +54,6 @@ window.ens                   = ens;
 var domainsale               = require('./domainsale');
 window.domainsale            = domainsale;
 var translate                = require('./translations/translate.js');
-var libreFuncs               = require('./libreFuncs');
-window.libreFuncs            = libreFuncs;
 if (IS_CX) {
   var cxFuncs                = require('./cxFuncs');
   window.cxFuncs             = cxFuncs;
@@ -142,7 +140,7 @@ app.controller('decryptWalletCtrl', ['$scope', '$sce', 'walletService', decryptW
 app.controller('viewWalletCtrl', ['$scope', 'walletService', viewWalletCtrl]);
 app.controller('bankStatusCtrl', ['$scope', 'libreService', bankStatusCtrl]);
 app.controller('txStatusCtrl', ['$scope', txStatusCtrl]);
-app.controller('sendTxCtrl', ['$scope', '$sce', 'walletService', '$rootScope', sendTxCtrl]);
+app.controller('sendTxCtrl', ['$scope', '$sce', 'walletService', 'libreService', '$rootScope', sendTxCtrl]);
 app.controller('emissionCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', emissionCtrl]);
 app.controller('remissionCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', '$translate', remissionCtrl]);
 app.controller('myOrdersCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', myOrdersCtrl]);
