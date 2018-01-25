@@ -117,12 +117,16 @@ etherscan.getEstimatedGas = function(txobj, callback) {
     });
 }
 etherscan.getEthCall = function(txobj, callback) {
-    this.post({
+    var ethData = {
         module: 'proxy',
         action: 'eth_call',
         to: txobj.to,
         data: txobj.data
-    }, function(data) {
+    }
+    if (txobj.from != undefined && txobj.from != null) {
+        ethData.from = txobj.from;
+    }
+    this.post(ethData, function(data) {
         if (data.error) callback({ error: true, msg: data.error.message, data: '' });
         else callback({ error: false, msg: '', data: data.result });
     });

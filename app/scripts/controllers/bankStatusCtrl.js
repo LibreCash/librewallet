@@ -41,11 +41,11 @@ var bankStatusCtrl = async function($scope) {
             default: "LibreCash Contract",
             translate: "VAR_tokenAddress"
         },
-        cryptoFiatRate: {
+/*        cryptoFiatRate: {
             default: "Nominal Tokens Rate",
             translate: "VAR_cryptoFiatRate",
             process: normalizeRate
-        },
+        },*/
         cryptoFiatRateBuy: {
             default: "Buy Tokens Rate",
             translate: "VAR_cryptoFiatRateBuy",
@@ -139,7 +139,10 @@ var bankStatusCtrl = async function($scope) {
     }
     async function getBankDataAsync(bankAbiRefactor, _var, params = []) {
         return new Promise((resolve, reject) => {
-            ajaxReq.getEthCall({ to: bankAddress, data: getDataString(bankAbiRefactor[_var], params) }, function(data) {
+            ajaxReq.getEthCall({
+                to: bankAddress,
+                data: getDataString(bankAbiRefactor[_var], params)
+            }, function(data) {
                 data.varName = _var;
                 if (data.error || data.data == '0x') {
                     reject(data.message);
@@ -177,6 +180,7 @@ var bankStatusCtrl = async function($scope) {
     }).catch(e => {
         console.log(e);
     });
+
     $scope.contractData = varsObject;
     // getting oracles
     function hex2a(hexx) {

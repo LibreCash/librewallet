@@ -1,6 +1,5 @@
 'use strict';
-var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
-    const TOKEN_DECIMALS = 18;
+var emissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope) {
 
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
@@ -97,8 +96,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     }
 
     var setAllTokens = function(data) {
-        console.log(data);
-        $scope.allTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+        $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     };
 
     $scope.$watch(function() {
@@ -107,7 +105,7 @@ var emissionCtrl = async function($scope, $sce, walletService, $rootScope) {
     }, function() {
         if (walletService.wallet == null) return;
         $scope.wallet = walletService.wallet;
-        libreFuncs.getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
+        libreService.methods.getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
         $scope.tx.to = bankAddress; //walletService.wallet.getAddressString();//$scope.wallet.setTokens();

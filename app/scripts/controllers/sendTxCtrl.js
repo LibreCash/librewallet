@@ -1,5 +1,5 @@
 'use strict';
-var sendTxCtrl = function($scope, $sce, walletService, $rootScope) {
+var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope) {
     const TOKEN_DECIMALS = 18;
     $scope.tx = {};
     $scope.signedTx;
@@ -39,8 +39,7 @@ var sendTxCtrl = function($scope, $sce, walletService, $rootScope) {
     }
 
     var setAllTokens = function(data) {
-        console.log(data);
-        $scope.allTokens = data.data[0] / Math.pow(10, TOKEN_DECIMALS);
+        $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     };
 
     $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
@@ -92,7 +91,7 @@ var sendTxCtrl = function($scope, $sce, walletService, $rootScope) {
     }, function() {
         if (walletService.wallet == null) return;
         $scope.wallet = walletService.wallet;
-        libreFuncs.getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
+        libreService.methods.getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
         $scope.wallet.setTokens();
