@@ -1,11 +1,8 @@
 'use strict';
 var emissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope) {
-
-    var networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
-
-    if (networkType != "rinkeby")
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
         $scope.notifier.danger("Contract work only in rinkeby network!!");
-    
+
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;

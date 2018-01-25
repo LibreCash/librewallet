@@ -9,10 +9,9 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
         getBankDataProcess = libreService.methods.getBankDataProcess,
         getCashDataProcess = libreService.methods.getCashDataProcess,
         normalizeUnixTime = libreService.methods.normalizeUnixTime,
-        getDataString = libreService.methods.getDataString,
-        networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
+        getDataString = libreService.methods.getDataString;
 
-    if (networkType != "rinkeby")
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
         $scope.notifier.danger("Contract work only in rinkeby network!!");
 
     var states = function(_data) { 

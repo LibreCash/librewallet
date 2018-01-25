@@ -3,11 +3,11 @@ var bankStatusCtrl = async function($scope) {
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank"),
         bankAddress = libreBank.address,
         bankAbi = libreBank.abi,
-        balanceBank = 0,
-        networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
+        balanceBank = 0;
+
     $scope.ajaxReq = ajaxReq;
 
-    if (networkType != "rinkeby")
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
         $scope.notifier.danger("Contract work only in rinkeby network!!");
 
     ajaxReq.getBalance(bankAddress,function(data) {

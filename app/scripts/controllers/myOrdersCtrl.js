@@ -5,10 +5,9 @@ var myOrdersCtrl = async function($scope, $sce, walletService, libreService, $ro
         bankAbiRefactor = libreService.bank.abi,
         cashAbiRefactor = libreService.token.abi,
         getBankDataAsync = libreService.methods.getBankDataAsync,
-        normalizeUnixTime = libreService.methods.normalizeUnixTime,
-        networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
+        normalizeUnixTime = libreService.methods.normalizeUnixTime;
 
-    if (networkType != "rinkeby")
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
         $scope.notifier.danger("Contract work only in rinkeby network!!");
 
     $scope.ajaxReq = ajaxReq;

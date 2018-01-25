@@ -134,7 +134,8 @@ var libreService = function(walletService) {
             getBankDataScope: getBankDataScope,
             getCashDataScope: getCashDataScope,
             normalizeUnixTime: normalizeUnixTime
-        }
+        },
+        networkType: "rinkeby"
 
     }
 };
