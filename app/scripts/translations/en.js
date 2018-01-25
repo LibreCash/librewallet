@@ -483,6 +483,7 @@ LIBREWITHDRAW_txOk              :  'The withdraw transaction confirmed',
 LIBREWITHDRAW_txFail            :  'The withdraw transaction failed',
 LIBREBUY_txOk                   :  'The buy transaction confirmed',
 LIBREBUY_txFail                 :  'The buy transaction failed',
+LIBREBUY_networkFail            :  'Contract works only in rinkeby network!!',
 
 NODE_CTA                        :  'Save & Use Custom Node',
 NODE_Name                       :  'Node Name',

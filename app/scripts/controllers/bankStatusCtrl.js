@@ -9,7 +9,7 @@ var bankStatusCtrl = async function($scope, libreService, $translate) {
         balanceBank = 0;
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
-        $scope.notifier.danger("Contract work only in rinkeby network!!");
+        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
 
     ajaxReq.getBalance(bankAddress, function(balanceData) {
         balanceBank = etherUnits.toEther(balanceData.data.balance, 'wei');

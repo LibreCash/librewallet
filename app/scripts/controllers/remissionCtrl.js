@@ -19,7 +19,7 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
         universalTxCallback = libreService.methods.universalTxCallback;
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
-        $scope.notifier.danger("Contract work only in rinkeby network!!");
+        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
 
     var processSellRate = function(data) {
         $scope.sellRate = data.error ? data.message : normalizeRate(data.data[0]);

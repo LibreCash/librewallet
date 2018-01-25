@@ -1,5 +1,5 @@
 'use strict';
-var myOrdersCtrl = async function($scope, $sce, walletService, libreService, $rootScope) {
+var myOrdersCtrl = async function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     var bankAddress = libreService.bank.address,
         cashAddress = libreService.token.address,
         bankAbiRefactor = libreService.bank.abi,
@@ -8,7 +8,7 @@ var myOrdersCtrl = async function($scope, $sce, walletService, libreService, $ro
         normalizeUnixTime = libreService.methods.normalizeUnixTime;
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
-        $scope.notifier.danger("Contract work only in rinkeby network!!");
+        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
 
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
