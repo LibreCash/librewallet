@@ -124,7 +124,7 @@ app.config(['$animateProvider', function($animateProvider) {
 }]);
 app.factory('globalService', ['$http', '$httpParamSerializerJQLike', globalService]);
 app.factory('walletService', walletService);
-app.factory('libreService', ['walletService', libreService]);
+app.factory('libreService', ['walletService', '$translate', libreService]);
 app.directive('blockieAddress', blockiesDrtv);
 app.directive('addressField', ['$compile', addressFieldDrtv]);
 app.directive('qrCode', QRCodeDrtv);

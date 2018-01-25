@@ -1,5 +1,5 @@
 'use strict';
-var libreService = function(walletService) {
+var libreService = function(walletService, $translate) {
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
@@ -38,15 +38,19 @@ var libreService = function(walletService) {
                 if (data.error || data.data == '0x') {
                     if (data.data == '0x') {
                         data.error = true;
-                        data.message = "Possible error with network or the bank contract";
+                        $translate("LIBRE_possibleError").then(error => {
+                            data.message = error;
+                            process(data, processParam);
+                        });
                     }
                 } else {
                     var outTypes = abiRefactored[_var].outputs.map(function(i) {
                         return i.type;
                     });
                     data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
+                    process(data, processParam);
                 }
-                process(data, processParam);
+                
             });
         })
     }
@@ -69,12 +73,12 @@ var libreService = function(walletService) {
                 from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
                 to: address,
                 data: getDataString(abiRefactored[_var], params)
-            }, function(data) {
+            }, async function(data) {
                 data.varName = _var;
                 if (data.error || data.data == '0x') {
                     if (data.data == '0x') {
                         data.error = true;
-                        data.message = "Possible error with network or the bank contract";
+                        data.message = await $translate("LIBRE_possibleError");
                     }
                 } else {
                     var outTypes = abiRefactored[_var].outputs.map(function(i) {
@@ -228,7 +232,7 @@ var libreService = function(walletService) {
                 getBankDataAsync("queuePeriod"),
                 getBankDataAsync("contractState"),
                 getBankDataAsync("paused")
-            ]).then(values => {
+            ]).then(async values => {
                 let _timeUpdateRequest = values[0],
                     _queuePeriod = values[1],
                     _contractState = values[2],
@@ -240,29 +244,31 @@ var libreService = function(walletService) {
                 // allowing orders condition:
                 // state == ORDER_CREATION (3) || lastedTime >= _queuePeriod
                 if ((_contractState.error) && (_queuePeriod.error)) {
-                    _scope.notifier.danger("Getting contract data error");
+                    _scope.notifier.danger(await $translate("LIBRE_gettingDataError"));
                     return;
                 }
                 var allowedState = (!_paused) && ((_contractState.data[0] == 3) || (lastedTime >= _queuePeriod.data[0]));
                 if (allowedState)
                     transactionFunc();                
                 else
-                    _scope.notifier.danger("Order creation isn't allowed now. Please look at the status page. Todo translate and add links");
+                    _scope.notifier.danger(await $translate("LIBRE_orderNotAllowed"));
             });
         });
     }
 
-    async function ifNotPaused(_scope, callback) {
-        getBankDataAsync("paused").then(value => {
+    async function ifNotPaused(_scope, transactionFunc) {
+        getBankDataAsync("paused").then(async value => {
             if (value.error) {
-                _scope.notifier.danger("Error getting data from contract");
+                _scope.notifier.danger(await $translate("LIBRE_gettingDataError"));
                 return;
             }
             var _paused = value.data[0];
             if (!_paused)
-                callback();                
-            else
-                _scope.notifier.danger("LibreBank contract is paused right now");
+                transactionFunc();                
+            else {
+                console.log(await $translate("LIBRE_bankPaused"));
+                _scope.notifier.danger(await $translate("LIBRE_bankPaused"));
+            }
         });
     }
     
