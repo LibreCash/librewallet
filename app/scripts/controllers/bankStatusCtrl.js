@@ -1,5 +1,5 @@
 'use strict';
-var bankStatusCtrl = async function($scope, libreService) {
+var bankStatusCtrl = async function($scope, libreService, $translate) {
     var bankAddress = libreService.bank.address,
         getBankDataAsync = libreService.methods.getBankDataAsync,
         normalizeUnixTime = libreService.methods.normalizeUnixTime,
