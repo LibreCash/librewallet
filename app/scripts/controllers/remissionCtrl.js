@@ -75,7 +75,6 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
         donate: false,
         tokensymbol: false,
         rateLimit: 0,
-        rateLimitReal: 0,
         sendMode: "ether"
     }
 
@@ -145,7 +144,6 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
     $scope.$watch('tx', function(newValue, oldValue) {
         $rootScope.rootScopeShowRawTx = false;
         updateContractData();
-        $scope.tx.rateLimitReal = Math.round($scope.tx.rateLimit * rateMultiplier);
     }, true);
 
     var isEnough = function(valA, valB) {
@@ -256,8 +254,9 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
 
     var callbackSellLibreTx = function() {
         var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals);
+        var rateLimit = Math.round($scope.tx.rateLimit * rateMultiplier);
         $scope.tx.data = getDataString(bankAbiRefactor["createSellOrder"], 
-            [$scope.wallet.getAddressString(), tokenCount, $scope.tx.rateLimitReal]);
+            [$scope.wallet.getAddressString(), tokenCount, rateLimit]);
 
         $scope.tx.to = bankAddress;
         $scope.tx.gasLimit = gasRemission;

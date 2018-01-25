@@ -126,22 +126,7 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
 
     $scope.$watch('tx', function(newValue, oldValue) {
         $rootScope.rootScopeShowRawTx = false;
-        if (newValue.sendMode == 'ether') {
-            $scope.tx.data = globalFuncs.urlGet('data') == null ? "" : globalFuncs.urlGet('data');
-        }
-        if ($scope.tx.sendMode == 'token') {
-            $scope.tokenTx.to = $scope.tx.to;
-            $scope.tokenTx.value = $scope.tx.value;
-        }
-        if (newValue.to !== oldValue.to) {
-            for (var i in $scope.customGas) {
-                if ($scope.tx.to.toLowerCase() == $scope.customGas[i].to.toLowerCase()) {
-                    $scope.customGasMsg = $scope.customGas[i].msg != '' ? $scope.customGas[i].msg : ''
-                    return;
-                }
-            }
-            $scope.customGasMsg = ''
-        }
+
     }, true);
 
     var isEnough = function(valA, valB) {
@@ -230,6 +215,7 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
         console.log(rateLimit);
         $scope.tx.data = getDataString(bankAbiRefactor["createBuyOrder"],
             [$scope.wallet.getAddressString(), rateLimit]);
+        console.log($scope.tx.data);
 
         $scope.tx.to = bankAddress;
         $scope.tx.gasLimit = gasEmission;
