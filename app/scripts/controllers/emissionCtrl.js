@@ -1,10 +1,15 @@
 'use strict';
 var emissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope) {
 
+    var networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
+
+    if (networkType != "rinkeby")
+        $scope.notifier.danger("Contract work only in rinkeby network!!");
+    
     var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
-    var bankAbiRefactor = {};    
+    var bankAbiRefactor = {};
     for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
 
     const rateMultiplier = 1000; // todo перенести

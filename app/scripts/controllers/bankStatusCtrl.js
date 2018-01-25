@@ -1,15 +1,18 @@
 'use strict';
 var bankStatusCtrl = async function($scope) {
-    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
-    var bankAddress = libreBank.address;
-    var bankAbi = libreBank.abi;
+    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank"),
+        bankAddress = libreBank.address,
+        bankAbi = libreBank.abi,
+        balanceBank = 0,
+        networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
     $scope.ajaxReq = ajaxReq;
-    var balanceBank = 0 ;
+
+    if (networkType != "rinkeby")
+        $scope.notifier.danger("Contract work only in rinkeby network!!");
 
     ajaxReq.getBalance(bankAddress,function(data) {
         balanceBank = etherUnits.toEther(data.data.balance, 'wei');
     });
-
 
 // нужно рефакторнуть аби, чтобы оборащаться к нему, как сделано в ens
     var bankAbiRefactor = {};
