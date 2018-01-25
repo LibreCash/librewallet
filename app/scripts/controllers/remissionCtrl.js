@@ -255,163 +255,27 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
     }
 
     var callbackSellLibreTx = function() {
-        $scope.sellPending = true;
-        try {
-            if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
-            else if (!globalFuncs.isNumeric($scope.tx.gasLimit) || parseFloat($scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
-            ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
-                try {
-                    if (data.error) {
-                        throw(data.msg);
-                    }
-                    var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals);
-                    $scope.tx.data = getDataString(bankAbiRefactor["createSellOrder"], 
-                        [$scope.wallet.getAddressString(), tokenCount, $scope.tx.rateLimitReal]);
-                    var txData = uiFuncs.getTxData($scope);
-                    txData.gasLimit = gasRemission;
-                    uiFuncs.generateTx(txData, function(rawTx) {
-                        if (rawTx.isError) {
-                            $scope.approvePending = false;
-                            $scope.notifier.danger(rawTx.error);
-                            return;
-                        }
-                        $scope.rawTx = rawTx.rawTx;
-                        $scope.signedTx = rawTx.signedTx;
-                        uiFuncs.sendTx($scope.signedTx, function(resp) {
-                            if (resp.isError) {
-                                $scope.notifier.danger(resp.error);
-                                $scope.sellPending = false;
-                                return;
-                            }
-                            var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
-                            var txHashLink = $scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
-                            var verifyTxBtn = $scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
-                            var checkTxBtn = '<a class="btn btn-xs btn-info" href="' + checkTxLink + '" target="_blank" rel="noopener noreferrer"> Check TX Status </a>';
-                            var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
-                            $scope.notifier.success(completeMsg, 0);
-                            
-                            $scope.wallet.setBalance(applyScope);
+        var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals);
+        $scope.tx.data = getDataString(bankAbiRefactor["createSellOrder"], 
+            [$scope.wallet.getAddressString(), tokenCount, $scope.tx.rateLimitReal]);
 
-                            var isCheckingTx = false,
-                                checkingTx = setInterval(() => {
-                                if (!$scope.sellPending) {
-                                    clearInterval(checkingTx);
-                                    return;
-                                }
-                                if (isCheckingTx) return; // fixing doubling success messages
-                                isCheckingTx = true;
-                                ajaxReq.getTransactionReceipt(resp.data, async (receipt) => {
-                                    if (receipt.error) {
-                                        $scope.notifier.danger(receipt.msg);
-                                        $scope.sellPending = false;
-                                    } else {
-                                        if (receipt.data != null) {
-                                            let status = receipt.data.status;
-                                            if (status == "0x1") {
-                                                $scope.notifier.success(await $translate("LIBRESELL_txOk"), 0);
-                                                updateContractData();
-                                            } else {
-                                                $scope.notifier.danger(await $translate("LIBRESELL_txFail"), 0);
-                                            }
-                                            $scope.sellPending = false;
-                                        }
-                                    }
-                                    isCheckingTx = false;
-                                });
-                            }, 2000);
-                        });
-                    });
-                } catch (e) {
-                    $scope.sellPending = false;
-                    $scope.notifier.danger(e);
-                }
-            }); // getTransactionData
-        } catch (e) {
-            $scope.sellPending = false;
-            $scope.notifier.danger(e);
-        }
+        $scope.tx.to = bankAddress;
+        $scope.tx.gasLimit = gasRemission;
+
+        universalTxCallback($scope, "sellPending", "SELL", $translate, updateContractData);
     }
 
     $scope.generateWithdrawLibreTx = function() {
         ifNotPaused(callbackWithdrawLibreTx);
     }
 
-    //$scope.tx.data = getDataString(bankAbiRefactor["getEther"], []);
-    //$scope.gasLimit = gasWithdraw;
-
     var callbackWithdrawLibreTx = function() {
-        $scope.withdrawPending = true;
-        try {
-            if ($scope.wallet == null) throw globalFuncs.errorMsgs[3];
-            else if (!globalFuncs.isNumeric($scope.tx.gasLimit) || parseFloat($scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
-            ajaxReq.getTransactionData($scope.wallet.getAddressString(), function(data) {
-                try {
-                    if (data.error) $scope.notifier.danger(data.msg);
-                    $scope.tx.data = getDataString(bankAbiRefactor["getEther"], []);
-                    $scope.gasLimit = gasWithdraw;
-                    var txData = uiFuncs.getTxData($scope);
+        $scope.tx.to = bankAddress;
+        $scope.tx.data = getDataString(bankAbiRefactor["getEther"], []);
+        $scope.tx.gasLimit = gasWithdraw;
 
-                    uiFuncs.generateTx(txData, function(rawTx) {
-                        if (rawTx.isError) {
-                            $scope.withdrawPending = false;
-                            $scope.notifier.danger(rawTx.error);
-                            return;
-                        }
-                        $scope.rawTx = rawTx.rawTx;
-                        $scope.signedTx = rawTx.signedTx;
-                        uiFuncs.sendTx($scope.signedTx, function(resp) {
-                            if (resp.isError) {
-                                $scope.notifier.danger(resp.error);
-                                $scope.withdrawPending = false;
-                                return;
-                            }
-                            var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
-                            var txHashLink = $scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
-                            var verifyTxBtn = $scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
-                            var checkTxBtn = '<a class="btn btn-xs btn-info" href="' + checkTxLink + '" target="_blank" rel="noopener noreferrer"> Check TX Status </a>';
-                            var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
-                            $scope.notifier.success(completeMsg, 0);
-                            
-                            $scope.wallet.setBalance(applyScope);
-
-                            var isCheckingTx = false,
-                            checkingTx = setInterval(() => {
-                                if (!$scope.withdrawPending) {
-                                    clearInterval(checkingTx);
-                                    return;
-                                }
-                                if (isCheckingTx) return; // fixing doubling success messages
-                                isCheckingTx = true;
-                                ajaxReq.getTransactionReceipt(resp.data, async (receipt) => {
-                                    if (receipt.error) {
-                                        $scope.notifier.danger(receipt.msg);
-                                        $scope.withdrawPending = false;
-                                    } else {
-                                        if (receipt.data != null) {
-                                            let status = receipt.data.status;
-                                            if (status == "0x1") {
-                                                $scope.notifier.success(await $translate("LIBREWITHDRAW_txOk"), 0);
-                                                updateContractData();
-                                            } else {
-                                                $scope.notifier.danger(await $translate("LIBREWITHDRAW_txFail"), 0);
-                                            }
-                                            $scope.withdrawPending = false;
-                                        }
-                                    }
-                                    isCheckingTx = false;
-                                });
-                            }, 2000);
-                        });
-                    });
-                } catch (e) {
-                    $scope.withdrawPending = false;
-                    $scope.notifier.danger(e);
-                }
-            });
-        } catch (e) {
-            $scope.withdrawPending = false;
-            $scope.notifier.danger(e);
-        }
+        universalTxCallback($scope, "withdrawPending", "WITHDRAW", $translate, updateContractData);
     }
+
 };
 module.exports = remissionCtrl;
