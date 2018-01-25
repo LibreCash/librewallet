@@ -621,6 +621,7 @@ VAR_relevancePeriod             :  'Emission Period in seconds',
 VAR_queuePeriod                 :  'Queue Updating max Period in seconds',
 VAR_timeUpdateRequest           :  'Time update requests were sent',
 VAR_contractState               :  'State of the contract',
+VAR_reserveBalance              :  'Reserve Balance',
 
 BANKSTATUS_bankContractAddress  :  'Bank contract address',
 BANKSTATUS_contractStatus       :  'Contract Status',
