@@ -95,7 +95,6 @@ var bankStatusCtrl = async function($scope, libreService) {
                 data.data = data.data[0];
             }
             varsObject[data.varName].data = data;
-            console.log(data);
         });
     }).catch(e => {
         console.log(e);
@@ -112,7 +111,6 @@ var bankStatusCtrl = async function($scope, libreService) {
         ORACLE_RATE = 5,
         ORACLE_NEXT = 6;
     let curOracle = await getBankDataAsync("firstOracle");
-
     
     for (
         let curData = await getBankDataAsync("getOracleData", curOracle.data);
