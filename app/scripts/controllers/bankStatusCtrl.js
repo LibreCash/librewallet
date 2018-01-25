@@ -7,10 +7,7 @@ var bankStatusCtrl = async function($scope) {
     var balanceBank = 0 ;
 
     ajaxReq.getBalance(bankAddress,function(data) {
-        console.log("Hello");
-        if (data.error) balanceBank = data.msg;
-        else balanceBank = etherUnits.toEther(data.data.balance, 'wei')
-        console.log("balance",balanceBank);
+        balanceBank = etherUnits.toEther(data.data.balance, 'wei');
     });
 
 
@@ -53,7 +50,7 @@ var bankStatusCtrl = async function($scope) {
             default: "Reserve Balance",
             translate: "VAR_reserveBalance",
             process: function(data) {
-                return `${data/100} % (${balanceBank} ether)`;
+                return `${balanceBank} ether (${data/100} %)`;
             }
         },
 /*        cryptoFiatRate: {
