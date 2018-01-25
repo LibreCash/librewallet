@@ -96,7 +96,6 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
     }
 
     var setAllTokens = function(data) {
-        console.log(data);
         $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     };
 
@@ -106,7 +105,7 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
     }, function() {
         if (walletService.wallet == null) return;
         $scope.wallet = walletService.wallet;
-        libreFuncs.getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
+        libreService.methods.getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
         $scope.tx.to = bankAddress; //walletService.wallet.getAddressString();//$scope.wallet.setTokens();
