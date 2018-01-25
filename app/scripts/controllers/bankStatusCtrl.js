@@ -140,7 +140,7 @@ var bankStatusCtrl = async function($scope, libreService, $translate) {
             waiting: curData.data[ORACLE_WAITING],
             rate: normalizeRate(curData.data[ORACLE_RATE])
         };
-        if(+curData.data[ORACLE_NEXT] == 0) break;   
+        if (+curData.data[ORACLE_NEXT] == 0) break;   
     }   
 };
 module.exports = bankStatusCtrl;
