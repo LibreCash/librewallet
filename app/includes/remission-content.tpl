@@ -200,7 +200,7 @@
                 <a style="min-width: 170px"
                     class="btn btn-default"
                     ng-disabled="withdrawPending"
-                    ng-click="generateWithdrawLibreTx()">
+                    ng-click="generateWithdrawEthTx()">
                     <strong>
                         {{ withdrawPending ? 'LIBRE_txPending' : 'LIBRE_withdraw' | translate }}
                     </strong>
