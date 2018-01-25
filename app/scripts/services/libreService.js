@@ -70,6 +70,7 @@ var libreService = function(walletService) {
                 to: address,
                 data: getDataString(abiRefactored[_var], params)
             }, function(data) {
+                data.varName = _var;
                 if (data.error || data.data == '0x') {
                     if (data.data == '0x') {
                         data.error = true;

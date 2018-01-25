@@ -7,6 +7,8 @@ var bankStatusCtrl = async function($scope, libreService) {
         hexToString = libreService.methods.hexToString,
         getStateName = libreService.methods.getStateName;
 
+    var balanceBank = 0;
+
     ajaxReq.getBalance(bankAddress, function(balanceData) {
         balanceBank = etherUnits.toEther(balanceData.data.balance, 'wei');
     });
@@ -20,7 +22,7 @@ var bankStatusCtrl = async function($scope, libreService) {
             default: "LibreCash Contract",
             translate: "VAR_tokenAddress"
         },
-/*        getReservePercent: {
+        getReservePercent: {
             default: "Reserve Balance",
             translate: "VAR_reserveBalance",
             process: function(data) {
@@ -88,7 +90,7 @@ var bankStatusCtrl = async function($scope, libreService) {
             default: "State of the contract",
             translate: "VAR_contractState",
             process: getStateName
-        }*/
+        }
     }
     
     $scope.address = bankAddress;
