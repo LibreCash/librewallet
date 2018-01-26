@@ -5,14 +5,15 @@ var bankStatusCtrl = async function($scope, libreService, $translate) {
         normalizeUnixTime = libreService.methods.normalizeUnixTime,
         normalizeRate = libreService.methods.normalizeRate,
         hexToString = libreService.methods.hexToString,
-        getStateName = libreService.methods.getStateName;
+        getStateName = libreService.methods.getStateName,
+        balanceBank = 0;
 
-    var balanceBank = 0;
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
+        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
 
     ajaxReq.getBalance(bankAddress, function(balanceData) {
         balanceBank = etherUnits.toEther(balanceData.data.balance, 'wei');
     });
-
 
     $scope.ajaxReq = ajaxReq;
 

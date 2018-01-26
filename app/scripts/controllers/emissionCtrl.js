@@ -16,6 +16,8 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
         universalLibreTransaction = libreService.methods.universalLibreTransaction,
         statusAllowsOrders = libreService.methods.statusAllowsOrders;
 
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
+        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
 
     $scope.buyPending = false;
     $scope.tx = {};

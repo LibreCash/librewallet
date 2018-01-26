@@ -21,6 +21,9 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
         statusAllowsOrders = libreService.methods.statusAllowsOrders,
         ifNotPaused = libreService.methods.ifNotPaused;
 
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
+        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
+
     var processSellRate = function(data) {
         $scope.sellRate = data.error ? data.message : normalizeRate(data.data[0]);
         $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 0.9); // +10%

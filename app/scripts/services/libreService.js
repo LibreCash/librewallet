@@ -316,8 +316,8 @@ var libreService = function(walletService, $translate) {
             universalLibreTransaction: universalLibreTransaction,
             statusAllowsOrders: statusAllowsOrders,
             ifNotPaused: ifNotPaused
-        }
-
+        },
+        networkType: "rinkeby"
     }
 };
 module.exports = libreService;
