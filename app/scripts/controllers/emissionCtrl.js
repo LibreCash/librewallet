@@ -102,7 +102,6 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
                 $scope.addressDrtv.ensAddressField = $scope.parentTxConfig.to;
                 $scope.tx.value = $scope.parentTxConfig.value;
                 $scope.tx.sendMode = 'ether';
- //               $scope.tx.tokensymbol = $scope.parentTxConfig.tokensymbol ? $scope.parentTxConfig.tokensymbol : '';
                 $scope.tx.gasPrice = $scope.parentTxConfig.gasPrice ? $scope.parentTxConfig.gasPrice : null;
                 $scope.tx.nonce = $scope.parentTxConfig.nonce ? $scope.parentTxConfig.nonce : null;
                 $scope.tx.data = $scope.parentTxConfig.data ? $scope.parentTxConfig.data : $scope.tx.data;
@@ -116,7 +115,6 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
                 setTxObj();
             }, true);
         }
-        //$scope.setTokenSendMode();
         defaultInit();
     });
 
@@ -143,28 +141,11 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
 
     var processBuyRate = function(data) {
         $scope.buyRate = data.error ? data.message : normalizeRate(data.data[0]);
-        $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 1.1); // -10%
+        $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 1.1); // +10%
     };
 
     function updateContractData() {
-        getBankDataProcess("contractState", function(data) {
-            $scope.bankState = getStateName(data);
-        });
-
-        // todo разместить куда-нибудь и протестировать
-        Promise.all([
-            getBankDataAsync("timeUpdateRequest"),
-            getBankDataAsync("queuePeriod")
-        ]).then(values => {
-            //$scope.now = (+new Date) / 1000; // todo взять из блока
-            let _timeUpdateRequest = values[0],
-                _queuePeriod = values[1];
-            $scope.queuePeriod = _queuePeriod;
-            $scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
-            $scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
-        });
-
-        getBankDataProcess("cryptoFiatRateBuy", processBuyRate);
+        // reserved for updating data code
     }
     updateContractData();
 

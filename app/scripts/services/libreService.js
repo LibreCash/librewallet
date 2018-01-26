@@ -1,12 +1,12 @@
 'use strict';
 var libreService = function(walletService, $translate) {
-    var libreBank = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreBank");
+    var libreBank = nodes.nodeList.rin_ethscan.abiList.find((contract) => contract.name == "LibreBank");
     var bankAddress = libreBank.address;
     var bankAbi = libreBank.abi;
     var bankAbiRefactor = {};    
     for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
 
-    var libreCash = nodes.nodeList.rin_ethscan.abiList.find(contract => contract.name == "LibreCash");
+    var libreCash = nodes.nodeList.rin_ethscan.abiList.find((contract) => contract.name == "LibreCash");
     var cashAddress = libreCash.address;
     var cashAbi = libreCash.abi;
     var cashAbiRefactor = {};    
@@ -38,7 +38,7 @@ var libreService = function(walletService, $translate) {
                 if (data.error || data.data == '0x') {
                     if (data.data == '0x') {
                         data.error = true;
-                        $translate("LIBRE_possibleError").then(error => {
+                        $translate("LIBRE_possibleError").then((error) => {
                             data.message = error;
                             process(data, processParam);
                         });
@@ -205,10 +205,10 @@ var libreService = function(walletService, $translate) {
                                     }
                                     _scope[pendingVarName] = false;
                                     if (receipt.data.status == "0x1") {
-                                        _scope.notifier.success(await translator("LIBRE" + opPrefix + "_txOk"), 0);
+                                        _scope.notifier.success(await translator(`LIBRE${opPrefix}_txOk`), 0);
                                         updater();
                                     } else {
-                                        _scope.notifier.danger(await translator("LIBRE" + opPrefix + "_txFail"), 0);
+                                        _scope.notifier.danger(await translator(`LIBRE${opPrefix}_txFail`), 0);
                                     }
                                     _scope[pendingVarName] = false;
                                 }
@@ -219,7 +219,7 @@ var libreService = function(walletService, $translate) {
                 });
             } catch (e) {
                 _scope[pendingVarName] = false;
-                _scope.notifier.danger("getTransactionData exception: " + e);
+                _scope.notifier.danger("getTransactionData: " + e);
             }
         });
     }
@@ -232,7 +232,7 @@ var libreService = function(walletService, $translate) {
                 getBankDataAsync("queuePeriod"),
                 getBankDataAsync("contractState"),
                 getBankDataAsync("paused")
-            ]).then(async values => {
+            ]).then(async (values) => {
                 let _timeUpdateRequest = values[0],
                     _queuePeriod = values[1],
                     _contractState = values[2],
@@ -257,7 +257,7 @@ var libreService = function(walletService, $translate) {
     }
 
     async function ifNotPaused(_scope, transactionFunc) {
-        getBankDataAsync("paused").then(async value => {
+        getBankDataAsync("paused").then(async (value) => {
             if (value.error) {
                 _scope.notifier.danger(await $translate("LIBRE_gettingDataError"));
                 return;
@@ -266,7 +266,6 @@ var libreService = function(walletService, $translate) {
             if (!_paused)
                 transactionFunc();                
             else {
-                console.log(await $translate("LIBRE_bankPaused"));
                 _scope.notifier.danger(await $translate("LIBRE_bankPaused"));
             }
         });
