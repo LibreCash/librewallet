@@ -487,7 +487,7 @@ LIBRE_possibleError             :  'Possible error with network or the bank cont
 LIBRE_gettingDataError          :  'Getting contract data error',
 LIBRE_orderNotAllowed           :  'Order creation isn\'t allowed now. Please have a look at the status page.',
 LIBRE_bankPaused                :  'LibreBank contract is paused right now',
-LIBREBUY_networkFail            :  'Contract works only in the rinkeby network!',
+LIBREBUY_networkFail            :  'Contract works only in the Rinkeby network!',
 
 NODE_CTA                        :  'Save & Use Custom Node',
 NODE_Name                       :  'Node Name',
