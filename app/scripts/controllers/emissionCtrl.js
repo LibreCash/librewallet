@@ -145,7 +145,7 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
     };
 
     function updateContractData() {
-        // reserved for updating data code
+        getBankDataProcess("cryptoFiatRateBuy", processBuyRate);
     }
     updateContractData();
 

@@ -26,9 +26,22 @@
   </article>
 
   <article class="row" ng-show="wallet!=null">
-    @@if (site === 'mew' ) { @@include( './my-orders-content.tpl', { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './my-orders-content.tpl', { "site": "cx"  } ) }
+    @@if (site === 'mew' ) { @@include( './myOrders-content.tpl', { "site": "mew" } ) }
+    @@if (site === 'cx'  ) { @@include( './myOrders-content.tpl', { "site": "cx"  } ) }
   </article>
 
+  <!-- Force Emission -->
+  <article class="collapse-container" ng-show="wallet!=null">
+    <div ng-click="viewForceEmission = !viewForceEmission">
+      <a class="collapse-button"><span ng-show="!viewForceEmission">+</span><span ng-show="viewForceEmission">-</span></a>
+      <h1 translate="LIBRE_forceEmission">
+        Force Emission
+      </h1>
+    </div>
+    <div ng-show="viewForceEmission">
+        @@if (site === 'mew' )  {  @@include( './forceEmission-content.tpl', { "site": "mew" } )  }
+        @@if (site === 'cx'  ) {  @@include( './forceEmission-content.tpl', { "site": "cx"  } )  }
+    </div>
+  </article>
 
 </main>

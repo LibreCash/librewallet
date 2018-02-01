@@ -17,7 +17,10 @@ var libreService = function(walletService, $translate) {
     const GAS_EMISSION = 300000,
           GAS_REMISSION = 300000,
           GAS_APPROVE = 70000,
-          GAS_WITHDRAW = 100000;
+          GAS_WITHDRAW = 100000,
+          GAS_RUR = 1000000,
+          GAS_CR = 300000,
+          GAS_QUEUE = 500000;
 
     var getDataString = function(func, inputs) {
         var fullFuncName = ethUtil.solidityUtils.transformToFullName(func);
@@ -161,6 +164,7 @@ var libreService = function(walletService, $translate) {
                     throw("getTransactionData: " + data.msg);
                 }
                 var txData = uiFuncs.getTxData(_scope);
+                console.log(txData);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     if (rawTx.isError) {
                         _scope[pendingVarName] = false;
@@ -243,7 +247,7 @@ var libreService = function(walletService, $translate) {
                 var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
                 // allowing orders condition:
                 // state == ORDER_CREATION (3) || lastedTime >= _queuePeriod
-                if ((_contractState.error) && (_queuePeriod.error)) {
+                if ((_contractState.error) || (_queuePeriod.error)) {
                     _scope.notifier.danger(await $translate("LIBRE_gettingDataError"));
                     return;
                 }
@@ -252,6 +256,110 @@ var libreService = function(walletService, $translate) {
                     transactionFunc();                
                 else
                     _scope.notifier.danger(await $translate("LIBRE_orderNotAllowed"));
+            });
+        });
+    }
+
+    async function ifAllowedRUR(_scope, transactionFunc) {
+        ajaxReq.getLatestBlockData(async function(blockData) {
+            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
+            await Promise.all([
+                getBankDataAsync("timeUpdateRequest"),
+                getBankDataAsync("relevancePeriod"),
+                getBankDataAsync("contractState"),
+                getBankDataAsync("paused"),
+                getBankDataAsync("getOracleDeficit")
+            ]).then(async (values) => {
+                let _timeUpdateRequest = values[0],
+                    _relevancePeriod = values[1],
+                    _contractState = values[2],
+                    _paused = values[3].data[0],
+                    _oracleDeficit = values[4];
+                _scope.relevancePeriod = _relevancePeriod;
+                _scope.then = +_timeUpdateRequest.data[0] + +_relevancePeriod.data[0];
+                _scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
+                var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
+                // allowing RUR:
+                // state == REQUEST_UPDATE_RATES (0) || lastedTime >= _relevancePeriod
+                if ((_contractState.error) || (_relevancePeriod.error) || (_oracleDeficit.error)) {
+                    _scope.notifier.danger(await $translate("LIBRE_gettingDataError"));
+                    return;
+                }
+                var allowedState = (!_paused) && ((_contractState.data[0] == 0) || (lastedTime >= _relevancePeriod.data[0]));
+                if (allowedState) {
+                    transactionFunc(_oracleDeficit.data[0]);           
+                } else
+                    _scope.notifier.danger(await $translate("LIBRE_RURNotAllowed"));
+            });
+        });
+    }
+
+    async function ifAllowedQueue(_scope, transactionFunc, numOrders) {
+        ajaxReq.getLatestBlockData(async function(blockData) {
+            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
+            await Promise.all([
+                getBankDataAsync("timeUpdateRequest"),
+                getBankDataAsync("queuePeriod"),
+                getBankDataAsync("contractState"),
+                getBankDataAsync("paused"),
+                getBankDataAsync("getOracleDeficit")
+            ]).then(async (values) => {
+                let _timeUpdateRequest = values[0],
+                    _queuePeriod = values[1],
+                    _contractState = values[2],
+                    _paused = values[3].data[0],
+                    _oracleDeficit = values[4];
+                _scope.queuePeriod = _queuePeriod;
+                _scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
+                _scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
+                var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
+                // allowing queues:
+                // state == REQUEST_UPDATE_RATES (2) && lastedTime < _queuePeriod
+                if ((_contractState.error) || (_queuePeriod.error)) {
+                    _scope.notifier.danger(await $translate("LIBRE_gettingDataError"));
+                    return;
+                }
+                var allowedState = (!_paused) && ((_contractState.data[0] == 2) && (lastedTime < _queuePeriod.data[0]));
+                if (allowedState) {
+                    transactionFunc(numOrders);           
+                } else
+                    _scope.notifier.danger(await $translate("LIBRE_QueueNotAllowed"));
+            });
+        });
+    }    
+
+    async function ifAllowedCR(_scope, transactionFunc) {
+        const MIN_READY_ORACLES = 2;
+        ajaxReq.getLatestBlockData(async function(blockData) {
+            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
+            await Promise.all([
+                getBankDataAsync("contractState"),
+                getBankDataAsync("paused"),
+                getBankDataAsync("numReadyOracles"),
+                getBankDataAsync("numEnabledOracles"),
+                getBankDataAsync("timeUpdateRequest")
+            ]).then(async (values) => {
+                let _contractState = values[0],
+                    _paused = values[1].data[0],
+                    _readyOracles = values[2],
+                    _enabledOracles = values[3],
+                    _timeUpdateRequest = values[4];
+
+                // allowing CR:
+                // state == CALC_RATES (1)
+                if ((_contractState.error) || (_readyOracles.error)) {
+                    _scope.notifier.danger(await $translate("LIBRE_gettingDataError"));
+                    return;
+                }
+                var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
+                var allowedState = (!_paused) && (_contractState.data[0] == 1) && (
+                    (+_readyOracles.data[0] == +_enabledOracles.data[0]) ||
+                    (+_readyOracles.data[0] >= MIN_READY_ORACLES && lastedTime >= 10 * 60) // 10 minutes to wait for oracles
+                );
+                if (allowedState) {
+                    transactionFunc();           
+                } else
+                    _scope.notifier.danger(await $translate("LIBRE_CRNotAllowed"));
             });
         });
     }
@@ -296,7 +404,10 @@ var libreService = function(walletService, $translate) {
             gasEmission: GAS_EMISSION,
             gasRemission: GAS_REMISSION,
             gasApprove: GAS_APPROVE,
-            gasWithdraw: GAS_WITHDRAW
+            gasWithdraw: GAS_WITHDRAW,
+            gasRUR: GAS_RUR,
+            gasCR: GAS_CR,
+            gasQueue: GAS_QUEUE
         },
         methods: {
             getDataString: getDataString,
@@ -314,7 +425,10 @@ var libreService = function(walletService, $translate) {
             fillStateData: fillStateData,
             universalLibreTransaction: universalLibreTransaction,
             statusAllowsOrders: statusAllowsOrders,
-            ifNotPaused: ifNotPaused
+            ifNotPaused: ifNotPaused,
+            ifAllowedRUR: ifAllowedRUR,
+            ifAllowedCR: ifAllowedCR,
+            ifAllowedQueue: ifAllowedQueue
         },
         networkType: "rinkeby"
     }
