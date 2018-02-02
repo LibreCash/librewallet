@@ -131,7 +131,6 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
 
     var recursiveGetOracleData = function(oracleAddress) {
         getBankDataAsync("getOracleData", [oracleAddress]).then((curData) => {
-            console.log(oracleAddress);
             oracles[oracleAddress] = {
                 name: hexToString(curData.data[ORACLE_NAME]),
                 type: hexToString(curData.data[ORACLE_TYPE]),
