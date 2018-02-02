@@ -17,7 +17,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
         gasRemission = libreService.coeff.gasRemission,
         gasApprove = libreService.coeff.gasApprove,
         gasWithdraw = libreService.coeff.gasWithdraw,
-        universalLibreTransaction = libreService.methods.universalLibreTransaction,
+        libreTransaction = libreService.methods.libreTransaction,
         statusAllowsOrders = libreService.methods.statusAllowsOrders,
         ifNotPaused = libreService.methods.ifNotPaused;
 
@@ -201,7 +201,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
             $scope.tx.to = cashAddress;
             $scope.tx.gasLimit = gasApprove;
 
-            universalLibreTransaction($scope, "approvePending", "ALLOWANCE", $translate, updateContractData);
+            libreTransaction($scope, "approvePending", "ALLOWANCE", $translate, updateContractData);
         });
     }
 
@@ -218,7 +218,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
         $scope.tx.to = bankAddress;
         $scope.tx.gasLimit = gasRemission;
 
-        universalLibreTransaction($scope, "sellPending", "SELL", $translate, updateContractData);
+        libreTransaction($scope, "sellPending", "SELL", $translate, updateContractData);
     }
 
     $scope.generateWithdrawEthTx = function() {
@@ -230,7 +230,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
         $scope.tx.data = getDataString(bankAbiRefactor["getEther"], []);
         $scope.tx.gasLimit = gasWithdraw;
 
-        universalLibreTransaction($scope, "withdrawPending", "WITHDRAW", $translate, updateContractData);
+        libreTransaction($scope, "withdrawPending", "WITHDRAW", $translate, updateContractData);
     }
 
 };

@@ -13,7 +13,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         getStateName = libreService.methods.getStateName,
         rateMultiplier = libreService.coeff.rateMultiplier,
         gasEmission = libreService.coeff.gasEmission,
-        universalLibreTransaction = libreService.methods.universalLibreTransaction,
+        libreTransaction = libreService.methods.libreTransaction,
         statusAllowsOrders = libreService.methods.statusAllowsOrders;
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
@@ -149,7 +149,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     };
 
     function updateContractData() {
-        // reserved for updating data code
+        getBankDataProcess("cryptoFiatRateBuy", processBuyRate);
     }
     updateContractData();
 
@@ -165,7 +165,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         $scope.tx.to = bankAddress;
         $scope.tx.gasLimit = gasEmission;
 
-        universalLibreTransaction($scope, "buyPending", "BUY", $translate, updateContractData);
+        libreTransaction($scope, "buyPending", "BUY", $translate, updateContractData);
     }
 
     $scope.transferAllBalance = function() {
