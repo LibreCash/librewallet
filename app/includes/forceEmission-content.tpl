@@ -54,36 +54,36 @@
         <table class="table">
           <tbody>
             <tr>
-              <td>LibreBank status:</td>
+              <td translate="LIBREFE_LBStatus">LibreBank status:</td>
               <td>{{ bankState.error ? bankState.msg : bankState.data[1] }}
               </td>
             </tr>
             <tr>
-              <td>Last block time:</td>
+              <td translate="LIBREFE_LastBlockTime">Last block time:</td>
               <td>{{ lastBlock }}</td>
             </tr>
             <tr>
-              <td>Last update:</td>
+              <td translate="LIBREFE_LastUpdate">Last update:</td>
               <td>{{ timeUpdateRequest.error ? timeUpdateRequest.msg : timeUpdateRequest.data[1] }}</td>
             </tr>
             <tr>
-              <td>Relevance period:</td>
+              <td translate="LIBREFE_RelevancePeriod">Relevance period:</td>
               <td>{{ relevancePeriod.error ? relevancePeriod.msg : relevancePeriod.data[0] }}</td>
             </tr>      
             <tr>
-              <td>Queue processing period:</td>
+              <td translate="LIBREFE_QueuePeriod">Queue processing period:</td>
               <td>{{ queuePeriod.error ? queuePeriod.msg : queuePeriod.data[0] }}</td>
             </tr>      
             <tr>
-              <td>Paused:</td>
+              <td translate="LIBREFE_Paused">Paused:</td>
               <td>{{ contractPaused }}</td>
             </tr>      
             <tr>
-                <td>Ready oracles:</td>
+                <td translate="LIBREFE_ReadyOracles">Ready oracles:</td>
                 <td>{{ readyOracles }} / {{ enabledOracles }}</td>
             </tr>
             <tr>
-                <td>Request Update Rates cost:</td>
+                <td translate="LIBREFE_RURCost">Request Update Rates cost:</td>
                 <td>{{ rurCost }} ETH + gas</td>
             </tr>     
         </tbody>
@@ -95,7 +95,6 @@
                 ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
                 ng-disabled="RURPending || CRPending">
             {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
-            <!-- todo write oracle deficit = the cost of request -->
           </a>
         </div>
         <div class="col-sm-5">

@@ -26,7 +26,7 @@ var myOrdersCtrl = async function($scope, $sce, walletService, libreService, glo
     $scope.RURAllowed = false;
     $scope.CRAllowed = false;
     $scope.queuesAllowed = false;
-
+    
     setInterval(() => {
         if (!$scope.viewForceEmission || globalService.currentTab!=globalService.tabs.myOrders.id) {
             return;
