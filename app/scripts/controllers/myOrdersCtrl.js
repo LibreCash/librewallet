@@ -1,5 +1,5 @@
 'use strict';
-var myOrdersCtrl = async function($scope, $sce, walletService, libreService, $rootScope, $translate) {
+var myOrdersCtrl = function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     var bankAddress = libreService.bank.address,
         cashAddress = libreService.token.address,
         bankAbiRefactor = libreService.bank.abi,
@@ -7,8 +7,12 @@ var myOrdersCtrl = async function($scope, $sce, walletService, libreService, $ro
         getBankDataAsync = libreService.methods.getBankDataAsync,
         normalizeUnixTime = libreService.methods.normalizeUnixTime;
 
-    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
-        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
+        $translate("LIBREBUY_networkFail").then((msg) => {
+            $scope.notifier.danger(msg);
+        });
+        return;
+    }
 
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
@@ -20,7 +24,7 @@ var myOrdersCtrl = async function($scope, $sce, walletService, libreService, $ro
     $scope.$watch(function() {
         if (walletService.wallet == null) return null;
         return walletService.wallet.getAddressString();
-    }, async function() {
+    }, function() {
         if (walletService.wallet == null) return;
         fillOrders();
         $scope.wallet = walletService.wallet;
@@ -37,49 +41,50 @@ var myOrdersCtrl = async function($scope, $sce, walletService, libreService, $ro
 
     $scope.orders = [];
     // to be run from wallet watcher when wallet!=null
-    async function fillOrders() {
-        var orderIDs = await getBankDataAsync("getMyOrders");
-        if (!orderIDs.error) {
-            $scope.orders = [];
-            var promises = [];
-            let buyOrdersData = orderIDs.data[0],
-                sellOrdersData = orderIDs.data[1];
-            if (buyOrdersData.length == 0 && sellOrdersData.length == 0) {
-                $scope.anyOrders = false;
-                return;
-            } else
-                $scope.anyOrders = true;
-            buyOrdersData.forEach(
-                orderID => {
-                    let orderData = {id: orderID, type: "Buy", currency: "ETH"};
-                    let orderPromise = getBankDataAsync("getBuyOrder", [orderID]);
-                    promises.push(orderPromise);
-                    $scope.orders.push(orderData);
-                }
-            );
-            sellOrdersData.forEach(
-                orderID => {
-                    let orderData = {id: orderID, type: "Sell", currency: "LCH"};
-                    let orderPromise = getBankDataAsync("getSellOrder", [orderID]);
-                    promises.push(orderPromise);
-                    $scope.orders.push(orderData);
-                }
-            );
-            Promise.all(promises).then(ordersData => {
-                ordersData.forEach(_order => {
-                    let _id = _order.params[0],
-                        curOrder = $scope.orders.find(order => order.id == _id);
-                    // data[0] is sender, no need
-                    curOrder.recipient = _order.data[1];
-                    curOrder.amount = _order.data[2] / Math.pow(10, libreService.coeff.tokenDecimals);
-                    curOrder.timestamp = normalizeUnixTime(_order.data[3]);
-                    curOrder.rateLimit = _order.data[4] / libreService.coeff.rateMultiplier;
-                    applyScope();
+    function fillOrders() {
+        getBankDataAsync("getMyOrders").then((orderIDs) => {
+            if (!orderIDs.error) {
+                $scope.orders = [];
+                var promises = [];
+                let buyOrdersData = orderIDs.data[0],
+                    sellOrdersData = orderIDs.data[1];
+                if (buyOrdersData.length == 0 && sellOrdersData.length == 0) {
+                    $scope.anyOrders = false;
+                    return;
+                } else
+                    $scope.anyOrders = true;
+                buyOrdersData.forEach(
+                    orderID => {
+                        let orderData = {id: orderID, type: "Buy", currency: "ETH"};
+                        let orderPromise = getBankDataAsync("getBuyOrder", [orderID]);
+                        promises.push(orderPromise);
+                        $scope.orders.push(orderData);
+                    }
+                );
+                sellOrdersData.forEach(
+                    orderID => {
+                        let orderData = {id: orderID, type: "Sell", currency: "LCH"};
+                        let orderPromise = getBankDataAsync("getSellOrder", [orderID]);
+                        promises.push(orderPromise);
+                        $scope.orders.push(orderData);
+                    }
+                );
+                Promise.all(promises).then(ordersData => {
+                    ordersData.forEach(_order => {
+                        let _id = _order.params[0],
+                            curOrder = $scope.orders.find(order => order.id == _id);
+                        // data[0] is sender, no need
+                        curOrder.recipient = _order.data[1];
+                        curOrder.amount = _order.data[2] / Math.pow(10, libreService.coeff.tokenDecimals);
+                        curOrder.timestamp = normalizeUnixTime(_order.data[3]);
+                        curOrder.rateLimit = _order.data[4] / libreService.coeff.rateMultiplier;
+                        applyScope();
+                    });
                 });
-            });
-        } else {
-            $scope.notifier.danger(orderIDs.msg, 0);
-        }
+            } else {
+                $scope.notifier.danger(orderIDs.msg, 0);
+            }
+        });
     }
 };
 module.exports = myOrdersCtrl;
