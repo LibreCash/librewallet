@@ -95,7 +95,6 @@ var bankStatusCtrl = async function($scope, libreService, $translate) {
     }
     
     $scope.address = bankAddress;
-    $scope.oracles = oracles;
 
     var bankPromises = [];
     for (var prop in varsObject) {
@@ -125,9 +124,32 @@ var bankStatusCtrl = async function($scope, libreService, $translate) {
         ORACLE_WAITING = 4,
         ORACLE_RATE = 5,
         ORACLE_NEXT = 6;
-    let curOracle = await getBankDataAsync("firstOracle");
-    
-    for (
+
+    var recursiveGetOracleData = function(oracleAddress) {
+        getBankDataAsync("getOracleData", [oracleAddress]).then((curData) => {
+            console.log(oracleAddress);
+            oracles[oracleAddress] = {
+                name: hexToString(curData.data[ORACLE_NAME]),
+                type: hexToString(curData.data[ORACLE_TYPE]),
+                updateTime: normalizeUnixTime(curData.data[ORACLE_UPDATE_TIME]),
+                enabled: curData.data[ORACLE_ENABLED],
+                waiting: curData.data[ORACLE_WAITING],
+                rate: normalizeRate(curData.data[ORACLE_RATE])
+            };
+            if (+curData.data[ORACLE_NEXT] != 0) {
+                recursiveGetOracleData(curData.data[ORACLE_NEXT]);
+            } else {
+                $scope.oracles = oracles;
+            }
+        })
+    }
+
+    getBankDataAsync("firstOracle").then((curOracle) => {
+        recursiveGetOracleData(curOracle.data[0]);
+    });
+
+
+/*    for (
         let curData = await getBankDataAsync("getOracleData", curOracle.data);
         ;
         curOracle.data[0] = curData.data[ORACLE_NEXT],
@@ -142,6 +164,6 @@ var bankStatusCtrl = async function($scope, libreService, $translate) {
             rate: normalizeRate(curData.data[ORACLE_RATE])
         };
         if (+curData.data[ORACLE_NEXT] == 0) break;   
-    }   
+    }   */
 };
 module.exports = bankStatusCtrl;
