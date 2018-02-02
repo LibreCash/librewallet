@@ -146,7 +146,7 @@ var libreService = function(walletService, $translate) {
         }
     }
 
-    var universalLibreTransaction = function(_scope, pendingVarName, opPrefix, translator, updater) {
+    var libreTransaction = function(_scope, pendingVarName, opPrefix, translator, updater) {
         _scope[pendingVarName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3];
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
@@ -320,7 +320,7 @@ var libreService = function(walletService, $translate) {
             hexToString: hexToString,
             getStateName: getStateName,
             fillStateData: fillStateData,
-            universalLibreTransaction: universalLibreTransaction,
+            libreTransaction: libreTransaction,
             statusAllowsOrders: statusAllowsOrders,
             ifNotPaused: ifNotPaused
         },
