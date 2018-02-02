@@ -1,5 +1,5 @@
 'use strict';
-var emissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope, $translate) {
+var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     var bankAddress = libreService.bank.address,
         bankAbiRefactor = libreService.bank.abi,
         getBankDataAsync = libreService.methods.getBankDataAsync,
@@ -13,11 +13,15 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
         getStateName = libreService.methods.getStateName,
         rateMultiplier = libreService.coeff.rateMultiplier,
         gasEmission = libreService.coeff.gasEmission,
-        universalLibreTransaction = libreService.methods.universalLibreTransaction,
+        libreTransaction = libreService.methods.libreTransaction,
         statusAllowsOrders = libreService.methods.statusAllowsOrders;
 
-    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
-        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
+        $translate("LIBREBUY_networkFail").then((msg) => {
+            $scope.notifier.danger(msg);
+        });
+        return;
+    }
 
     $scope.buyPending = false;
     $scope.tx = {};
@@ -161,7 +165,7 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
         $scope.tx.to = bankAddress;
         $scope.tx.gasLimit = gasEmission;
 
-        universalLibreTransaction($scope, "buyPending", "BUY", $translate, updateContractData);
+        libreTransaction($scope, "buyPending", "BUY", $translate, updateContractData);
     }
 
     $scope.transferAllBalance = function() {

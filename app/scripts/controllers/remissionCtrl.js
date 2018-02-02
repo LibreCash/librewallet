@@ -1,5 +1,5 @@
 'use strict';
-var remissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope, $translate) {
+var remissionCtrl = function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     var bankAddress = libreService.bank.address,
         cashAddress = libreService.token.address,
         bankAbiRefactor = libreService.bank.abi,
@@ -17,12 +17,16 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
         gasRemission = libreService.coeff.gasRemission,
         gasApprove = libreService.coeff.gasApprove,
         gasWithdraw = libreService.coeff.gasWithdraw,
-        universalLibreTransaction = libreService.methods.universalLibreTransaction,
+        libreTransaction = libreService.methods.libreTransaction,
         statusAllowsOrders = libreService.methods.statusAllowsOrders,
         ifNotPaused = libreService.methods.ifNotPaused;
 
-    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
-        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
+        $translate("LIBREBUY_networkFail").then((msg) => {
+            $scope.notifier.danger(msg);
+        });
+        return;
+    }
 
     var processSellRate = function(data) {
         $scope.sellRate = data.error ? data.message : normalizeRate(data.data[0]);
@@ -170,32 +174,35 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
         ifNotPaused($scope, approveTx);
     }
 
-    var approveTx = async function() {
-        var allowanceData = await getCashDataAsync("allowance", [walletService.wallet.getAddressString(), bankAddress]);
-        if (allowanceData.error) {
-            $scope.notifier.danger(allowanceData.msg);
-            return;
-        }
-        var allowance = +allowanceData.data[0];
+    var approveTx = function() {
+        getCashDataAsync("allowance", [walletService.wallet.getAddressString(), bankAddress]).then((allowanceData) => {
+            if (allowanceData.error) {
+                $scope.notifier.danger(allowanceData.msg);
+                return;
+            }
+            var allowance = +allowanceData.data[0];
 
-        var tokensToAllowCount = $scope.tokensToAllow * Math.pow(10, libreService.coeff.tokenDecimals);
-        if (allowance == tokensToAllowCount) {
-            $scope.notifier.danger(await $translate("LIBREALLOWANCE_equal"));
-            return;
-        } else if (tokensToAllowCount < allowance) {
-            $scope.tx.data = getDataString(
-                cashAbiRefactor["decreaseApproval"], [bankAddress, allowance - tokensToAllowCount]
-            );
-        } else {
-            // tokensToAllowCount > allowance
-            $scope.tx.data = getDataString(
-                cashAbiRefactor["increaseApproval"], [bankAddress, tokensToAllowCount - allowance]
-            );
-        }
-        $scope.tx.to = cashAddress;
-        $scope.tx.gasLimit = gasApprove;
+            var tokensToAllowCount = $scope.tokensToAllow * Math.pow(10, libreService.coeff.tokenDecimals);
+            if (allowance == tokensToAllowCount) {
+                $translate("LIBREALLOWANCE_equal").then((msg) => {
+                    $scope.notifier.danger(msg);
+                })
+                return;
+            } else if (tokensToAllowCount < allowance) {
+                $scope.tx.data = getDataString(
+                    cashAbiRefactor["decreaseApproval"], [bankAddress, allowance - tokensToAllowCount]
+                );
+            } else {
+                // tokensToAllowCount > allowance
+                $scope.tx.data = getDataString(
+                    cashAbiRefactor["increaseApproval"], [bankAddress, tokensToAllowCount - allowance]
+                );
+            }
+            $scope.tx.to = cashAddress;
+            $scope.tx.gasLimit = gasApprove;
 
-        universalLibreTransaction($scope, "approvePending", "ALLOWANCE", $translate, updateContractData);
+            libreTransaction($scope, "approvePending", "ALLOWANCE", $translate, updateContractData);
+        });
     }
 
     $scope.generateSellLibreTx = function() {
@@ -211,7 +218,7 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
         $scope.tx.to = bankAddress;
         $scope.tx.gasLimit = gasRemission;
 
-        universalLibreTransaction($scope, "sellPending", "SELL", $translate, updateContractData);
+        libreTransaction($scope, "sellPending", "SELL", $translate, updateContractData);
     }
 
     $scope.generateWithdrawEthTx = function() {
@@ -223,7 +230,7 @@ var remissionCtrl = async function($scope, $sce, walletService, libreService, $r
         $scope.tx.data = getDataString(bankAbiRefactor["getEther"], []);
         $scope.tx.gasLimit = gasWithdraw;
 
-        universalLibreTransaction($scope, "withdrawPending", "WITHDRAW", $translate, updateContractData);
+        libreTransaction($scope, "withdrawPending", "WITHDRAW", $translate, updateContractData);
     }
 
 };

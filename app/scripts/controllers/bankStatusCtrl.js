@@ -1,5 +1,5 @@
 'use strict';
-var bankStatusCtrl = async function($scope, libreService, $translate) {
+var bankStatusCtrl = function($scope, libreService, $translate) {
     var bankAddress = libreService.bank.address,
         getBankDataAsync = libreService.methods.getBankDataAsync,
         normalizeUnixTime = libreService.methods.normalizeUnixTime,
@@ -8,8 +8,12 @@ var bankStatusCtrl = async function($scope, libreService, $translate) {
         getStateName = libreService.methods.getStateName,
         balanceBank = 0;
 
-    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
-        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
+        $translate("LIBREBUY_networkFail").then((msg) => {
+            $scope.notifier.danger(msg);
+        });
+        return;
+    }
 
     ajaxReq.getBalance(bankAddress, function(balanceData) {
         balanceBank = etherUnits.toEther(balanceData.data.balance, 'wei');
@@ -95,7 +99,6 @@ var bankStatusCtrl = async function($scope, libreService, $translate) {
     }
     
     $scope.address = bankAddress;
-    $scope.oracles = oracles;
 
     var bankPromises = [];
     for (var prop in varsObject) {
@@ -125,23 +128,27 @@ var bankStatusCtrl = async function($scope, libreService, $translate) {
         ORACLE_WAITING = 4,
         ORACLE_RATE = 5,
         ORACLE_NEXT = 6;
-    let curOracle = await getBankDataAsync("firstOracle");
-    
-    for (
-        let curData = await getBankDataAsync("getOracleData", curOracle.data);
-        ;
-        curOracle.data[0] = curData.data[ORACLE_NEXT],
-        curData = await getBankDataAsync("getOracleData", curOracle.data)
-    ) {
-        oracles[curOracle.data[0]] = {
-            name: hexToString(curData.data[ORACLE_NAME]),
-            type: hexToString(curData.data[ORACLE_TYPE]),
-            updateTime: normalizeUnixTime(curData.data[ORACLE_UPDATE_TIME]),
-            enabled: curData.data[ORACLE_ENABLED],
-            waiting: curData.data[ORACLE_WAITING],
-            rate: normalizeRate(curData.data[ORACLE_RATE])
-        };
-        if (+curData.data[ORACLE_NEXT] == 0) break;   
-    }   
+
+    var recursiveGetOracleData = function(oracleAddress) {
+        getBankDataAsync("getOracleData", [oracleAddress]).then((curData) => {
+            oracles[oracleAddress] = {
+                name: hexToString(curData.data[ORACLE_NAME]),
+                type: hexToString(curData.data[ORACLE_TYPE]),
+                updateTime: normalizeUnixTime(curData.data[ORACLE_UPDATE_TIME]),
+                enabled: curData.data[ORACLE_ENABLED],
+                waiting: curData.data[ORACLE_WAITING],
+                rate: normalizeRate(curData.data[ORACLE_RATE])
+            };
+            if (+curData.data[ORACLE_NEXT] != 0) {
+                recursiveGetOracleData(curData.data[ORACLE_NEXT]);
+            } else {
+                $scope.oracles = oracles;
+            }
+        })
+    }
+
+    getBankDataAsync("firstOracle").then((curOracle) => {
+        recursiveGetOracleData(curOracle.data[0]);
+    });
 };
 module.exports = bankStatusCtrl;
