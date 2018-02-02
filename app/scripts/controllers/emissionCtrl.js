@@ -1,5 +1,5 @@
 'use strict';
-var emissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope, $translate) {
+var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     var bankAddress = libreService.bank.address,
         bankAbiRefactor = libreService.bank.abi,
         getBankDataAsync = libreService.methods.getBankDataAsync,
@@ -16,8 +16,12 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
         universalLibreTransaction = libreService.methods.universalLibreTransaction,
         statusAllowsOrders = libreService.methods.statusAllowsOrders;
 
-    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
-        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
+    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
+        $translate("LIBREBUY_networkFail").then((msg) => {
+            $scope.notifier.danger(msg);
+        });
+        return;
+    }
 
     $scope.buyPending = false;
     $scope.tx = {};

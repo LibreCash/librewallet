@@ -67,20 +67,15 @@ var libreService = function(walletService, $translate) {
         return getDataProcess(cashAddress, cashAbiRefactor, _var, process, params);
     }
 
-    async function getDataAsync(address, abiRefactored, _var, params = []) {
+    function getDataAsync(address, abiRefactored, _var, params = []) {
         return new Promise((resolve, reject) => { 
             ajaxReq.getEthCall({
                 from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
                 to: address,
                 data: getDataString(abiRefactored[_var], params)
-            }, async function(data) {
+            }, function(data) {
                 data.varName = _var;
-                if (data.error || data.data == '0x') {
-                    if (data.data == '0x') {
-                        data.error = true;
-                        data.message = await $translate("LIBRE_possibleError");
-                    }
-                } else {
+                if (!data.error && data.data != '0x') {
                     var outTypes = abiRefactored[_var].outputs.map(function(i) {
                         return i.type;
                     });
@@ -92,11 +87,11 @@ var libreService = function(walletService, $translate) {
         })
     }
 
-    async function getBankDataAsync(_var, params = []) {
+    function getBankDataAsync(_var, params = []) {
         return getDataAsync(bankAddress, bankAbiRefactor, _var, params);
     }
 
-    async function getCashDataAsync(_var, params = []) {
+    function getCashDataAsync(_var, params = []) {
         return getDataAsync(cashAddress, cashAbiRefactor, _var, params);
     }
 
@@ -108,11 +103,11 @@ var libreService = function(walletService, $translate) {
         return getDataCommon(_scope, address, abiRefactored, _var, setScope, params, _key);
     }
 
-    async function getBankDataScope(_scope, _var, _key, params = []) {
+    function getBankDataScope(_scope, _var, _key, params = []) {
         return getDataScope(_scope, bankAddress, bankAbiRefactor, _var, _key, params);
     }
 
-    async function getCashDataScope(_scope, _var, _key, params = []) {
+    function getCashDataScope(_scope, _var, _key, params = []) {
         return getDataScope(_scope, cashAddress, cashAbiRefactor, _var, _key, params);
     }
 
@@ -194,7 +189,7 @@ var libreService = function(walletService, $translate) {
                             }
                             if (isCheckingTx) return; // fixing doubling success messages
                             isCheckingTx = true;
-                            ajaxReq.getTransactionReceipt(resp.data, async (receipt) => {
+                            ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
                                 if (receipt.error) {
                                     _scope[pendingVarName] = false;
                                     _scope.notifier.danger(receipt.msg);
@@ -204,11 +199,15 @@ var libreService = function(walletService, $translate) {
                                         return; // next interval
                                     }
                                     _scope[pendingVarName] = false;
-                                    if (receipt.data.status == "0x1") {
-                                        _scope.notifier.success(await translator(`LIBRE${opPrefix}_txOk`), 0);
+                                    if (receipt.data.status == "0x1") { 
+                                        translator(`LIBRE${opPrefix}_txOk`).then((msg) => {
+                                            _scope.notifier.success(msg, 0);
+                                        });
                                         updater();
                                     } else {
-                                        _scope.notifier.danger(await translator(`LIBRE${opPrefix}_txFail`), 0);
+                                        translator(`LIBRE${opPrefix}_txFail`).then((msg) => {
+                                            _scope.notifier.danger(msg, 0);
+                                        });
                                     }
                                     _scope[pendingVarName] = false;
                                 }
@@ -224,15 +223,15 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    async function statusAllowsOrders(_scope, transactionFunc) {
-        ajaxReq.getLatestBlockData(async function(blockData) {
+    function statusAllowsOrders(_scope, transactionFunc) {
+        ajaxReq.getLatestBlockData(function(blockData) {
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            await Promise.all([
+            Promise.all([
                 getBankDataAsync("timeUpdateRequest"),
                 getBankDataAsync("queuePeriod"),
                 getBankDataAsync("contractState"),
                 getBankDataAsync("paused")
-            ]).then(async (values) => {
+            ]).then((values) => {
                 let _timeUpdateRequest = values[0],
                     _queuePeriod = values[1],
                     _contractState = values[2],
@@ -244,29 +243,38 @@ var libreService = function(walletService, $translate) {
                 // allowing orders condition:
                 // state == ORDER_CREATION (3) || lastedTime >= _queuePeriod
                 if ((_contractState.error) && (_queuePeriod.error)) {
-                    _scope.notifier.danger(await $translate("LIBRE_gettingDataError"));
+                    $translate("LIBRE_gettingDataError").then((msg) => {
+                        _scope.notifier.danger(msg, 0);
+                    });
                     return;
                 }
                 var allowedState = (!_paused) && ((_contractState.data[0] == 3) || (lastedTime >= _queuePeriod.data[0]));
                 if (allowedState)
                     transactionFunc();                
-                else
-                    _scope.notifier.danger(await $translate("LIBRE_orderNotAllowed"));
+                else {
+                    $translate("LIBRE_orderNotAllowed").then((msg) => {
+                        _scope.notifier.danger(msg);
+                    });
+                }
             });
         });
     }
 
-    async function ifNotPaused(_scope, transactionFunc) {
-        getBankDataAsync("paused").then(async (value) => {
+    function ifNotPaused(_scope, transactionFunc) {
+        getBankDataAsync("paused").then((value) => {
             if (value.error) {
-                _scope.notifier.danger(await $translate("LIBRE_gettingDataError"));
+                $translate("LIBRE_gettingDataError").then((msg) => {
+                    _scope.notifier.danger(msg);
+                });
                 return;
             }
             var _paused = value.data[0];
             if (!_paused)
                 transactionFunc();                
             else {
-                _scope.notifier.danger(await $translate("LIBRE_bankPaused"));
+                $translate("LIBRE_bankPaused").then((msg) => {
+                    _scope.notifier.danger(msg);
+                });
             }
         });
     }
