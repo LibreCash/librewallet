@@ -29,12 +29,12 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         },
         buyRate: {
             default: "Buy Rate",
-            translate: "VAR_cryptoFiatRateBuy",
+            translate: "VAR_buyRate",
             process: normalizeRate
         },
         sellRate: {
             default: "Sell Rate",
-            translate: "VAR_cryptoFiatRateSell",
+            translate: "VAR_sellRate",
             process: normalizeRate
         },
         buyFee: {
@@ -58,7 +58,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         requestPrice:{
            default:"Request price",
            translate: "VAR_requestPrice", // translate later
-           process:normalizeRate 
+           process:(price)=>etherUnits.toEther(price, 'wei')
         },
         getState: {
             default: "State",
