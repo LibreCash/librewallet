@@ -79,11 +79,12 @@ var walletGenCtrl            = require('./controllers/walletGenCtrl');
 var bulkGenCtrl              = require('./controllers/bulkGenCtrl');
 var decryptWalletCtrl        = require('./controllers/decryptWalletCtrl');
 var viewWalletCtrl           = require('./controllers/viewWalletCtrl');
-var bankStatusCtrl           = require('./controllers/bankStatusCtrl')
+var bankStatusCtrl           = require('./controllers/bankStatusCtrl');
 var txStatusCtrl             = require('./controllers/txStatusCtrl');
 var sendTxCtrl               = require('./controllers/sendTxCtrl');
 var emissionCtrl             = require('./controllers/emissionCtrl');
 var remissionCtrl            = require('./controllers/remissionCtrl');
+
 var swapCtrl                 = require('./controllers/swapCtrl');
 var signMsgCtrl              = require('./controllers/signMsgCtrl');
 var contractsCtrl            = require('./controllers/contractsCtrl');
