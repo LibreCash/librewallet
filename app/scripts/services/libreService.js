@@ -1,34 +1,42 @@
-'use strict';
+/*jshint esversion: 6 */ 
+"use strict";
 var libreService = function(walletService, $translate) {
-    var libreBank = nodes.nodeList.rin_ethscan.abiList.find((contract) => contract.name == "LibreBank");
-    var bankAddress = libreBank.address;
-    var bankAbi = libreBank.abi;
-    var bankAbiRefactor = {};    
-    for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
+    var 
+        exchanger = getContract("LibreExchanger"),
+        cash = getContract("LibreCash");
+        console.log(exchanger);
+        console.log(cash);
+    const 
+        coeff = {
+            tokenDecimals:18,
+            rateMultiplier:1000,
+            gasEmission:300000,
+            gasRemission:300000,
+            gasApprove:70000,
+            gasWithdraw:100000,
+            gasRUR:1000000,
+            gasCR:300000,
+            gasQueue:500000
+        },
+        states = [
+            'LOCKED',
+            'PROCESSING_ORDERS',
+            'WAIT_ORACLES',
+            'CALC_RATES',
+            'REQUEST_RATES'
+        ];
+        
 
-    var libreCash = nodes.nodeList.rin_ethscan.abiList.find((contract) => contract.name == "LibreCash");
-    var cashAddress = libreCash.address;
-    var cashAbi = libreCash.abi;
-    var cashAbiRefactor = {};    
-    for (var i = 0; i < cashAbi.length; i++) cashAbiRefactor[cashAbi[i].name] = cashAbi[i];
+    function getDataString(func, inputs) {
+        let
+            fullName = ethUtil.solidityUtils.transformToFullName(func),
+            funcSig = ethFuncs.getFunctionSignature(fullName),
+            typeName = ethUtil.solidityUtils.extractTypeName(fullName),
+            types = typeName.split(',');
 
-    const RATE_MULTIPLIER = 1000;
-    const TOKEN_DECIMALS = 18;
-    const GAS_EMISSION = 300000,
-          GAS_REMISSION = 300000,
-          GAS_APPROVE = 70000,
-          GAS_WITHDRAW = 100000,
-          GAS_RUR = 1000000,
-          GAS_CR = 300000,
-          GAS_QUEUE = 500000;
-
-    var getDataString = function(func, inputs) {
-        var fullFuncName = ethUtil.solidityUtils.transformToFullName(func);
-        var funcSig = ethFuncs.getFunctionSignature(fullFuncName);
-        var typeName = ethUtil.solidityUtils.extractTypeName(fullFuncName);
-        var types = typeName.split(',');
-        types = types[0] == "" ? [] : types;
-        return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
+            types = types[0] == "" ? [] : types;
+            
+        return `0x${funcSig}${ethUtil.solidityCoder.encodeParams(types, inputs)}`;
     };
 
     function getDataCommon(address, abiRefactored, _var, process, transactionParams, processParam) {
@@ -55,19 +63,35 @@ var libreService = function(walletService, $translate) {
                 }
                 
             });
-        })
+        });
     }
 
     function getDataProcess(address, abiRefactored, _var, process, params = []) {
         return getDataCommon(address, abiRefactored, _var, process, params, "");
     }
 
+    function getContract(name){
+        let
+            abiList = nodes.nodeList.rin_ethscan.abiList,
+            contract = abiList.find((contract) => contract.name == name),
+            abi = JSON.parse(contract.abi),
+            refactored = {};
+
+        abi.forEach((item)=>refactored[item.name] = item);
+
+        return {
+            address:contract.address,
+            abi:abi,
+            abiRefactored:refactored
+        };
+    }
+
     function getBankDataProcess(_var, process, params = []) {
-        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, params);
+        return getDataProcess(exchanger.address, exchanger.abiRefactored, _var, process, params);
     }
 
     function getCashDataProcess(_var, process, params = []) {
-        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, params);
+        return getDataProcess(cash.address, cash.abiRefactored, _var, process, params);
     }
 
     function getDataAsync(address, abiRefactored, _var, params = []) {
@@ -87,15 +111,15 @@ var libreService = function(walletService, $translate) {
                 data.params = params;
                 resolve(data);
             });
-        })
+        });
     }
 
     function getBankDataAsync(_var, params = []) {
-        return getDataAsync(bankAddress, bankAbiRefactor, _var, params);
+        return getDataAsync(exchanger.address, exchanger.abiRefactored, _var, params);
     }
 
     function getCashDataAsync(_var, params = []) {
-        return getDataAsync(cashAddress, cashAbiRefactor, _var, params);
+        return getDataAsync(cash.address, cash.abiRefactored, _var, params);
     }
 
     function setScope(_scope, _value, _key) {
@@ -107,21 +131,23 @@ var libreService = function(walletService, $translate) {
     }
 
     function getBankDataScope(_scope, _var, _key, params = []) {
-        return getDataScope(_scope, bankAddress, bankAbiRefactor, _var, _key, params);
+        return getDataScope(_scope, exchanger.address, exchanger.abiRefactored, _var, _key, params);
     }
 
     function getCashDataScope(_scope, _var, _key, params = []) {
-        return getDataScope(_scope, cashAddress, cashAbiRefactor, _var, _key, params);
+        return getDataScope(_scope, cash.address, cash.abiRefactored, _var, _key, params);
     }
 
-    var normalizeUnixTime = function(data) {
-        var date = new Date(data * 1000);
+    function normalizeUnixTime (timestamp) {
+        let date = new Date(timestamp * 1000);
         return date.toLocaleString();
-    },
-    normalizeRate = function(data) {
-        return data / RATE_MULTIPLIER;
-    },
-    hexToString = function(_hex) {
+    }
+
+    function normalizeRate (bigNumber) {
+        return bigNumber / coeff.rateMultiplier;
+    }
+
+    function hexToString(_hex) {
         var hex = _hex.toString();//force conversion
         var str = '';
         for (var i = 2; i < hex.length; i += 2) {
@@ -130,26 +156,27 @@ var libreService = function(walletService, $translate) {
             }
         }
         return str;
-    },
-    getStateName = function(data) { 
-        var states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
+    }
+
+    function getStateName (number) { 
         try {
-            return states[data];
+            return states[number];
         } catch(e) {
             return e.message;
         }
-    },
-    fillStateData = function(_data) { 
+    }
+
+    function fillStateData(source) { 
         try {
-            var stateName = getStateName(_data.data[0]);
-            _data.data.push(stateName);
-            return _data;
+            var stateName = getStateName(source.data[0]);
+            source.data.push(stateName);
+            return source;
         } catch(e) {
             return {error: true, message: e.message};
         }
     }
 
-    var libreTransaction = function(_scope, pendingVarName, opPrefix, translator, updater) {
+    function libreTransaction (_scope, pendingVarName, opPrefix, translator, updater) {
         _scope[pendingVarName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3];
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
@@ -241,7 +268,7 @@ var libreService = function(walletService, $translate) {
                     _contractState = values[2],
                     _paused = values[3].data[0];
                 _scope.queuePeriod = _queuePeriod;
-                _scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
+                _scope.then = +_timeUpdateRequest.data[0] + (+_queuePeriod.data[0]);
                 _scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
                 var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
                 // allowing orders condition:
@@ -280,7 +307,7 @@ var libreService = function(walletService, $translate) {
                     _paused = values[3].data[0],
                     _oracleDeficit = values[4];
                 _scope.relevancePeriod = _relevancePeriod;
-                _scope.then = +_timeUpdateRequest.data[0] + +_relevancePeriod.data[0];
+                _scope.then = +_timeUpdateRequest.data[0] + (+_relevancePeriod.data[0]);
                 _scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
                 var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
                 // allowing RUR:
@@ -319,7 +346,7 @@ var libreService = function(walletService, $translate) {
                     _paused = values[3].data[0],
                     _oracleDeficit = values[4];
                 _scope.queuePeriod = _queuePeriod;
-                _scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
+                _scope.then = +_timeUpdateRequest.data[0] + (+_queuePeriod.data[0]);
                 _scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
                 var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
                 // allowing queues:
@@ -402,11 +429,11 @@ var libreService = function(walletService, $translate) {
         });
     }
     
-    var normalizeUnixTimeObject = function(data) {
+    function normalizeUnixTimeObject(obj) {
         try {
-            var _time = normalizeUnixTime(data.data[0]);
-            data.data.push(_time);
-            return data;
+            var _time = normalizeUnixTime(obj.data[0]);
+            obj.data.push(_time);
+            return obj;
         } catch(e) {
             return {error: true, message: e.message};
         }
@@ -414,24 +441,14 @@ var libreService = function(walletService, $translate) {
 
     return {
         bank: {
-            address: bankAddress,
-            abi: bankAbiRefactor
+            address: exchanger.address,
+            abi: exchanger.abiRefactored
         },
         token: {
-            address: cashAddress,
-            abi: cashAbiRefactor
+            address: cash.address,
+            abi: cash.abiRefactored
         },
-        coeff: {
-            rateMultiplier: RATE_MULTIPLIER,
-            tokenDecimals: TOKEN_DECIMALS,
-            gasEmission: GAS_EMISSION,
-            gasRemission: GAS_REMISSION,
-            gasApprove: GAS_APPROVE,
-            gasWithdraw: GAS_WITHDRAW,
-            gasRUR: GAS_RUR,
-            gasCR: GAS_CR,
-            gasQueue: GAS_QUEUE
-        },
+        coeff:coeff,
         methods: {
             getDataString: getDataString,
             getBankDataProcess: getBankDataProcess,
@@ -454,6 +471,6 @@ var libreService = function(walletService, $translate) {
             ifAllowedQueue: ifAllowedQueue
         },
         networkType: "rinkeby"
-    }
+    };
 };
 module.exports = libreService;
