@@ -91,13 +91,6 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     url: "bank-status",
     mew: true,
     cx: true
-  },
-  myOrders: {
-    id: 12,
-    name: "NAV_MyOrders",
-    url: "my-orders",
-    mew: true,
-    cx: true
   }
   }
 

@@ -465,7 +465,6 @@ LIBRE_withdrawInfo              :  'You can withdraw your ETH after the remissio
 LIBRE_withdraw                  :  'Withdraw',
 LIBRE_getEther                  :  'ETH to withdraw',
 LIBRE_txPending                 :  'pending...',
-LIBRE_myOrders                  :  'My Orders',
 LIBRE_orderID                   :  'ID',
 LIBRE_orderType                 :  'Type',
 LIBRE_orderRecipient            :  'Recipient',

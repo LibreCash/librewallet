@@ -84,7 +84,6 @@ var txStatusCtrl             = require('./controllers/txStatusCtrl');
 var sendTxCtrl               = require('./controllers/sendTxCtrl');
 var emissionCtrl             = require('./controllers/emissionCtrl');
 var remissionCtrl            = require('./controllers/remissionCtrl');
-var myOrdersCtrl            = require('./controllers/myOrdersCtrl');
 var swapCtrl                 = require('./controllers/swapCtrl');
 var signMsgCtrl              = require('./controllers/signMsgCtrl');
 var contractsCtrl            = require('./controllers/contractsCtrl');
