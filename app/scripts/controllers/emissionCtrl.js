@@ -14,7 +14,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         rateMultiplier = libreService.coeff.rateMultiplier,
         gasEmission = libreService.coeff.gasEmission,
         libreTransaction = libreService.methods.libreTransaction,
-        statusAllowsOrders = libreService.methods.statusAllowsOrders;
+        canOrder = libreService.methods.canOrder;
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
@@ -75,11 +75,11 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         $scope.dropdownAmount = false;
     }
 
-    var applyScope = function() {
+    function applyScope() {
         if (!$scope.$$phase) $scope.$apply();
     }
 
-    var defaultInit = function() {
+    function defaultInit() {
         globalFuncs.urlGet('sendMode') == null ? $scope.setSendMode('ether') : $scope.setSendMode(globalFuncs.urlGet('sendMode'));
         $scope.gasLimitChanged = globalFuncs.urlGet('gaslimit') != null ? true : false;
         $scope.showAdvance = globalFuncs.urlGet('gaslimit') != null || globalFuncs.urlGet('gas') != null || globalFuncs.urlGet('data') != null;
@@ -87,7 +87,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     }
 
-    var setAllTokens = function(data) {
+    function setAllTokens (data) {
         $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     };
 
@@ -134,7 +134,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         $rootScope.rootScopeShowRawTx = false;
     }, true);
 
-    var isEnough = function(valA, valB) {
+    function isEnough(valA, valB) {
         return new BigNumber(valA).lte(new BigNumber(valB));
     }
 
@@ -143,25 +143,25 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         return isEnough($scope.tx.value, $scope.wallet.balance);
     }
 
-    var processBuyRate = function(data) {
+    function processBuyRate(data) {
         $scope.buyRate = data.error ? data.message : normalizeRate(data.data[0]);
         $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 1.1); // +10%
     };
 
     function updateContractData() {
-        getBankDataProcess("cryptoFiatRateBuy", processBuyRate);
+        getBankDataProcess("buyRate", processBuyRate);
     }
     updateContractData();
 
     $scope.generateBuyLibreTx = function() {
-        statusAllowsOrders($scope, buyLibreTx);
-    }
+        canOrder($scope, buyLibreTx);
+    };
 
-    var buyLibreTx = function() {
-        let rateLimit = Math.round($scope.tx.rateLimit * rateMultiplier);
-        $scope.tx.data = getDataString(bankAbiRefactor["createBuyOrder"],
-            [$scope.wallet.getAddressString(), rateLimit]);
+    function buyLibreTx() {
+        let txData = getDataString(bankAbiRefactor["buyTokens"],
+        [$scope.wallet.getAddressString()]);
 
+        $scope.tx.data = txData;
         $scope.tx.to = bankAddress;
         $scope.tx.gasLimit = gasEmission;
 

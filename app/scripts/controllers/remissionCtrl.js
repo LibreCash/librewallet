@@ -18,7 +18,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
         gasApprove = libreService.coeff.gasApprove,
         gasWithdraw = libreService.coeff.gasWithdraw,
         libreTransaction = libreService.methods.libreTransaction,
-        statusAllowsOrders = libreService.methods.statusAllowsOrders,
+        canOrder = libreService.methods.canOrder,
         ifNotPaused = libreService.methods.ifNotPaused;
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {

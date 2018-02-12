@@ -365,7 +365,6 @@ var libreService = function(walletService, $translate) {
             getStateName: getStateName,
             fillStateData: fillStateData,
             libreTransaction: libreTransaction,
-            statusAllowsOrders: statusAllowsOrders,
             canRequest: canRequest,
             canCalc: canCalc,
             canOrder: canOrder
