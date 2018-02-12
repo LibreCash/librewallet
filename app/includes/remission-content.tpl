@@ -90,7 +90,40 @@
               No tokens on balance
           </strong>
       </div>
-      <div ng-hide="allTokens == 0">
+
+      <div class="col-sm-11">
+          <label>
+            canRequest
+          </label>
+      </div>
+      <div class="col-sm-8 offset-col-sm-2">
+            <a style="min-width: 170px"
+              class="btn btn-default"
+              ng-disabled="sellPending"
+              ng-click="canRequest()">
+              <strong>
+                canRequest
+              </strong>
+            </a>
+        </div>
+
+        <div class="col-sm-11">
+          <label>
+            canCalc
+          </label>
+      </div>
+      <div class="col-sm-8 offset-col-sm-2">
+            <a style="min-width: 170px"
+              class="btn btn-default"
+              ng-disabled="!canCalc()"
+              ng-click="canCalc()">
+              <strong>
+                canCalc
+              </strong>
+            </a>
+        </div>
+
+      <div ng-hide="allTokens != 0">
         <div class="col-sm-11" ng-hide="tx.readOnly">
           <label translate="LIBRE_allowance">
               Allowance
@@ -150,9 +183,7 @@
             </span>
           </a>
         </p>
-      
-      
-      
+
             <!-- rateLimit -->
         <div class="col-sm-11">
           <label translate="LIBRE_minPriceSell">

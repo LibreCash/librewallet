@@ -19,7 +19,17 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
         gasWithdraw = libreService.coeff.gasWithdraw,
         libreTransaction = libreService.methods.libreTransaction,
         canOrder = libreService.methods.canOrder,
-        ifNotPaused = libreService.methods.ifNotPaused;
+        //ifNotPaused = libreService.methods.ifNotPaused,
+        canRequest = libreService.methods.canRequest;
+
+    console.log("Hello remissionCtrl");
+    //$scope.state = 
+
+    /*
+    canRequest(() => {
+        //console.log("canRequest call function txest!!!");
+    });
+    */
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
@@ -145,7 +155,8 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
     }, true);
 
     var isEnough = function(valA, valB) {
-        return new BigNumber(valA).lte(new BigNumber(valB));
+        //return new BigNumber(valA).lte(new BigNumber(vatransformToFullName transformToFullName lB));
+        return true;
     }
 
     $scope.hasEnoughBalance = function() {
@@ -171,7 +182,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
 
     
     $scope.generateApproveTx = function() {
-        ifNotPaused($scope, approveTx);
+        //ifNotPaused($scope, approveTx);
     }
 
     var approveTx = function() {
@@ -222,7 +233,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
     }
 
     $scope.generateWithdrawEthTx = function() {
-        ifNotPaused($scope, withdrawEthTx);
+        //ifNotPaused($scope, withdrawEthTx);
     }
 
     var withdrawEthTx = function() {

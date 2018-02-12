@@ -276,7 +276,7 @@ var libreService = function(walletService, $translate) {
                 let canOrder = state == statesENUM.PROCESSING_ORDERS;
 
                 if (canOrder)
-                    transactionFunc();                
+                    transactionFunc();
                 else {
                     $translate("LIBRE_orderNotAllowed").then((msg) => {
                         _scope.notifier.danger(msg);
@@ -287,6 +287,7 @@ var libreService = function(walletService, $translate) {
     }
 
     function canRequest(_scope, transactionFunc) {
+        console.log("hello canRequest");
         ajaxReq.getLatestBlockData(function(blockData) {
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
             Promise.all([
@@ -300,10 +301,10 @@ var libreService = function(walletService, $translate) {
                 let сanRequest = (state == statesENUM.REQUEST_RATES);
                 console.log
                 if (сanRequest) {
-                    transactionFunc(requestPrice.data[0]);           
+                    transactionFunc(requestPrice.data[0]);
                 } else {
                     $translate("LIBRE_RURNotAllowed").then((msg) => 
-                        _scope.notifier.danger(msg));     
+                        _scope.notifier.danger(msg));
                 }
             });
         });
