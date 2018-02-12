@@ -27,21 +27,14 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
             default: "LibreCash Contract",
             translate: "VAR_tokenAddress"
         },
-        getReservePercent: {
-            default: "Reserve Balance",
-            translate: "VAR_reserveBalance",
-            process: function(data) {
-                return `${balanceBank} ether (${data/100} %)`;
-            }
-        },
-        cryptoFiatRateBuy: {
-            default: "Buy Tokens Rate",
-            translate: "VAR_cryptoFiatRateBuy",
+        buyRate: {
+            default: "Buy Rate",
+            translate: "VAR_buyRate",
             process: normalizeRate
         },
-        cryptoFiatRateSell: {
-            default: "Sell Tokens Rate",
-            translate: "VAR_cryptoFiatRateSell",
+        sellRate: {
+            default: "Sell Rate",
+            translate: "VAR_sellRate",
             process: normalizeRate
         },
         buyFee: {
@@ -58,45 +51,31 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
                 return "{0} %".replace("{0}", data / 100);
             }
         },
-        getBuyOrdersCount: {
-            default: "Buy Orders Count",
-            translate: "VAR_getBuyOrdersCount"
-        },
-        getSellOrdersCount: {
-            default: "Sell Orders Count",
-            translate: "VAR_getSellOrdersCount"
-        },
-        numEnabledOracles: {
-            default: "Enabled Oracle Count",
-            translate: "VAR_numEnabledOracles"
-        },
-        numReadyOracles: {
-            default: "Ready Oracle Count",
-            translate: "VAR_numReadyOracles"
-        },
-        countOracles: {
-            default: "All Oracle Count",
+        oracleCount: {
+            default: "Oracle Count",
             translate: "VAR_countOracles"
         },
-        relevancePeriod: {
-            default: "Emission Period in seconds",
-            translate: "VAR_relevancePeriod"
+        requestPrice:{
+           default:"Request price",
+           translate: "VAR_requestPrice", // translate later
+           process:(price)=>etherUnits.toEther(price, 'wei')
         },
-        queuePeriod: {
-            default: "Queue Updating max Period in seconds",
-            translate: "VAR_queuePeriod"
-        },
-        timeUpdateRequest: {
-            default: "Time update requests were sent",
-            translate: "VAR_timeUpdateRequest",
-            process: normalizeUnixTime
-        },
-        contractState: {
-            default: "State of the contract",
+        getState: {
+            default: "State",
             translate: "VAR_contractState",
             process: getStateName
+        },
+        requestTime:{
+            default: "Request time",
+            translate: "VAR_requestTime", //append later
+            process: normalizeUnixTime
+        },
+        calcTime:{
+            default: "Calc time",
+            translate: "VAR_calcTime", //append later
+            process: normalizeUnixTime
         }
-    }
+    };
     
     $scope.address = bankAddress;
 
@@ -120,35 +99,43 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
 
     $scope.contractData = varsObject;
 
-    const 
-        ORACLE_NAME = 0,
-        ORACLE_TYPE = 1,
-        ORACLE_UPDATE_TIME = 2,
-        ORACLE_ENABLED = 3,
-        ORACLE_WAITING = 4,
-        ORACLE_RATE = 5,
-        ORACLE_NEXT = 6;
+    const oraclesStruct = {
+        address:0,
+        name:1,
+        type:2,
+        waitQuery:3,
+        updateTime:4,
+        callbackTime:5,
+        rate:6,
+    };
 
-    var recursiveGetOracleData = function(oracleAddress) {
-        getBankDataAsync("getOracleData", [oracleAddress]).then((curData) => {
-            oracles[oracleAddress] = {
-                name: hexToString(curData.data[ORACLE_NAME]),
-                type: hexToString(curData.data[ORACLE_TYPE]),
-                updateTime: normalizeUnixTime(curData.data[ORACLE_UPDATE_TIME]),
-                enabled: curData.data[ORACLE_ENABLED],
-                waiting: curData.data[ORACLE_WAITING],
-                rate: normalizeRate(curData.data[ORACLE_RATE])
+
+    function recursiveGetOracleData (number,limit) {
+        getBankDataAsync("getOracleData", [number]).then((res) => {
+            let oracle = res.data;
+            console.log(oracle);
+
+            oracles[oracle[oraclesStruct.address]] = {
+                name: hexToString(oracle[oraclesStruct.name]),
+                type: hexToString(oracle[oraclesStruct.type]),
+                updateTime: normalizeUnixTime(oracle[oraclesStruct.updateTime]),
+                waiting: oracle[oraclesStruct.waitQuery],
+                rate: normalizeRate(oracle[oraclesStruct.rate])
             };
-            if (+curData.data[ORACLE_NEXT] != 0) {
-                recursiveGetOracleData(curData.data[ORACLE_NEXT]);
+
+            number++;
+
+            if (number < limit) {
+                recursiveGetOracleData(number,limit);
             } else {
                 $scope.oracles = oracles;
             }
         })
     }
 
-    getBankDataAsync("firstOracle").then((curOracle) => {
-        recursiveGetOracleData(curOracle.data[0]);
+    getBankDataAsync("oracleCount").then((res) => {
+        let count = res.data[0];
+        recursiveGetOracleData(1,count);
     });
 };
 module.exports = bankStatusCtrl;

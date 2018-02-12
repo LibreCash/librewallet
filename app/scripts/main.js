@@ -79,12 +79,12 @@ var walletGenCtrl            = require('./controllers/walletGenCtrl');
 var bulkGenCtrl              = require('./controllers/bulkGenCtrl');
 var decryptWalletCtrl        = require('./controllers/decryptWalletCtrl');
 var viewWalletCtrl           = require('./controllers/viewWalletCtrl');
-var bankStatusCtrl           = require('./controllers/bankStatusCtrl')
+var bankStatusCtrl           = require('./controllers/bankStatusCtrl');
 var txStatusCtrl             = require('./controllers/txStatusCtrl');
 var sendTxCtrl               = require('./controllers/sendTxCtrl');
 var emissionCtrl             = require('./controllers/emissionCtrl');
 var remissionCtrl            = require('./controllers/remissionCtrl');
-var myOrdersCtrl            = require('./controllers/myOrdersCtrl');
+
 var swapCtrl                 = require('./controllers/swapCtrl');
 var signMsgCtrl              = require('./controllers/signMsgCtrl');
 var contractsCtrl            = require('./controllers/contractsCtrl');
@@ -143,7 +143,6 @@ app.controller('txStatusCtrl', ['$scope', txStatusCtrl]);
 app.controller('sendTxCtrl', ['$scope', '$sce', 'walletService', 'libreService', '$rootScope', sendTxCtrl]);
 app.controller('emissionCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', '$translate', emissionCtrl]);
 app.controller('remissionCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', '$translate', remissionCtrl]);
-app.controller('myOrdersCtrl',['$scope', '$sce', 'walletService', 'libreService', 'globalService', '$rootScope', '$translate', myOrdersCtrl]);
 app.controller('swapCtrl', ['$scope', '$sce', 'walletService', swapCtrl]);
 app.controller('signMsgCtrl', ['$scope', '$sce', 'walletService', signMsgCtrl]);
 app.controller('contractsCtrl', ['$scope', '$sce', 'walletService', contractsCtrl]);
