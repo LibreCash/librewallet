@@ -178,7 +178,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
 
     
     $scope.generateApproveTx = function() {
-        //ifNotPaused($scope, approveTx);
+        approveTx();
     }
 
     var approveTx = function() {

@@ -197,7 +197,7 @@
       </div>
 
       <div class="col-sm-11">
-        <span translate="LIBRE_sellRate">Last sell price</span>: {{ sellRate }} <span>LIBRE/ETH</span>
+        <span translate="LIBRE_sellRate">Sell rate</span>: {{ sellRate }} <span>LIBRE/ETH</span>
       </div>
     </section>
 
