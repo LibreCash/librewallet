@@ -6,6 +6,7 @@ var libreService = function(walletService, $translate) {
         cash = getContract("LibreCash");
     const 
         IS_DEBUG = false,
+        MIN_READY_ORACLES = 2,
         coeff = {
             tokenDecimals:18,
             rateMultiplier:1000,
@@ -135,8 +136,10 @@ var libreService = function(walletService, $translate) {
                     reject(res);
                 }
             });
-    });
-}
+        });
+    }
+
+    function getLatestBlockData()
 
     function encodeData(abi,data){
         let outTypes = abi.outputs.map((i)=> i.type);
@@ -286,72 +289,86 @@ var libreService = function(walletService, $translate) {
         });
     }
 
+    function getLatestBlockData() {
+        return new Promise((resolve,reject)=>{
+            ajaxReq.getLatestBlockData((res)=>{
+                if(res.error) reject(res);
+                if(IS_DEBUG) console.log(res);
+                resolve(res);
+            }) 
+        })
+          
+    }
     function canOrder(_scope, transactionFunc) {
-        ajaxReq.getLatestBlockData(function(blockData) {
-            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
+        getLatestBlockData()
+        .then((blockData)=> {
+            return parseInt(blockData.data.timestamp, 16);
+        }) // Refactor its
+        .then((time)=>{
+            console.log(time);
+
+            return Promise.all([
                 getContractData("getState"),
                 getContractData("tokenBalance")
-            ]).then((values) => {
-                let 
-                    state = values[0],
-                    balance = values[1];
-                console.log(values);
-
-                let canOrder = state == statesENUM.PROCESSING_ORDERS;
+            ]);
+        })
+        .then((values) => {
+            let 
+                state = values[0],
+                balance = values[1],
+                canOrder = state == statesENUM.PROCESSING_ORDERS;
 
                 if (canOrder)
-                    transactionFunc();
+                    transactionFunc(); // Refwrote on promises
                 else {
                     $translate("LIBRE_orderNotAllowed").then((msg) => {
                         _scope.notifier.danger(msg);
                     });
                 }
             });
-        });
+
     }
 
     function canRequest(_scope, transactionFunc) {
-        console.log("hello canRequest",ajaxReq);
-        ajaxReq.getLatestBlockData(function(blockData) {
+        return getLatestBlockData()
+        .then((blockData)=>{
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
+            return Promise.all([
                 getContractData("getState"),
                 getContractData("requestPrice"),
-            ]).then((values) => {
+            ]);
+        })
+        .then((values) => {
                 let 
                     state = values[0],
                     requestPrice = values[0]; // Append user balance checking later
 
                 let сanRequest = (state == statesENUM.REQUEST_RATES);
-                console.log
                 if (сanRequest) {
-                    transactionFunc(requestPrice.data[0]);
+                    transactionFunc(requestPrice.data[0]); // Rewrote on promises
                 } else {
                     $translate("LIBRE_RURNotAllowed").then((msg) => 
                         _scope.notifier.danger(msg));
                 }
-            });
         });
     }
 
     
     function canCalc(_scope, transactionFunc) {
-        const MIN_READY_ORACLES = 2;
-        ajaxReq.getLatestBlockData(function(blockData) {
+        return getLatestBlockData()
+        .then((blockData)=>{
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
-                getContractData("getState"),
-            ]).then((values) => {
-                
-                if (allowedState) {
-                    transactionFunc();           
-                } else {
-                    $translate("LIBRE_CRNotAllowed").then((msg) => {
-                        _scope.notifier.danger(msg);
-                    });
-                }
-            });
+            return Promise.all([
+                getContractData("getState")
+            ]);
+        })
+        .then((values) => {
+            if (allowedState) {
+                transactionFunc();           
+            } else {
+                $translate("LIBRE_CRNotAllowed")
+                .then((msg) =>_scope.notifier.danger(msg));
+            }
         });
     }
 
