@@ -4,12 +4,12 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
         cashAddress = libreService.token.address,
         bankAbiRefactor = libreService.bank.abi,
         cashAbiRefactor = libreService.token.abi,
-        getBankDataAsync = libreService.methods.getBankDataAsync,
-        getCashDataAsync = libreService.methods.getCashDataAsync,
+        getContractData = libreService.methods.getContractData,
+        getTokenData = libreService.methods.getTokenData,
         getBankDataProcess = libreService.methods.getBankDataProcess,
         getCashDataProcess = libreService.methods.getCashDataProcess,
-        normalizeUnixTime = libreService.methods.normalizeUnixTime,
-        normalizeUnixTimeObject = libreService.methods.normalizeUnixTimeObject,
+        toUnixtime = libreService.methods.toUnixtime,
+        toUnixtimeObject = libreService.methods.toUnixtimeObject,
         getDataString = libreService.methods.getDataString,
         fillStateData = libreService.methods.fillStateData,
         normalizeRate = libreService.methods.normalizeRate,
@@ -43,7 +43,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
     }
     function processTokenCount(data) {
         $scope.tokenCount = data.error ? data.message : normalizeRate(data.data[0]);
-    };
+    }
 
     $scope.allTokens = 'Loading';
 
@@ -183,7 +183,7 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
     }
 
     var approveTx = function() {
-        getCashDataAsync("allowance", [walletService.wallet.getAddressString(), bankAddress]).then((allowanceData) => {
+        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]).then((allowanceData) => {
             if (allowanceData.error) {
                 $scope.notifier.danger(allowanceData.msg);
                 return;

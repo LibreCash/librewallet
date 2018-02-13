@@ -1,11 +1,11 @@
 'use strict';
 var bankStatusCtrl = function($scope, libreService, $translate) {
     var bankAddress = libreService.bank.address,
-        getBankDataAsync = libreService.methods.getBankDataAsync,
-        normalizeUnixTime = libreService.methods.normalizeUnixTime,
+        getContractData = libreService.methods.getContractDataAsync,
+        toUnixtime = libreService.methods.toUnixtime,
         normalizeRate = libreService.methods.normalizeRate,
         hexToString = libreService.methods.hexToString,
-        getStateName = libreService.methods.getStateName,
+        stateName = libreService.methods.stateName,
         balanceBank = 0;
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
@@ -63,17 +63,17 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         getState: {
             default: "State",
             translate: "VAR_contractState",
-            process: getStateName
+            process: stateName
         },
         requestTime:{
             default: "Request time",
             translate: "VAR_requestTime", //append later
-            process: normalizeUnixTime
+            process: toUnixtime
         },
         calcTime:{
             default: "Calc time",
             translate: "VAR_calcTime", //append later
-            process: normalizeUnixTime
+            process: toUnixtime
         }
     };
     
@@ -81,7 +81,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
 
     var bankPromises = [];
     for (var prop in varsObject) {
-        let bankPromise = getBankDataAsync(prop);
+        let bankPromise = getContractData(prop);
         bankPromises.push(bankPromise);
     } // for
     Promise.all(bankPromises).then(bankData => {
@@ -110,15 +110,15 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     };
 
 
-    function recursiveGetOracleData (number,limit) {
-        getBankDataAsync("getOracleData", [number]).then((res) => {
+    function getOracleData (number,limit) {
+        getContractData("getOracleData", [number]).then((res) => {
             let oracle = res.data;
-            console.log(oracle);
+            if(IS_DEBUG) console.log(`Oracle data: ${JSON.stringify(oracle)}s`);
 
             oracles[oracle[oraclesStruct.address]] = {
                 name: hexToString(oracle[oraclesStruct.name]),
                 type: hexToString(oracle[oraclesStruct.type]),
-                updateTime: normalizeUnixTime(oracle[oraclesStruct.updateTime]),
+                updateTime: toUnixtime(oracle[oraclesStruct.updateTime]),
                 waiting: oracle[oraclesStruct.waitQuery],
                 rate: normalizeRate(oracle[oraclesStruct.rate])
             };
@@ -126,16 +126,16 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
             number++;
 
             if (number < limit) {
-                recursiveGetOracleData(number,limit);
+                getOracleData(number,limit);
             } else {
                 $scope.oracles = oracles;
             }
         })
     }
 
-    getBankDataAsync("oracleCount").then((res) => {
+    getContractData("oracleCount").then((res) => {
         let count = res.data[0];
-        recursiveGetOracleData(1,count);
+        getOracleData(1,count);
     });
 };
 module.exports = bankStatusCtrl;

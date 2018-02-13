@@ -2,15 +2,15 @@
 var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     var bankAddress = libreService.bank.address,
         bankAbiRefactor = libreService.bank.abi,
-        getBankDataAsync = libreService.methods.getBankDataAsync,
+        getContractData = libreService.methods.getContractData,
         getBankDataProcess = libreService.methods.getBankDataProcess,
         getCashDataProcess = libreService.methods.getCashDataProcess,
         getDataString = libreService.methods.getDataString,
-        normalizeUnixTime = libreService.methods.normalizeUnixTime,
-        normalizeUnixTimeObject = libreService.methods.normalizeUnixTimeObject,
+        toUnixtime = libreService.methods.toUnixtime,
+        toUnixtimeObject = libreService.methods.toUnixtimeObject,
         normalizeRate = libreService.methods.normalizeRate,
         hexToString = libreService.methods.hexToString,
-        getStateName = libreService.methods.getStateName,
+        stateName = libreService.methods.stateName,
         rateMultiplier = libreService.coeff.rateMultiplier,
         gasEmission = libreService.coeff.gasEmission,
         libreTransaction = libreService.methods.libreTransaction,
@@ -58,7 +58,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         donate: false,
         tokensymbol: false,
         rateLimit: 0
-    }
+    };
 
     $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
         $scope.tx.sendMode = sendMode;
@@ -73,7 +73,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.tokenTx.id = tokenId;
         }
         $scope.dropdownAmount = false;
-    }
+    };
 
     function applyScope() {
         if (!$scope.$$phase) $scope.$apply();
@@ -82,8 +82,22 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     function defaultInit() {
         globalFuncs.urlGet('sendMode') == null ? $scope.setSendMode('ether') : $scope.setSendMode(globalFuncs.urlGet('sendMode'));
         $scope.gasLimitChanged = globalFuncs.urlGet('gaslimit') != null ? true : false;
-        $scope.showAdvance = globalFuncs.urlGet('gaslimit') != null || globalFuncs.urlGet('gas') != null || globalFuncs.urlGet('data') != null;
-        if (globalFuncs.urlGet('data') || globalFuncs.urlGet('value') || globalFuncs.urlGet('to') || globalFuncs.urlGet('gaslimit') || globalFuncs.urlGet('sendMode') || globalFuncs.urlGet('gas') || globalFuncs.urlGet('tokensymbol')) $scope.hasQueryString = true // if there is a query string, show an warning at top of page
+        
+        $scope.showAdvance = (
+            globalFuncs.urlGet('gaslimit') != null || 
+            globalFuncs.urlGet('gas') != null || 
+            globalFuncs.urlGet('data') != null
+        );
+
+        if (
+            globalFuncs.urlGet('data') || 
+            globalFuncs.urlGet('value') || 
+            globalFuncs.urlGet('to') || 
+            globalFuncs.urlGet('gaslimit') || 
+            globalFuncs.urlGet('sendMode') || 
+            globalFuncs.urlGet('gas') || 
+            globalFuncs.urlGet('tokensymbol')
+        ) $scope.hasQueryString = true // if there is a query string, show an warning at top of page
 
     }
 
