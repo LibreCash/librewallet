@@ -295,8 +295,8 @@ var libreService = function(walletService, $translate) {
                 getBankDataAsync("requestPrice"),
             ]).then((values) => {
                 let 
-                    state = value[0],
-                    requestPrice = value[0]; // Append user balance checking later
+                    state = values[0],
+                    requestPrice = values[0]; // Append user balance checking later
 
                 let сanRequest = (state == statesENUM.REQUEST_RATES);
                 console.log
