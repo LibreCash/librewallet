@@ -64,11 +64,11 @@
     <!-- Amount to Send -->
       <div class="col-sm-11">
         <label translate="LIBRE_sendAmount">
-          ETH to Send:
+          ETH -> Libre
         </label>
       </div>
 
-      <div class="col-sm-11">
+      <div class="col-sm-6">
         <input type="text"
                 class="form-control"
                 placeholder="{{ 'SEND_amount_short' | translate }}"
@@ -76,6 +76,7 @@
                 ng-disabled="tx.readOnly || checkTxReadOnly"
                 ng-class="Validator.isPositiveNumber(tx.value) ? 'is-valid' : 'is-invalid'"/>
       </div>
+      <div class="col-sm-5 btn">1 Libre</div>
 
       <!-- Amount to Send - Transfer Entire Balance -->
       <p class="col-xs-12" ng-hide="tx.readOnly">
