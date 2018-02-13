@@ -24,12 +24,13 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
 
     console.log("Hello remissionCtrl");
     //$scope.state = 
-
-    /*
-    canRequest(() => {
-        //console.log("canRequest call function txest!!!");
+    
+    canRequest((data) => {
+        console.log("canRequest call function text!!!", data);
     });
-    */
+    
+    //$scope.canRequest = 0;
+    //$scope.canCalc
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
@@ -167,15 +168,22 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
     function updateContractData() {
         if (walletService.wallet != null) {
             updateBalanceAndAllowance();
-            getBankDataProcess("getBalanceEther", function(_balance) {
+            /*
+            getBankDataProcess("getBalance", function(_balance) {
                 $scope.getBalance = _balance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
             });
+            */
         }
-        getBankDataProcess("contractState", function(data) {
+        getBankDataProcess("getState", function(data) {
             $scope.bankState = fillStateData(data);
         });
 
-        getBankDataProcess("cryptoFiatRateSell", processSellRate);
+        getBankDataProcess("sellRate", processSellRate);
+        /*
+        libreService.methods.canRequest((data) => {
+            console.log("canRequest", data);
+        });
+        */
     }
     updateContractData();
 

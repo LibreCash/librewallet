@@ -109,7 +109,7 @@
 
         <div class="col-sm-11">
           <label>
-            canCalc
+            canCalc {{ bankState}}
           </label>
       </div>
       <div class="col-sm-8 offset-col-sm-2">

@@ -287,7 +287,7 @@ var libreService = function(walletService, $translate) {
     }
 
     function canRequest(_scope, transactionFunc) {
-        console.log("hello canRequest");
+        console.log("hello canRequest",ajaxReq);
         ajaxReq.getLatestBlockData(function(blockData) {
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
             Promise.all([
