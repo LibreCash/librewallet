@@ -19,17 +19,16 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
         gasWithdraw = libreService.coeff.gasWithdraw,
         libreTransaction = libreService.methods.libreTransaction,
         canOrder = libreService.methods.canOrder,
-        //ifNotPaused = libreService.methods.ifNotPaused,
         canRequest = libreService.methods.canRequest;
 
     console.log("Hello remissionCtrl");
     //$scope.state = 
 
-    /*
-    canRequest(() => {
-        //console.log("canRequest call function txest!!!");
+    
+    canRequest((data) => {
+        console.log(data);
+        console.log("canRequest call function txest!!!");
     });
-    */
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
@@ -38,11 +37,10 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
         return;
     }
 
-    var processSellRate = function(data) {
+    function processSellRate(data) {
         $scope.sellRate = data.error ? data.message : normalizeRate(data.data[0]);
-        $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 0.9); // +10%
-    },
-    processTokenCount = function(data) {
+    }
+    function processTokenCount(data) {
         $scope.tokenCount = data.error ? data.message : normalizeRate(data.data[0]);
     };
 
@@ -91,21 +89,22 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
 
     $scope.unitReadable = ajaxReq.type;
 
-    var applyScope = function() {
+    function applyScope() {
         if (!$scope.$$phase) $scope.$apply();
     }
 
-    var defaultInit = function() {
+    function defaultInit() {
         $scope.gasLimitChanged = false;
         $scope.showAdvance = false;
     }
 
-    var setAllTokens = function(data) {
+    function setAllTokens(data) {
         $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-    }, 
-    setAllowance = function(data) {
+    }
+
+    function setAllowance(data) {
         $scope.allowedTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-    };
+    }
 
     function updateBalanceAndAllowance() {
         getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
@@ -167,15 +166,12 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
     function updateContractData() {
         if (walletService.wallet != null) {
             updateBalanceAndAllowance();
-            getBankDataProcess("getBalanceEther", function(_balance) {
-                $scope.getBalance = _balance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-            });
         }
-        getBankDataProcess("contractState", function(data) {
+        getBankDataProcess("getState", function(data) {
             $scope.bankState = fillStateData(data);
         });
 
-        getBankDataProcess("cryptoFiatRateSell", processSellRate);
+        getBankDataProcess("sellRate", processSellRate);
     }
     updateContractData();
 
@@ -217,31 +213,18 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
     }
 
     $scope.generateSellLibreTx = function() {
-        statusAllowsOrders($scope, sellLibreTx);
+        canOrder($scope, sellLibreTx);
     }
 
     var sellLibreTx = function() {
-        var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals);
-        var rateLimit = Math.round($scope.tx.rateLimit * rateMultiplier);
-        $scope.tx.data = getDataString(bankAbiRefactor["createSellOrder"], 
-            [$scope.wallet.getAddressString(), tokenCount, rateLimit]);
+        var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals)
+        $scope.tx.data = getDataString(bankAbiRefactor["sellTokens"], 
+            [$scope.wallet.getAddressString(), tokenCount]);
 
         $scope.tx.to = bankAddress;
         $scope.tx.gasLimit = gasRemission;
 
         libreTransaction($scope, "sellPending", "SELL", $translate, updateContractData);
-    }
-
-    $scope.generateWithdrawEthTx = function() {
-        //ifNotPaused($scope, withdrawEthTx);
-    }
-
-    var withdrawEthTx = function() {
-        $scope.tx.to = bankAddress;
-        $scope.tx.data = getDataString(bankAbiRefactor["getEther"], []);
-        $scope.tx.gasLimit = gasWithdraw;
-
-        libreTransaction($scope, "withdrawPending", "WITHDRAW", $translate, updateContractData);
     }
 
 };
