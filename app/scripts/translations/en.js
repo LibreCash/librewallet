@@ -660,6 +660,7 @@ VAR_requestTime                 :  'Rate request time',
 VAR_calcTime                    :  'Rate calc time',
 VAR_contractState               :  'Contract state',
 VAR_reserveBalance              :  'Reserve Balance',
+VAR_tokenBalance                :  'Exchanger token balance',
 
 BANKSTATUS_bankContractAddress  :  'Bank contract address',
 BANKSTATUS_contractStatus       :  'Contract Status',

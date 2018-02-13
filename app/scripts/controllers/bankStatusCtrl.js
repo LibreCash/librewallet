@@ -58,7 +58,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         requestPrice:{
            default:"Request price",
            translate: "VAR_requestPrice", // translate later
-           process:(price)=>etherUnits.toEther(price, 'wei')
+           process: (price) => etherUnits.toEther(price, 'wei')
         },
         getState: {
             default: "State",
@@ -70,10 +70,15 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
             translate: "VAR_requestTime", //append later
             process: normalizeUnixTime
         },
-        calcTime:{
+        calcTime: {
             default: "Calc time",
             translate: "VAR_calcTime", //append later
             process: normalizeUnixTime
+        },
+        tokenBalance: {
+            default: "Exchanger token balance",
+            translate: "VAR_tokenBalance",
+            process: (tokens) => tokens / Math.pow(10, libreService.coeff.tokenDecimals)
         }
     };
     

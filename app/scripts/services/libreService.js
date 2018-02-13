@@ -165,7 +165,7 @@ var libreService = function(walletService, $translate) {
         return str;
     }
 
-    function getStateName (number) { 
+    function getStateName(number) { 
         try {
             return states[number];
         } catch(e) {
@@ -183,7 +183,7 @@ var libreService = function(walletService, $translate) {
         }
     }
 
-    function libreTransaction (_scope, pendingVarName, opPrefix, translator, updater) {
+    function libreTransaction(_scope, pendingVarName, opPrefix, translator, updater) {
         _scope[pendingVarName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3];
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
@@ -261,7 +261,7 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    function canOrder(_scope, transactionFunc) {
+    function canOrder(_scope, transactionFunc, fallbackFunc = null) {
         ajaxReq.getLatestBlockData(function(blockData) {
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
             Promise.all([
@@ -271,16 +271,19 @@ var libreService = function(walletService, $translate) {
                 let 
                     state = values[0],
                     balance = values[1];
-                console.log(values);
 
-                let canOrder = state == statesENUM.PROCESSING_ORDERS;
-
+                let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
+                console.log("STATE", +state.data[0]);
                 if (canOrder)
                     transactionFunc();
                 else {
-                    $translate("LIBRE_orderNotAllowed").then((msg) => {
-                        _scope.notifier.danger(msg);
-                    });
+                    if (fallbackFunc == null) {
+                        $translate("LIBRE_orderNotAllowed").then((msg) => {
+                            _scope.notifier.danger(msg);
+                        });
+                    } else {
+                        fallbackFunc();
+                    }
                 }
             });
         });
@@ -350,7 +353,7 @@ var libreService = function(walletService, $translate) {
             address: cash.address,
             abi: cash.abiRefactored
         },
-        coeff:coeff,
+        coeff: coeff,
         methods: {
             getDataString: getDataString,
             getBankDataProcess: getBankDataProcess,

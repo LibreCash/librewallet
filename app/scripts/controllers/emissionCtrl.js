@@ -24,6 +24,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     $scope.buyPending = false;
+    $scope.buyAllowed = false;
     $scope.tx = {};
     $scope.signedTx;
     $scope.ajaxReq = ajaxReq;
@@ -59,6 +60,23 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         tokensymbol: false,
         rateLimit: 0
     }
+
+    $scope.pendingBuyAllowCheck = false;
+    setInterval(() => {
+        if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
+            if ($scope.pendingBuyAllowCheck) {
+                return;
+            }
+            $scope.pendingBuyAllowCheck = true;
+            canOrder($scope, () => {
+                $scope.buyAllowed = true;
+                $scope.pendingBuyAllowCheck = false;
+            }, () => {
+                $scope.buyAllowed = false;
+                $scope.pendingBuyAllowCheck = false;
+            })
+        }
+    }, 1000);
 
     $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
         $scope.tx.sendMode = sendMode;
