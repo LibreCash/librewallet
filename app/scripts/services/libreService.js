@@ -326,7 +326,7 @@ var libreService = function(walletService, $translate) {
                     state = values[0],
                     requestPrice = values[0]; // Append user balance checking later
 
-                let allowedState = (state == statesENUM.CALC_RATES);
+                let allowedState = (+state.data[0] == statesENUM.CALC_RATES);
                 
                 if (allowedState) {
                     transactionFunc();           
