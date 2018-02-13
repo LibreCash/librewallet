@@ -108,8 +108,10 @@
         <a style="min-width: 170px"
             class="btn btn-default"
             ng-click="generateBuyLibreTx()"
-            ng-disabled="buyPending || !buyAllowed">
-              {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
+            ng-disabled="buyPending || !orderAllowed">
+          <strong>
+            {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
+          </strong>
         </a>
       </div>
 
@@ -194,8 +196,8 @@
           <div class="col-sm-8 offset-col-sm-2">
               <a style="min-width: 170px"
                 class="btn btn-default"
-                ng-disabled="sellPending"
-                ng-click="generateSellLibreTx()">
+                ng-click="generateSellLibreTx()"
+                ng-disabled="sellPending || !orderAllowed">
                 <strong>
                   {{ sellPending ? 'LIBRE_txPending' : 'LIBRE_sell' | translate }}
                 </strong>
@@ -206,6 +208,23 @@
         <div class="col-sm-11">
           <span translate="LIBRE_sellRate">Sell rate</span>: {{ sellRate }} <span>LIBRE/ETH</span>
         </div>
+
+        <div class="col-sm-5">
+            <a class="btn btn-block"
+                  ng-click="generateRURTx()"
+                  ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
+                  ng-disabled="RURPending || CRPending">
+              {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
+            </a>
+          </div>
+          <div class="col-sm-5">
+            <a class="btn btn-block"
+                  ng-click="generateCRTx()"
+                  ng-class="CRAllowed ? 'btn-success' : 'btn-default'"
+                  ng-disabled="RURPending || CRPending">
+              {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
+            </a>
+          </div>
 
 
       <!-- /REMISSION -->

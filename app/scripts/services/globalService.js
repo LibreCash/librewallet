@@ -78,13 +78,6 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     mew: true,
     cx: true
   },
-  remission: {
-    id: 10,
-    name: "NAV_SellLibre",
-    url: "sell-libre",
-    mew: true,
-    cx: true
-  },
   bankStatus: {
     id: 11,
     name: "NAV_BankStatus",

@@ -7,31 +7,32 @@ var libreService = function(walletService, $translate) {
         console.log(exchanger);
         console.log(cash);
     const 
-        coeff = {
-            tokenDecimals:18,
-            rateMultiplier:1000,
-            gasEmission:300000,
-            gasRemission:300000,
-            gasApprove:70000,
-            gasWithdraw:100000,
-            gasRUR:1000000,
-            gasCR:300000,
-            gasQueue:500000
-        },
-        states = [
-            'LOCKED',
-            'PROCESSING_ORDERS',
-            'WAIT_ORACLES',
-            'CALC_RATES',
-            'REQUEST_RATES'
-        ],
-        statesENUM = {
-            'LOCKED':0,
-            'PROCESSING_ORDERS':1,
-            'WAIT_ORACLES':2,
-            'CALC_RATES':3,
-            'REQUEST_RATES':4
-        };
+    states = [
+        'LOCKED',
+        'PROCESSING_ORDERS',
+        'WAIT_ORACLES',
+        'CALC_RATES',
+        'REQUEST_RATES'
+    ],
+    statesENUM = {
+        'LOCKED':0,
+        'PROCESSING_ORDERS':1,
+        'WAIT_ORACLES':2,
+        'CALC_RATES':3,
+        'REQUEST_RATES':4
+    },
+    coeff = {
+        tokenDecimals: 18,
+        rateMultiplier: 1000,
+        gasEmission: 300000,
+        gasRemission: 300000,
+        gasApprove: 70000,
+        gasWithdraw: 100000,
+        gasRUR: 1000000,
+        gasCR: 300000,
+        gasQueue: 500000,
+        statesENUM: statesENUM
+    };
         
 
     function getDataString(func, inputs) {
@@ -301,8 +302,8 @@ var libreService = function(walletService, $translate) {
                     state = values[0],
                     requestPrice = values[0]; // Append user balance checking later
 
-                let сanRequest = (state == statesENUM.REQUEST_RATES);
-                console.log
+                let сanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
+
                 if (сanRequest) {
                     transactionFunc(requestPrice.data[0]);
                 } else {
@@ -321,6 +322,11 @@ var libreService = function(walletService, $translate) {
             Promise.all([
                 getBankDataAsync("getState"),
             ]).then((values) => {
+                let 
+                    state = values[0],
+                    requestPrice = values[0]; // Append user balance checking later
+
+                let allowedState = (state == statesENUM.CALC_RATES);
                 
                 if (allowedState) {
                     transactionFunc();           
