@@ -57,8 +57,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         nonce: null,
         gasPrice: null,
         donate: false,
-        tokensymbol: false,
-        rateLimit: 0
+        tokensymbol: false
     }
 
     $scope.pendingBuyAllowCheck = false;
@@ -163,7 +162,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     function processBuyRate(data) {
         $scope.buyRate = data.error ? data.message : normalizeRate(data.data[0]);
-        $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 1.1); // +10%
     };
 
     function updateContractData() {

@@ -84,7 +84,6 @@ var remissionCtrl = function($scope, $sce, walletService, libreService, $rootSco
         gasPrice: null,
         donate: false,
         tokensymbol: false,
-        rateLimit: 0,
         sendMode: "ether"
     }
 

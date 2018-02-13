@@ -86,21 +86,6 @@
         </a>
       </p>
 
-      <!-- rateLimit -->
-        <div class="col-sm-11">
-          <label translate="LIBRE_maxPriceBuy">
-            Maximum Buy Price
-          </label>
-        </div>
-
-        <div class="col-sm-11">
-          <input type="text"
-                 class="form-control"
-                 placeholder="0"
-                 ng-model="tx.rateLimit"
-                 ng-class="Validator.isPositiveNumber(tx.rateLimit) ? 'is-valid' : 'is-invalid'"/>
-        </div>
-
         <div class="col-sm-11">
           <span translate="LIBRE_buyRate">Last buy price</span>: {{ buyRate }} <span>LIBRE/ETH</span>
         </div>
