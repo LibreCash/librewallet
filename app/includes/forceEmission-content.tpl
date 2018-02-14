@@ -83,7 +83,7 @@
                 <td>{{ readyOracles }} / {{ enabledOracles }}</td>
             </tr>
             <tr>
-                <td translate="LIBREFE_RURCost">Request Update Rates cost:</td>
+                <td translate="LIBREFE_RURCost">Request Rates cost:</td>
                 <td>{{ rurCost }} ETH + gas</td>
             </tr>     
         </tbody>

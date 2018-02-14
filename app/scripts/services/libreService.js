@@ -4,8 +4,6 @@ var libreService = function(walletService, $translate) {
     var 
         exchanger = getContract("LibreExchanger"),
         cash = getContract("LibreCash");
-        console.log(exchanger);
-        console.log(cash);
     const 
     states = [
         'LOCKED',
@@ -15,11 +13,11 @@ var libreService = function(walletService, $translate) {
         'REQUEST_RATES'
     ],
     statesENUM = {
-        'LOCKED':0,
-        'PROCESSING_ORDERS':1,
-        'WAIT_ORACLES':2,
-        'CALC_RATES':3,
-        'REQUEST_RATES':4
+        'LOCKED': 0,
+        'PROCESSING_ORDERS': 1,
+        'WAIT_ORACLES': 2,
+        'CALC_RATES': 3,
+        'REQUEST_RATES': 4
     },
     coeff = {
         tokenDecimals: 18,
@@ -88,9 +86,9 @@ var libreService = function(walletService, $translate) {
         abi.forEach((item)=>refactored[item.name] = item);
 
         return {
-            address:contract.address,
-            abi:abi,
-            abiRefactored:refactored
+            address: contract.address,
+            abi: abi,
+            abiRefactored: refactored
         };
     }
 
@@ -146,12 +144,12 @@ var libreService = function(walletService, $translate) {
         return getDataScope(_scope, cash.address, cash.abiRefactored, _var, _key, params);
     }
 
-    function normalizeUnixTime (timestamp) {
+    function normalizeUnixTime(timestamp) {
         let date = new Date(timestamp * 1000);
         return date.toLocaleString();
     }
 
-    function normalizeRate (bigNumber) {
+    function normalizeRate(bigNumber) {
         return bigNumber / coeff.rateMultiplier;
     }
 
@@ -194,7 +192,6 @@ var libreService = function(walletService, $translate) {
                     throw("getTransactionData: " + data.msg);
                 }
                 var txData = uiFuncs.getTxData(_scope);
-                console.log(txData);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     if (rawTx.isError) {
                         _scope[pendingVarName] = false;
@@ -262,36 +259,47 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    function canOrder(_scope, transactionFunc, fallbackFunc = null) {
+    function canOrder(_scope, transactionFunc, rates = [0, 0]) {
+        if (rates[0] == 0 && rates[1] == 0) {
+            $translate("LIBRE_errorValidatingRates").then((msg) => {
+                _scope.notifier.danger(msg);
+            });
+            return;
+        }
         ajaxReq.getLatestBlockData(function(blockData) {
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
             Promise.all([
                 getBankDataAsync("getState"),
-                getBankDataAsync("tokenBalance")
+                getBankDataAsync("tokenBalance"),
+                getBankDataAsync(rates[0] != 0 ? "buyRate" : "sellRate")
             ]).then((values) => {
                 let 
                     state = values[0],
-                    balance = values[1];
+                    balance = values[1],
+                    rate = values[2];
+
+                let _rate = rates[0] != 0 ? rates[0] : rates[1];
+                if (rate.data[0] / coeff.rateMultiplier != _rate) {
+                    $translate("LIBRE_errorValidatingRates").then((msg) => {
+                        _scope.notifier.danger(msg);
+                    });
+                    return;
+                }
 
                 let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
-                console.log("STATE", +state.data[0]);
+
                 if (canOrder)
                     transactionFunc();
                 else {
-                    if (fallbackFunc == null) {
-                        $translate("LIBRE_orderNotAllowed").then((msg) => {
-                            _scope.notifier.danger(msg);
-                        });
-                    } else {
-                        fallbackFunc();
-                    }
+                    $translate("LIBRE_orderNotAllowed").then((msg) => {
+                        _scope.notifier.danger(msg);
+                    });
                 }
             });
         });
     }
 
     function canRequest(_scope, transactionFunc) {
-        console.log("hello canRequest",ajaxReq);
         ajaxReq.getLatestBlockData(function(blockData) {
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
             Promise.all([
@@ -314,7 +322,6 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    
     function canCalc(_scope, transactionFunc) {
         const MIN_READY_ORACLES = 2;
         ajaxReq.getLatestBlockData(function(blockData) {
@@ -339,7 +346,6 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    
     function normalizeUnixTimeObject(obj) {
         try {
             var _time = normalizeUnixTime(obj.data[0]);

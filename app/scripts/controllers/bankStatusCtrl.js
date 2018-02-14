@@ -115,7 +115,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     };
 
 
-    function recursiveGetOracleData (number,limit) {
+    function recursiveGetOracleData(number,limit) {
         getBankDataAsync("getOracleData", [number]).then((res) => {
             let oracle = res.data;
             console.log(oracle);

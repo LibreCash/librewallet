@@ -57,7 +57,7 @@
           </strong>
       </div>
       <div class="col-sm-11">
-        <span>LibreBank</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', bankAddress) }}" target="_blank" rel="noopener noreferrer">{{ tx.to }}</a>
+        <span>LibreBank</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', bankAddress) }}" target="_blank" rel="noopener noreferrer">{{ bankAddress }}</a>
         <br/>
         <span>LibreCash</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', cashAddress) }}" target="_blank" rel="noopener noreferrer">{{ cashAddress }}</a>
         <br/>
@@ -101,18 +101,18 @@
       </p>
 
       <div class="col-sm-11">
-        <span translate="LIBRE_buyRate">Last buy price</span>: {{ buyRate }} <span>LIBRE/ETH</span>
+        <span translate="LIBRE_buyRate">Buy rate</span>: {{ buyRate }} <span>LIBRE/ETH</span>
       </div>
 
       <div class="col-sm-4">
-        <a style="min-width: 170px"
+        <button style="min-width: 170px"
             class="btn btn-default"
             ng-click="generateBuyLibreTx()"
             ng-disabled="buyPending || !orderAllowed">
           <strong>
             {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
           </strong>
-        </a>
+        </button>
       </div>
 
       <!-- REMISSION -->
@@ -146,14 +146,14 @@
                       ng-disabled="tx.readOnly || checkTxReadOnly"
                       ng-class="Validator.isPositiveNumber(tokensToAllow) ? 'is-valid' : 'is-invalid'"/>
               <div class="input-group-btn">
-                <a style="min-width: 170px"
+                <button style="min-width: 170px"
                   class="btn btn-default"
                   ng-disabled="approvePending"
                   ng-click="generateApproveTx()">
                   <strong>
                     {{ approvePending ? 'LIBRE_txPending' : 'LIBRE_approve' | translate }}
                   </strong>
-                </a>
+                </button>
               </div>
             
             </div>
@@ -174,18 +174,30 @@
           </div>
         
           <div class="col-sm-11">
+            <div class="input-group">
               <input type="text"
                       class="form-control"
                       placeholder="{{ 'SEND_amount_short' | translate }}"
                       ng-model="tokenValue"
                       ng-disabled="tx.readOnly || checkTxReadOnly"
-                      ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"/>
+                      ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"
+                      ng-change="changedEth = tokenValue / sellRate"/>
+              <div class="input-group-btn">
+                <span style="min-width: 170px"
+                      class="btn btn-default"
+                      ng-class="'disabled'">
+                        <strong>
+                          {{ changedEth }} ETH
+                        </strong>
+                </span>
+              </div>
+            </div>
           </div>
         
               <!-- Amount to Send - Transfer Entire Balance -->
           <p class="col-xs-12" ng-hide="tx.readOnly">
             
-            <a ng-click="tokenValue = allowedTokens">
+            <a ng-click="tokenValue = allowedTokens; changedEth = tokenValue / sellRate">
               <span class="strong" translate="LIBRE_sellAllApproved">
                 Sell All Approved
               </span>
@@ -194,37 +206,40 @@
         
 
           <div class="col-sm-8 offset-col-sm-2">
-              <a style="min-width: 170px"
+              <button style="min-width: 170px"
                 class="btn btn-default"
                 ng-click="generateSellLibreTx()"
                 ng-disabled="sellPending || !orderAllowed">
                 <strong>
                   {{ sellPending ? 'LIBRE_txPending' : 'LIBRE_sell' | translate }}
                 </strong>
-              </a>
+              </button>
           </div>
         </div>
   
         <div class="col-sm-11">
           <span translate="LIBRE_sellRate">Sell rate</span>: {{ sellRate }} <span>LIBRE/ETH</span>
         </div>
+        <div class="col-sm-11" ng-show="RURAllowed">
+          <span translate="LIBRE_RURCost">Update rates cost</span>: {{ RURCost }} ETH
+        </div>
 
         <div class="col-sm-5">
-            <a class="btn btn-block"
-                  ng-click="generateRURTx()"
-                  ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
-                  ng-disabled="RURPending || CRPending">
-              {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
-            </a>
-          </div>
-          <div class="col-sm-5">
-            <a class="btn btn-block"
-                  ng-click="generateCRTx()"
-                  ng-class="CRAllowed ? 'btn-success' : 'btn-default'"
-                  ng-disabled="RURPending || CRPending">
-              {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
-            </a>
-          </div>
+          <button class="btn btn-block"
+                ng-click="generateRURTx()"
+                ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
+                ng-disabled="(RURPending || CRPending) || !RURAllowed">
+            {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
+          </button>
+        </div>
+        <div class="col-sm-5">
+          <button class="btn btn-block"
+                ng-click="generateCRTx()"
+                ng-class="CRAllowed ? 'btn-success' : 'btn-default'"
+                ng-disabled="(RURPending || CRPending) || !CRAllowed">
+            {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
+        </button>
+        </div>
 
 
       <!-- /REMISSION -->
