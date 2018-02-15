@@ -28,7 +28,7 @@
             </tr>
             <tr>
               <td class="small text-right">Gas Price:</td>
-              <td class="small text-left mono">{{gasPrice.gwei}} GWEI</small>
+              <td class="small text-left mono">{{gas}} GWEI</small>
               </td>
             </tr>
             <tr>
@@ -41,9 +41,6 @@
       </div>
 
       <div class="modal-footer">
-        <h4 class="text-center">
-          <strong class="mono">{{buyTXValue}} ETH</strong>
-        </h4>
         <p translate="SENDModal_Content_3">
           Are you sure you want to do this?
         </p>

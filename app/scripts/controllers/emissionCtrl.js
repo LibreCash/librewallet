@@ -178,6 +178,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     updateContractData();
 
     $scope.generateBuyLibreTx = function() {
+        $scope.buyModal.close();
         canOrder($scope, buyLibreTx, [$scope.buyRate, 0]);
     };
 
@@ -230,6 +231,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     $scope.generateSellLibreTx = function() {
+        $scope.sellModal.close();
         canOrder($scope, sellLibreTx, [0, $scope.sellRate]);
     }
 
@@ -250,6 +252,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     var RURTx = function() {
+        $scope.urModal.close();
         getBankDataAsync("requestPrice", []).then((oracleDeficit) => {
             $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
 
