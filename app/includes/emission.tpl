@@ -27,18 +27,22 @@
     </div>
   </article>
 
-
   <!-- Send Tx Content -->
   <article class="row" ng-show="wallet!=null">
-    @@if (site === 'mew' ) { @@include( './emission-content.tpl', { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './emission-content.tpl', { "site": "cx"  } ) }
+    <section ng-hide="state == states.LOCKED">
+      @@if (site === 'mew' ) { @@include( './emission-content.tpl', { "site": "mew" } ) }
+      @@if (site === 'cx'  ) { @@include( './emission-content.tpl', { "site": "cx"  } ) }
 
-    @@if (site === 'mew' ) { @@include( './buyTx-modal.tpl',   { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './buyTx-modal.tpl',   { "site": "cx"  } ) }
-    @@if (site === 'mew' ) { @@include( './sellTx-modal.tpl',   { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './sellTx-modal.tpl',   { "site": "cx"  } ) }
-    @@if (site === 'mew' ) { @@include( './urTx-modal.tpl',   { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './urTx-modal.tpl',   { "site": "cx"  } ) }
+      @@if (site === 'mew' ) { @@include( './buyTx-modal.tpl',   { "site": "mew" } ) }
+      @@if (site === 'cx'  ) { @@include( './buyTx-modal.tpl',   { "site": "cx"  } ) }
+      @@if (site === 'mew' ) { @@include( './sellTx-modal.tpl',   { "site": "mew" } ) }
+      @@if (site === 'cx'  ) { @@include( './sellTx-modal.tpl',   { "site": "cx"  } ) }
+      @@if (site === 'mew' ) { @@include( './urTx-modal.tpl',   { "site": "mew" } ) }
+      @@if (site === 'cx'  ) { @@include( './urTx-modal.tpl',   { "site": "cx"  } ) }
+    </section>
+    <section ng-show="state == states.LOCKED" translate="LIBRE_exchangerLocked">
+      The exchanger is locked
+    </section>
   </article>
 
 

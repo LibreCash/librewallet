@@ -38,6 +38,8 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.bankAddress = bankAddress;
     $scope.RURCost = 'n/a';
 
+    $scope.states = libreService.coeff.statesENUM;
+
     //$scope.allTokens = 'Loading';
     $scope.approvePending = false;
     $scope.sellPending = false;
@@ -116,6 +118,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         state = values[0],
                         balance = values[1],
                         RURCost = values[2];
+
+                    let stateDec = +state.data[0];
+                    $scope.state = stateDec;
 
                     $scope.orderAllowed = (+state.data[0] == libreService.coeff.statesENUM.PROCESSING_ORDERS);
                     $scope.RURAllowed = (+state.data[0] == libreService.coeff.statesENUM.REQUEST_RATES);
