@@ -49,6 +49,13 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.CRAllowed = false;
     $scope.changedTokens = 0;
     $scope.changedEth = 0;
+    $scope.emissionLimit = gasEmission;
+    $scope.remissionLimit = gasRemission;
+    $scope.urLimit = libreService.coeff.gasRUR;
+    // modals
+    $scope.buyModal = new Modal(document.getElementById('buyTx'));
+    $scope.sellModal = new Modal(document.getElementById('sellTx'));
+    $scope.urModal = new Modal(document.getElementById('urTx'));
 
     //$scope.allTokens = 'Loading';
     $scope.Validator = Validator;

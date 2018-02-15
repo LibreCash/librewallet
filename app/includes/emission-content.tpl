@@ -107,7 +107,8 @@
       <div class="col-sm-4">
         <button style="min-width: 170px"
             class="btn btn-default"
-            ng-click="generateBuyLibreTx()"
+            data-toggle="modal"
+            data-target="#buyTx"
             ng-disabled="buyPending || !orderAllowed">
           <strong>
             {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
@@ -208,7 +209,8 @@
           <div class="col-sm-8 offset-col-sm-2">
               <button style="min-width: 170px"
                 class="btn btn-default"
-                ng-click="generateSellLibreTx()"
+                data-toggle="modal"
+                data-target="#sellTx"
                 ng-disabled="sellPending || !orderAllowed">
                 <strong>
                   {{ sellPending ? 'LIBRE_txPending' : 'LIBRE_sell' | translate }}
@@ -226,7 +228,8 @@
 
         <div class="col-sm-5">
           <button class="btn btn-block"
-                ng-click="generateRURTx()"
+                data-toggle="modal"
+                data-target="#urTx"
                 ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
                 ng-disabled="(RURPending || CRPending) || !RURAllowed">
             {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
