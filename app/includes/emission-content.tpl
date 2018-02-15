@@ -1,6 +1,7 @@
 <!-- Content -->
 <div class="col-sm-8">
-
+  ***STATE*** {{ state }}
+<!-- todo state is "" for several seconds when we come from status tab. do "loading"? -->
   <!-- If unlocked with address only -->
   <article class="block" ng-show="wallet.type=='addressOnly'">
     <div class="row form-group">
@@ -63,7 +64,16 @@
         <br/>
         <span translate="LIBRE_checkLegit">Please, check its legitimity.</span>
       </div>
-    <!-- Amount to Send -->
+      <div class="col-sm-11" ng-show="state == states.PROCESSING_ORDERS">
+          <br/><!-- todo br -> margin/padding? -->
+          <span>Buy rate</span>: {{ buyRate }}</a>
+          <br/>
+          <span>Sell rate</span>: {{ sellRate }}</a>
+          <br/>
+          <span>Rates are actual for</span>: {{ rateActualTime }}</a> seconds
+          <!-- todo hours, minutes + translation -->
+        </div>
+        <!-- Amount to Send -->
       <div class="col-sm-11">
         <label translate="LIBRE_sendAmount">
           ETH -> Libre
@@ -99,10 +109,6 @@
           </span>
         </a>
       </p>
-
-      <div class="col-sm-11">
-        <span translate="LIBRE_buyRate">Buy rate</span>: {{ buyRate }} <span>LIBRE/ETH</span>
-      </div>
 
       <div class="col-sm-4">
         <button style="min-width: 170px"
@@ -218,34 +224,47 @@
               </button>
           </div>
         </div>
+        
+        <section ng-show="state == states.WAIT_ORACLES">
+          <div class="col-sm-11">
+            Rate information processing from the oracles...
+          </div>
+          <div class="col-sm-11">
+            {{ readyOracles }} of {{ oracleCount }}
+          </div>
+          <div class="col-sm-11">
+            Or timeout: {{ waitOraclesRemains }} seconds remain (todo write about min_oracle_count)
+          </div>
+        </section>
   
-        <div class="col-sm-11">
-          <span translate="LIBRE_sellRate">Sell rate</span>: {{ sellRate }} <span>LIBRE/ETH</span>
-        </div>
-        <div class="col-sm-11" ng-show="RURAllowed">
-          <span translate="LIBRE_RURCost">Update rates cost</span>: {{ RURCost }} ETH
-        </div>
 
-        <div class="col-sm-5">
-          <button class="btn btn-block"
-                data-toggle="modal"
-                data-target="#urTx"
-                ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
-                ng-disabled="(RURPending || CRPending) || !RURAllowed">
-            {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
+        <section ng-show="state == states.REQUEST_RATES">
+          <div class="col-sm-11" ng-show="RURAllowed">
+            <span translate="LIBRE_RURCost">Update rates cost</span>: {{ RURCost }} ETH
+          </div>
+
+          <div class="col-sm-5">
+            <button class="btn btn-block"
+                  data-toggle="modal"
+                  data-target="#urTx"
+                  ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
+                  ng-disabled="(RURPending || CRPending) || !RURAllowed">
+              {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
+            </button>
+          </div>
+        </section>
+        <section ng-show="state == states.CALC_RATES">        
+          <div class="col-sm-5">
+            <button class="btn btn-block"
+                  ng-click="generateCRTx()"
+                  ng-class="CRAllowed ? 'btn-success' : 'btn-default'"
+                  ng-disabled="(RURPending || CRPending) || !CRAllowed">
+              {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
           </button>
-        </div>
-        <div class="col-sm-5">
-          <button class="btn btn-block"
-                ng-click="generateCRTx()"
-                ng-class="CRAllowed ? 'btn-success' : 'btn-default'"
-                ng-disabled="(RURPending || CRPending) || !CRAllowed">
-            {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
-        </button>
-        </div>
+          </div>
+        </section>
 
 
-      <!-- /REMISSION -->
     </section>
 
   </article>

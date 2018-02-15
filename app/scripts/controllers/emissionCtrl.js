@@ -40,6 +40,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     $scope.states = libreService.coeff.statesENUM;
 
+    const ORACLE_ACTUAL = 10 * 60; // todo fix constant
+    const ORACLE_TIMEOUT = 10 * 60;
+
     //$scope.allTokens = 'Loading';
     $scope.approvePending = false;
     $scope.sellPending = false;
@@ -112,22 +115,39 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                 Promise.all([
                     getBankDataAsync("getState"),
                     getBankDataAsync("tokenBalance"),
-                    getBankDataAsync("requestPrice")
+                    getBankDataAsync("requestPrice"),
+                    getBankDataAsync("calcTime"),
+                    getBankDataAsync("readyOracles"),
+                    getBankDataAsync("oracleCount"),
+                    getBankDataAsync("requestTime")
                 ]).then((values) => {
                     let 
                         state = values[0],
                         balance = values[1],
-                        RURCost = values[2];
+                        RURCost = values[2],
+                        calcTime = values[3],
+                        readyOracles = values[4],
+                        oracleCount = values[5],
+                        requestTime = values[6];
 
                     let stateDec = +state.data[0];
                     $scope.state = stateDec;
 
-                    $scope.orderAllowed = (+state.data[0] == libreService.coeff.statesENUM.PROCESSING_ORDERS);
-                    $scope.RURAllowed = (+state.data[0] == libreService.coeff.statesENUM.REQUEST_RATES);
-                    $scope.CRAllowed = (+state.data[0] == libreService.coeff.statesENUM.CALC_RATES);
+                    $scope.readyOracles = +readyOracles.data[0];
+                    $scope.oracleCount = +oracleCount.data[0];
+
+                    $scope.orderAllowed = (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS);
+                    $scope.RURAllowed = (stateDec == libreService.coeff.statesENUM.REQUEST_RATES);
+                    $scope.CRAllowed = (stateDec == libreService.coeff.statesENUM.CALC_RATES);
                     if ($scope.RURAllowed) {
                         $scope.RURCost = RURCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
                     }
+
+                    $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
+                    $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
+
+
+
                     $scope.pendingOrderAllowCheck = false;
                 });
             });
