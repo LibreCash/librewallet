@@ -1,6 +1,5 @@
 <!-- Content -->
 <div class="col-sm-8">
-  ***STATE*** {{ state }}
 <!-- todo state is "" for several seconds when we come from status tab. do "loading"? -->
   <!-- If unlocked with address only -->
   <article class="block" ng-show="wallet.type=='addressOnly'">
@@ -50,8 +49,23 @@
 
   <!-- If unlocked with PK -->
   <article class="block" ng-hide="wallet.type=='addressOnly'" ng-show="buy">
+    <nav class="container nav-container" ng-show="state == states.PROCESSING_ORDERS">
+      <div class="nav-scroll">
+      <ul class="nav-inner">
+        <li class="nav-item {{ buyOrSell ? 'active' : '' }}" ng-click="buyOrSell=!buyOrSell"><a translate="LIBRE_buyDirection">ETH -> Libre</a></li>
+        <li class="nav-item {{ buyOrSell ? '' : 'active' }}" ng-click="buyOrSell=!buyOrSell"><a translate="LIBRE_sellDirection">Libre -> ETH</a></li>
+      </ul>
+      </div>
+    </nav>
 
-    <section class="row form-group">
+    <section  class="row form-group" ng-show="state != states.PROCESSING_ORDERS &&
+                                              state != states.WAIT_ORACLES &&
+                                              state != states.REQUEST_RATES &&
+                                              state != states.CALC_RATES">
+                                                Loading contract data...
+                                            </section>
+    <!-- buy/sell section -->
+    <section class="row form-group" ng-show="state == states.PROCESSING_ORDERS">
       <div class="col-sm-11">
           <strong translate="LIBRE_contracts">
               Contracts
@@ -64,68 +78,71 @@
         <br/>
         <span translate="LIBRE_checkLegit">Please, check its legitimity.</span>
       </div>
-      <div class="col-sm-11" ng-show="state == states.PROCESSING_ORDERS">
-          <br/><!-- todo br -> margin/padding? -->
-          <span>Buy rate</span>: {{ buyRate }}</a>
-          <br/>
-          <span>Sell rate</span>: {{ sellRate }}</a>
-          <br/>
-          <span>Rates are actual for</span>: {{ rateActualTime }}</a> seconds
-          <!-- todo hours, minutes + translation -->
-        </div>
-        <!-- Amount to Send -->
       <div class="col-sm-11">
-        <label translate="LIBRE_sendAmount">
-          ETH -> Libre
-        </label>
+        <br/><!-- todo br -> margin/padding? -->
+        <span>Buy rate</span>: {{ buyRate }}</a>
+        <br/>
+        <span>Sell rate</span>: {{ sellRate }}</a>
+        <br/>
+        <span>Rates are actual for</span>: {{ rateActualTime | secondsToDateTime | date:'HH:mm:ss' }}</a>
+        <!-- todo hours, minutes + translation -->
       </div>
 
-      <div class="col-sm-11">
-        <div class="input-group">
-          <input type="text"
-                  class="form-control"
-                  placeholder="{{ 'SEND_amount_short' | translate }}"
-                  ng-model="buyTXValue"
-                  ng-disabled="tx.readOnly || checkTxReadOnly"
-                  ng-class="Validator.isPositiveNumber(buyTXValue) ? 'is-valid' : 'is-invalid'"
-                  ng-change="changedTokens = buyTXValue * buyRate"/>
-          <div class="input-group-btn">
-            <span style="min-width: 170px"
-                  class="btn btn-default"
-                  ng-class="'disabled'">
-                   <strong>
-                     {{ changedTokens }} Libre
-                   </strong>
-            </span>
+      <!-- buy section -->
+      <section ng-show="buyOrSell">
+        <div class="col-sm-11">
+          <label translate="LIBRE_buyDirection">
+            ETH  -> Libre
+          </label>
+        </div>
+        <div class="col-sm-11">
+          <div class="input-group">
+            <input type="text"
+                    class="form-control"
+                    placeholder="{{ 'SEND_amount_short' | translate }}"
+                    ng-model="buyTXValue"
+                    ng-disabled="tx.readOnly || checkTxReadOnly"
+                    ng-class="Validator.isPositiveNumber(buyTXValue) ? 'is-valid' : 'is-invalid'"
+                    ng-change="changedTokens = buyTXValue * buyRate"/>
+            <div class="input-group-btn">
+              <span style="min-width: 170px"
+                    class="btn btn-default"
+                    ng-class="'disabled'">
+                    <strong>
+                      {{ changedTokens }} Libre
+                    </strong>
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Amount to Send - Transfer Entire Balance -->
-      <p class="col-xs-12" ng-hide="tx.readOnly">
-        <a ng-click="transferAllBalance()">
-          <span class="strong" translate="SEND_TransferTotal">
-            Send Entire Balance
-          </span>
-        </a>
-      </p>
+        <!-- Amount to Send - Transfer Entire Balance -->
+        <p class="col-xs-12" ng-hide="tx.readOnly">
+          <a ng-click="transferAllBalance()">
+            <span class="strong" translate="SEND_TransferTotal">
+              Send Entire Balance
+            </span>
+          </a>
+        </p>
 
-      <div class="col-sm-4">
-        <button style="min-width: 170px"
-            class="btn btn-default"
-            data-toggle="modal"
-            data-target="#buyTx"
-            ng-disabled="buyPending || !orderAllowed">
-          <strong>
-            {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
-          </strong>
-        </button>
-      </div>
-
-      <!-- REMISSION -->
-      <div class="col-sm-11">
-          <label translate="LIBRE_balance">
-              Balance
+        <div class="col-sm-4">
+          <button style="min-width: 170px"
+              class="btn btn-default"
+              data-toggle="modal"
+              data-target="#buyTx"
+              ng-disabled="buyPending || !orderAllowed">
+            <strong>
+              {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
+            </strong>
+          </button>
+        </div>
+      </section>
+      <!-- end buy section -->
+      <!-- sell section -->
+      <section ng-hide="buyOrSell">
+        <div class="col-sm-11">
+          <label translate="LIBRE_sellDirection">
+            Libre -> ETH
           </label>
         </div>
         <p class="col-xs-12">
@@ -134,14 +151,14 @@
           <span>All tokens: </span><span>{{ allTokens | number: 3 }}</span>
         </p>
         <div ng-show="allTokens == 0" class="col-sm-11">
-            <strong translate="LIBRE_noTokens">
-                No tokens on balance
-            </strong>
+          <strong translate="LIBRE_noTokens">
+            No tokens on balance
+          </strong>
         </div>
         <div ng-hide="allTokens == 0">
           <div class="col-sm-11" ng-hide="tx.readOnly">
             <label translate="LIBRE_allowance">
-                Allowance
+              Allowance
             </label>
           </div>
           <div class="col-sm-11">
@@ -162,7 +179,6 @@
                   </strong>
                 </button>
               </div>
-            
             </div>
           </div>
           <p class="col-xs-12" ng-hide="tx.readOnly">
@@ -173,46 +189,52 @@
             </a>
           </p>
         
-            <!-- Amount to Send -->
-          <div class="col-sm-11">
-            <label translate="LIBRE_sellTokens">
-              Tokens to Sell:
-            </label>
-          </div>
-        
-          <div class="col-sm-11">
-            <div class="input-group">
-              <input type="text"
-                      class="form-control"
-                      placeholder="{{ 'SEND_amount_short' | translate }}"
-                      ng-model="tokenValue"
-                      ng-disabled="tx.readOnly || checkTxReadOnly"
-                      ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"
-                      ng-change="changedEth = tokenValue / sellRate"/>
-              <div class="input-group-btn">
-                <span style="min-width: 170px"
-                      class="btn btn-default"
-                      ng-class="'disabled'">
-                        <strong>
-                          {{ changedEth }} ETH
-                        </strong>
-                </span>
+          <section ng-hide="allowedTokens > 0">
+            <div class="col-sm-11">
+              <label>
+                You need to approve some tokens before selling them
+              </label>
+            </div>
+          </section>
+          <!-- sell section after allowance -->
+          <section ng-show="allowedTokens > 0">
+            <div class="col-sm-11">
+              <label translate="LIBRE_sellTokens">
+                Tokens to Sell:
+              </label>
+            </div>
+          
+            <div class="col-sm-11">
+              <div class="input-group">
+                <input type="text"
+                        class="form-control"
+                        placeholder="{{ 'SEND_amount_short' | translate }}"
+                        ng-model="tokenValue"
+                        ng-disabled="tx.readOnly || checkTxReadOnly"
+                        ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"
+                        ng-change="changedEth = tokenValue / sellRate"/>
+                <div class="input-group-btn">
+                  <span style="min-width: 170px"
+                        class="btn btn-default"
+                        ng-class="'disabled'">
+                          <strong>
+                            {{ changedEth }} ETH
+                          </strong>
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        
-              <!-- Amount to Send - Transfer Entire Balance -->
-          <p class="col-xs-12" ng-hide="tx.readOnly">
-            
-            <a ng-click="tokenValue = allowedTokens; changedEth = tokenValue / sellRate">
-              <span class="strong" translate="LIBRE_sellAllApproved">
-                Sell All Approved
-              </span>
-            </a>
-          </p>
-        
-
-          <div class="col-sm-8 offset-col-sm-2">
+          
+                <!-- Amount to Send - Transfer Entire Balance -->
+            <p class="col-xs-12" ng-hide="tx.readOnly">
+              <a ng-click="tokenValue = allowedTokens; changedEth = tokenValue / sellRate">
+                <span class="strong" translate="LIBRE_sellAllApproved">
+                  Sell All Approved
+                </span>
+              </a>
+            </p>
+          
+            <div class="col-sm-8 offset-col-sm-2">
               <button style="min-width: 170px"
                 class="btn btn-default"
                 data-toggle="modal"
@@ -222,51 +244,53 @@
                   {{ sellPending ? 'LIBRE_txPending' : 'LIBRE_sell' | translate }}
                 </strong>
               </button>
-          </div>
+            </div>
+          </section><!-- end sell section after allowance -->
         </div>
-        
-        <section ng-show="state == states.WAIT_ORACLES">
-          <div class="col-sm-11">
-            Rate information processing from the oracles...
-          </div>
-          <div class="col-sm-11">
-            {{ readyOracles }} of {{ oracleCount }}
-          </div>
-          <div class="col-sm-11">
-            Or timeout: {{ waitOraclesRemains }} seconds remain (todo write about min_oracle_count)
-          </div>
-        </section>
-  
-
-        <section ng-show="state == states.REQUEST_RATES">
-          <div class="col-sm-11" ng-show="RURAllowed">
-            <span translate="LIBRE_RURCost">Update rates cost</span>: {{ RURCost }} ETH
-          </div>
-
-          <div class="col-sm-5">
-            <button class="btn btn-block"
-                  data-toggle="modal"
-                  data-target="#urTx"
-                  ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
-                  ng-disabled="(RURPending || CRPending) || !RURAllowed">
-              {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
-            </button>
-          </div>
-        </section>
-        <section ng-show="state == states.CALC_RATES">        
-          <div class="col-sm-5">
-            <button class="btn btn-block"
-                  ng-click="generateCRTx()"
-                  ng-class="CRAllowed ? 'btn-success' : 'btn-default'"
-                  ng-disabled="(RURPending || CRPending) || !CRAllowed">
-              {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
-          </button>
-          </div>
-        </section>
-
-
+      </section><!-- end sell section -->
+    </section><!-- end buy/sell section -->
+    <section ng-show="state == states.WAIT_ORACLES">
+      <div class="col-sm-11">
+        Rate information processing from the oracles...
+      </div>
+      <div class="col-sm-11">
+        {{ readyOracles }} of {{ oracleCount }}
+      </div>
+      <div class="col-sm-11">
+        Or timeout: {{ waitOraclesRemains  | secondsToDateTime | date:'HH:mm:ss' }} remain (todo write about min_oracle_count)
+      </div>
     </section>
+  
+    <section ng-show="state == states.REQUEST_RATES">
+      <div class="col-sm-11" ng-show="RURAllowed">
+        <span translate="LIBRE_RURCost">Update rates cost</span>: {{ RURCost }} ETH
+      </div>
 
+      <div class="col-sm-5">
+        <button class="btn btn-block"
+              data-toggle="modal"
+              data-target="#urTx"
+              ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
+              ng-disabled="(RURPending || CRPending) || !RURAllowed">
+          {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
+        </button>
+      </div>
+    </section>
+    <section ng-show="state == states.CALC_RATES">
+      <div class="col-sm-11">
+        <label>
+          Oracles have actual data. You need to initiate calculating buy and sell rates
+        </label>
+      </div>
+      <div class="col-sm-5">
+        <button class="btn btn-block"
+              ng-click="generateCRTx()"
+              ng-class="CRAllowed ? 'btn-success' : 'btn-default'"
+              ng-disabled="(RURPending || CRPending) || !CRAllowed">
+          {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
+        </button>
+      </div>
+    </section>
   </article>
 
 </div>

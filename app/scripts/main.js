@@ -157,3 +157,8 @@ if (IS_CX) {
   app.controller('quickSendCtrl', ['$scope', '$sce', quickSendCtrl]);
   app.controller('cxDecryptWalletCtrl', ['$scope', '$sce', 'walletService', cxDecryptWalletCtrl]);
 }
+app.filter('secondsToDateTime', [function() {
+  return function(seconds) {
+      return new Date(1970, 0, 1).setSeconds(seconds);
+  };
+}]);

@@ -37,6 +37,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.cashAddress = cashAddress;
     $scope.bankAddress = bankAddress;
     $scope.RURCost = 'n/a';
+    $scope.buyOrSell = true;
 
     $scope.states = libreService.coeff.statesENUM;
 
@@ -101,7 +102,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     // end remission
-
+    var decreaseCalcTimer, decreaseRequestTimer, lastCalcTime, lastRequestTime, lastLastBlockTime;
     $scope.pendingOrderAllowCheck = false;
     setInterval(() => {
         if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
@@ -143,8 +144,37 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         $scope.RURCost = RURCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
                     }
 
-                    $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
-                    $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
+                    
+
+                    if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
+                        clearInterval(decreaseCalcTimer);
+                        $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
+                        lastLastBlockTime = lastBlockTime;
+                        lastCalcTime = +calcTime.data[0];
+                        decreaseCalcTimer = setInterval(() => {
+                            if ($scope.rateActualTime > 0) {
+                                $scope.rateActualTime--;
+                            } else {
+                                clearInterval(decreaseCalcTimer);
+                            }
+                        }, 1000);
+                    }
+
+                    if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
+                        clearInterval(decreaseRequestTimer);
+                        $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
+                        console.log(lastLastBlockTime, lastBlockTime);
+                        console.log(lastRequestTime, +requestTime.data[0]);
+                        lastLastBlockTime = lastBlockTime;
+                        lastRequestTime = +requestTime.data[0];
+                        decreaseRequestTimer = setInterval(() => {
+                            if ($scope.waitOraclesRemains > 0) {
+                                $scope.waitOraclesRemains--;
+                            } else {
+                                clearInterval(decreaseRequestTimer);
+                            }
+                        }, 1000);
+                    }
 
 
 
