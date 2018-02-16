@@ -116,9 +116,13 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
 
 
     function recursiveGetOracleData(number,limit) {
+        if ($scope.globalService.currentTab != $scope.globalService.tabs.bankStatus.id) {
+            // not to make user wait when he opens bank status tab and immediately opens another tab
+            return;
+        }
+        console.log("oracle loaded");
         getBankDataAsync("getOracleData", [number]).then((res) => {
             let oracle = res.data;
-            console.log(oracle);
 
             oracles[oracle[oraclesStruct.address]] = {
                 name: hexToString(oracle[oraclesStruct.name]),

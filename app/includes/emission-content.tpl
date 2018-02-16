@@ -259,6 +259,14 @@
       <div class="col-sm-11">
         Or timeout: {{ waitOraclesRemains  | secondsToDateTime | date:'HH:mm:ss' }} remain (todo write about min_oracle_count)
       </div>
+      <div class="col-sm-11">&nbsp;</div>
+      <div class="col-sm-11">
+        Conditions for calculating rates:
+        <ul>
+          <li>every oracle gets actual data</li>
+          <li>or timeout lasted and at least {{ MIN_READY_ORACLES }} oracles get actual data</li>
+        </ul>
+      </div>
     </section>
   
     <section ng-show="state == states.REQUEST_RATES">
@@ -276,10 +284,16 @@
         </button>
       </div>
     </section>
+
     <section ng-show="state == states.CALC_RATES">
       <div class="col-sm-11">
         <label>
           Oracles have actual data. You need to initiate calculating buy and sell rates
+        </label>
+      </div>
+      <div class="col-sm-11">
+        <label>
+            {{ readyOracles }} oracles of {{ oracleCount }} have actual data now. Each oracle's data is actual for 10 minutes. Yon need at least {{ MIN_READY_ORACLES }} actual oracles to calculate rates
         </label>
       </div>
       <div class="col-sm-5">

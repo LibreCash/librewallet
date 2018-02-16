@@ -43,6 +43,8 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     const ORACLE_ACTUAL = 10 * 60; // todo fix constant
     const ORACLE_TIMEOUT = 10 * 60;
+    const RATE_PERIOD = 10 * 60;
+    $scope.MIN_READY_ORACLES = 2;
 
     //$scope.allTokens = 'Loading';
     $scope.approvePending = false;
@@ -101,7 +103,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         getCashDataProcess("allowance", setAllowance, [walletService.wallet.getAddressString(), bankAddress]);
     }
 
-    // end remission
     var decreaseCalcTimer, decreaseRequestTimer, lastCalcTime, lastRequestTime, lastLastBlockTime;
     $scope.pendingOrderAllowCheck = false;
     setInterval(() => {
@@ -144,8 +145,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         $scope.RURCost = RURCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
                     }
 
-                    
-
                     if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
                         clearInterval(decreaseCalcTimer);
                         $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
@@ -176,7 +175,21 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         }, 1000);
                     }
 
-
+                    if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
+                        clearInterval(decreaseRequestTimer);
+                        $scope.waitOraclesRemains = RATE_PERIOD - (lastBlockTime - +requestTime.data[0]);
+                        console.log(lastLastBlockTime, lastBlockTime);
+                        console.log(lastRequestTime, +requestTime.data[0]);
+                        lastLastBlockTime = lastBlockTime;
+                        lastRequestTime = +requestTime.data[0];
+                        decreaseRatePeriodTimer = setInterval(() => {
+                            if ($scope.waitOraclesRemains > 0) {
+                                $scope.waitOraclesRemains--;
+                            } else {
+                                clearInterval(decreaseRatePeriodTimer);
+                            }
+                        }, 1000);
+                    }
 
                     $scope.pendingOrderAllowCheck = false;
                 });

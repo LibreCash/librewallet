@@ -31,6 +31,8 @@ var libreService = function(walletService, $translate) {
         gasQueue: 500000,
         statesENUM: statesENUM
     };
+
+    const IS_DEBUG = false;
         
 
     function getDataString(func, inputs) {
@@ -266,85 +268,76 @@ var libreService = function(walletService, $translate) {
             });
             return;
         }
-        getLatestBlockData()
-        .then((blockData)=> {
-            return parseInt(blockData.data.timestamp, 16);
-        }) // Refactor its
-        .then((time)=>{
-            console.log(time);
-
-            return Promise.all([
-                getContractData("getState"),
-                getContractData("tokenBalance"),
-                getBankDataAsync(rates[0] != 0 ? "buyRate" : "sellRate")
-            ]);
-        })
+        return Promise.all([
+            getBankDataAsync("getState"),
+            getBankDataAsync("tokenBalance"),
+            getBankDataAsync(rates[0] != 0 ? "buyRate" : "sellRate"),
+            getLatestBlockData()
+        ])
         .then((values) => {
-                let 
-                    state = values[0],
-                    balance = values[1],
-                    rate = values[2];
+            let 
+                state = values[0],
+                balance = values[1],
+                rate = values[2],
+                blockData = values[3];
 
-                let _rate = rates[0] != 0 ? rates[0] : rates[1];
-                if (rate.data[0] / coeff.rateMultiplier != _rate) {
-                    $translate("LIBRE_errorValidatingRates").then((msg) => {
-                        _scope.notifier.danger(msg);
-                    });
-                    return;
-                }
+            let time = parseInt(blockData.data.timestamp, 16);
+            let _rate = rates[0] != 0 ? rates[0] : rates[1];
+            if (rate.data[0] / coeff.rateMultiplier != _rate) {
+                $translate("LIBRE_errorValidatingRates").then((msg) => {
+                    _scope.notifier.danger(msg);
+                });
+                return;
+            }
 
-                let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
+            let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
 
-                if (canOrder)
-                    transactionFunc();
-                else {
-                    $translate("LIBRE_orderNotAllowed").then((msg) => {
-                        _scope.notifier.danger(msg);
-                    });
-                }
-            });
+            if (canOrder)
+                transactionFunc();
+            else {
+                $translate("LIBRE_orderNotAllowed").then((msg) => {
+                    _scope.notifier.danger(msg);
+                });
+            }
         });
     }
 
-    function canRequest(_scope, transactionFunc) {
-        return getLatestBlockData()
-        .then((blockData)=>{
+    function canRequest(_scope, transactionFunc) {    
+        return Promise.all([
+            getBankDataAsync("getState"),
+            getBankDataAsync("requestPrice"),
+            getLatestBlockData()
+        ]).then((values) => {
+            let 
+                state = values[0],
+                requestPrice = values[1], // Append user balance checking later
+                blockData = values[2];
+
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            return Promise.all([
-                getContractData("getState"),
-                getContractData("requestPrice"),
-            ]);
-        })
-        .then((values) => {
-                let 
-                    state = values[0],
-                    requestPrice = values[0]; // Append user balance checking later
 
-                let сanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
+            let сanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
 
-                if (сanRequest) {
-                    transactionFunc(requestPrice.data[0]);
-                } else {
-                    $translate("LIBRE_RURNotAllowed").then((msg) => 
-                        _scope.notifier.danger(msg));
-                }
-            });
-        };
+            if (сanRequest) {
+                transactionFunc(requestPrice.data[0]);
+            } else {
+                $translate("LIBRE_RURNotAllowed").then((msg) => 
+                    _scope.notifier.danger(msg));
+            }
+        });
+    };
     
 
     function canCalc(_scope, transactionFunc) {
         const MIN_READY_ORACLES = 2;
-        return getLatestBlockData()
-        .then((blockData)=>{
-            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            return Promise.all([
-                getContractData("getState")
-            ]);
-        }).then((values) => {
+        return Promise.all([
+            getBankDataAsync("getState"),
+            getLatestBlockData()
+        ]).then((values) => {
             let 
                 state = values[0],
-                requestPrice = values[0]; // Append user balance checking later
+                blockData = values[1]; // Append user balance checking later
 
+            let lastBlockTime = parseInt(blockData.data.timestamp, 16);
             let allowedState = (+state.data[0] == statesENUM.CALC_RATES);
             
             if (allowedState) {
