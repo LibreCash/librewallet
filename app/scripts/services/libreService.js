@@ -53,30 +53,25 @@ var libreService = function(walletService, $translate) {
     };
 
     function getDataCommon(to, abi, varName, process, txParam, processParam) {
-        return new Promise((resolve, reject) => {
-        
-            ajaxReq.getEthCall({
+        return getEthCall({
                 from: walletService.wallet == null ? null 
                     : walletService.wallet.getAddressString(),
                 to,
                 data: getDataString(abi[varName], txParam)
-            }, function(res) {
-                if (res.error || res.data == '0x') {
-                    $translate("LIBRE_possibleError").then((error) => {
-                        res.error = true;
-                        res.message = error;
-                        process(res, processParam);
-                        //TODO: use reject() here
-                    });
-                } else {
-                    let outTypes = abi[varName].outputs.map((i)=>i.type);
-                    res.data = ethUtil.solidityCoder.decodeParams(outTypes, res.data.replace('0x', ''));
+            })
+            .catch(()=>{
+                $translate("LIBRE_possibleError").then((error) => {
+                    res.error = true;
+                    res.message = error;
                     process(res, processParam);
-                    //TODO: use resolve() here
-                }
-                
+                    //TODO: use reject() here
+                });
+            })
+            .then((res) => {
+                res.data = encodeData(abi[varName],res.data);
+                process(res, processParam);
+                //TODO: use resolve() here
             });
-        });
     }
 
     function getDataProcess(to, abi, varName, process, params = []) {
@@ -108,6 +103,14 @@ var libreService = function(walletService, $translate) {
     }
 
     function getDataAsync(to, abi, _var, params = []) {
+        if(IS_DEBUG) {
+        console.log({
+            from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
+            data: getDataString(abi[_var], params),
+            to
+        });
+        }
+
         return getEthCall({
             from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
             data: getDataString(abi[_var], params),
@@ -170,7 +173,7 @@ var libreService = function(walletService, $translate) {
         return getScope(_scope, cash.address, cash.abiRefactored, _var, _key, params);
     }
 
-    function toUnixtime (timestamp) {
+    function toUnixtime(timestamp) {
         let date = new Date(timestamp * 1000);
         return date.toLocaleString();
     }
@@ -210,16 +213,24 @@ var libreService = function(walletService, $translate) {
         }
     }
 
+    function getTransactionData(addr) {
+        return new Promise((resolve,reject)=>{
+            ajaxReq.getTransactionData(addr,(data)=>{
+                if(data.error) reject(data);
+                resolve(data);
+            });
+        });
+    }
+
     function libreTransaction (_scope, pendingName, opPrefix, translator, updater) {
         _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
         
-        ajaxReq.getTransactionData(_scope.wallet.getAddressString(), function(data) {
+        let userWallet = _scope.wallet.getAddressString();
+        getTransactionData(userWallet)
+        .then((data) => {
             try {
-                if (data.error) {
-                    throw("getTransactionData: " + data.msg);
-                }
                 var txData = uiFuncs.getTxData(_scope);
                 if (IS_DEBUG) console.log(txData);
                 uiFuncs.generateTx(txData, function(rawTx) {
@@ -236,11 +247,11 @@ var libreService = function(walletService, $translate) {
                             _scope.notifier.danger("sendTx: " + resp.error);
                             return;
                         }
-                        var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
+                        var checkTxLink = `https://www.myetherwallet.com?txHash=${resp.data}#check-tx-status`;
                         var txHashLink = _scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
                         var verifyTxBtn = _scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
-                        var checkTxBtn = '<a class="btn btn-xs btn-info" href="' + checkTxLink + '" target="_blank" rel="noopener noreferrer"> Check TX Status </a>';
-                        var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
+                        var checkTxBtn = `<a class="btn btn-xs btn-info" href="${checkTxLink}" target="_blank" rel="noopener noreferrer"> Check TX Status </a>`;
+                        var completeMsg = `<p>${globalFuncs.successMsgs[2]}<strong>${resp.data}</strong></p><p>${verifyTxBtn} ${checkTxBtn}</p>`;
                         _scope.notifier.success(completeMsg, 0);
                         
                         _scope.wallet.setBalance(function() {
