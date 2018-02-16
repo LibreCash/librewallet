@@ -254,17 +254,17 @@
         Rate information processing from the oracles...
       </div>
       <div class="col-sm-11">
-        {{ readyOracles }} of {{ oracleCount }}
+        {{ readyOracles }} of {{ oracleCount }} oracles have received data
       </div>
       <div class="col-sm-11">
-        Or timeout: {{ waitOraclesRemains  | secondsToDateTime | date:'HH:mm:ss' }} remain (todo write about min_oracle_count)
+        Timeout: {{ waitOraclesRemains  | secondsToDateTime | date:'HH:mm:ss' }} remains
       </div>
       <div class="col-sm-11">&nbsp;</div>
       <div class="col-sm-11">
-        Conditions for calculating rates:
+        Calculating rates is possible when:
         <ul>
           <li>every oracle gets actual data</li>
-          <li>or timeout lasted and at least {{ MIN_READY_ORACLES }} oracles get actual data</li>
+          <li>or timeout and at least {{ MIN_READY_ORACLES }} oracles get actual data</li>
         </ul>
       </div>
     </section>
@@ -293,7 +293,7 @@
       </div>
       <div class="col-sm-11">
         <label>
-            {{ readyOracles }} oracles of {{ oracleCount }} have actual data now. Each oracle's data is actual for 10 minutes. Yon need at least {{ MIN_READY_ORACLES }} actual oracles to calculate rates
+            {{ readyOracles }} oracles of {{ oracleCount }} have actual data now. Each oracle's data is actual for 10 minutes. You need at least {{ MIN_READY_ORACLES }} actual oracles to calculate rates
         </label>
       </div>
       <div class="col-sm-5">

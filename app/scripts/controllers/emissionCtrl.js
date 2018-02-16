@@ -4,16 +4,16 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         cashAddress = libreService.token.address,
         bankAbiRefactor = libreService.bank.abi,
         cashAbiRefactor = libreService.token.abi,
-        getBankDataAsync = libreService.methods.getBankDataAsync,
-        getCashDataAsync = libreService.methods.getCashDataAsync,
+        getTokenData = libreService.methods.getTokenData,
+        getContractData = libreService.methods.getContractData,
         getBankDataProcess = libreService.methods.getBankDataProcess,
         getCashDataProcess = libreService.methods.getCashDataProcess,
         getDataString = libreService.methods.getDataString,
-        normalizeUnixTime = libreService.methods.normalizeUnixTime,
-        normalizeUnixTimeObject = libreService.methods.normalizeUnixTimeObject,
+        toUnixtime = libreService.methods.toUnixtime,
+        toUnixtimeObject = libreService.methods.toUnixtimeObject,
         normalizeRate = libreService.methods.normalizeRate,
         hexToString = libreService.methods.hexToString,
-        getStateName = libreService.methods.getStateName,
+        stateName = libreService.methods.stateName,
         rateMultiplier = libreService.coeff.rateMultiplier,
         gasEmission = libreService.coeff.gasEmission,
         gasRemission = libreService.coeff.gasRemission,
@@ -115,13 +115,13 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             ajaxReq.getLatestBlockData(function(blockData) {
                 var lastBlockTime = parseInt(blockData.data.timestamp, 16);
                 Promise.all([
-                    getBankDataAsync("getState"),
-                    getBankDataAsync("tokenBalance"),
-                    getBankDataAsync("requestPrice"),
-                    getBankDataAsync("calcTime"),
-                    getBankDataAsync("readyOracles"),
-                    getBankDataAsync("oracleCount"),
-                    getBankDataAsync("requestTime")
+                    getContractData("getState"),
+                    getContractData("tokenBalance"),
+                    getContractData("requestPrice"),
+                    getContractData("calcTime"),
+                    getContractData("readyOracles"),
+                    getContractData("oracleCount"),
+                    getContractData("requestTime")
                 ]).then((values) => {
                     let 
                         state = values[0],
@@ -267,7 +267,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     var approveTx = function() {
-        getCashDataAsync("allowance", [walletService.wallet.getAddressString(), bankAddress]).then((allowanceData) => {
+        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]).then((allowanceData) => {
             if (allowanceData.error) {
                 $scope.notifier.danger(allowanceData.msg);
                 return;
@@ -321,7 +321,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     var RURTx = function() {
         $scope.urModal.close();
-        getBankDataAsync("requestPrice", []).then((oracleDeficit) => {
+        getContractData("requestPrice", []).then((oracleDeficit) => {
             $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
 
             $scope.tx.to = bankAddress;
