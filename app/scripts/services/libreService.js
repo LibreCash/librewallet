@@ -266,13 +266,20 @@ var libreService = function(walletService, $translate) {
             });
             return;
         }
-        ajaxReq.getLatestBlockData(function(blockData) {
-            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
-                getBankDataAsync("getState"),
-                getBankDataAsync("tokenBalance"),
+        getLatestBlockData()
+        .then((blockData)=> {
+            return parseInt(blockData.data.timestamp, 16);
+        }) // Refactor its
+        .then((time)=>{
+            console.log(time);
+
+            return Promise.all([
+                getContractData("getState"),
+                getContractData("tokenBalance"),
                 getBankDataAsync(rates[0] != 0 ? "buyRate" : "sellRate")
-            ]).then((values) => {
+            ]);
+        })
+        .then((values) => {
                 let 
                     state = values[0],
                     balance = values[1],
@@ -300,12 +307,15 @@ var libreService = function(walletService, $translate) {
     }
 
     function canRequest(_scope, transactionFunc) {
-        ajaxReq.getLatestBlockData(function(blockData) {
+        return getLatestBlockData()
+        .then((blockData)=>{
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
-                getBankDataAsync("getState"),
-                getBankDataAsync("requestPrice"),
-            ]).then((values) => {
+            return Promise.all([
+                getContractData("getState"),
+                getContractData("requestPrice"),
+            ]);
+        })
+        .then((values) => {
                 let 
                     state = values[0],
                     requestPrice = values[0]; // Append user balance checking later
@@ -319,16 +329,18 @@ var libreService = function(walletService, $translate) {
                         _scope.notifier.danger(msg));
                 }
             });
-        });
-    }
+        };
+    
 
     function canCalc(_scope, transactionFunc) {
         const MIN_READY_ORACLES = 2;
-        ajaxReq.getLatestBlockData(function(blockData) {
+        return getLatestBlockData()
+        .then((blockData)=>{
             var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
-                getBankDataAsync("getState"),
-            ]).then((values) => {
+            return Promise.all([
+                getContractData("getState")
+            ]);
+        }).then((values) => {
                 let 
                     state = values[0],
                     requestPrice = values[0]; // Append user balance checking later
@@ -354,6 +366,33 @@ var libreService = function(walletService, $translate) {
         } catch(e) {
             return {error: true, message: e.message};
         }
+    }
+
+    function getEthCall(options){
+        return new Promise((resolve,reject)=>{
+            ajaxReq.getEthCall({
+                from: options.from,
+                data: options.data,
+                to:options.to
+            },(res)=>{
+                if(!res.error && res.data != '0x'){
+                    resolve(res);
+                } else {
+                    reject(res);
+                }
+            });
+        });
+    }
+
+    function getLatestBlockData() {
+        return new Promise((resolve,reject)=>{
+            ajaxReq.getLatestBlockData((res)=>{
+                if(res.error) reject(res);
+                if(IS_DEBUG) console.log(res);
+                resolve(res);
+            }) 
+        })
+          
     }
 
     return {
