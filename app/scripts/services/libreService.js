@@ -356,6 +356,11 @@ var libreService = function(walletService, $translate) {
         }
     }
 
+    function getGasPrice() {
+        return globalFuncs.localStorage.getItem("gasPrice", null);
+    }
+
+
     return {
         bank: {
             address: exchanger.address,
@@ -383,7 +388,8 @@ var libreService = function(walletService, $translate) {
             libreTransaction: libreTransaction,
             canRequest: canRequest,
             canCalc: canCalc,
-            canOrder: canOrder
+            canOrder: canOrder,
+            getGasPrice:getGasPrice
         },
         networkType: "rinkeby"
     };
