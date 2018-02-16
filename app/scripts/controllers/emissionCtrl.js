@@ -46,6 +46,8 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     const RATE_PERIOD = 10 * 60;
     $scope.MIN_READY_ORACLES = 2;
 
+    $scope.deadlineRemains = 0;
+
     //$scope.allTokens = 'Loading';
     $scope.approvePending = false;
     $scope.sellPending = false;
@@ -103,7 +105,8 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         getCashDataProcess("allowance", setAllowance, [walletService.wallet.getAddressString(), bankAddress]);
     }
 
-    var decreaseCalcTimer, decreaseRequestTimer, lastCalcTime, lastRequestTime, lastLastBlockTime;
+    var decreaseCalcTimer, decreaseRequestTimer, decreaseRatePeriodTimer, lastCalcTime, lastRequestTime, lastLastBlockTime,
+        deadline = 0, deadlineTimer;
     $scope.pendingOrderAllowCheck = false;
     setInterval(() => {
         if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
@@ -114,6 +117,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
             ajaxReq.getLatestBlockData(function(blockData) {
                 var lastBlockTime = parseInt(blockData.data.timestamp, 16);
+
                 Promise.all([
                     getContractData("getState"),
                     getContractData("tokenBalance"),
@@ -148,7 +152,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
                         clearInterval(decreaseCalcTimer);
                         $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
-                        lastLastBlockTime = lastBlockTime;
                         lastCalcTime = +calcTime.data[0];
                         decreaseCalcTimer = setInterval(() => {
                             if ($scope.rateActualTime > 0) {
@@ -162,9 +165,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
                         clearInterval(decreaseRequestTimer);
                         $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
-                        console.log(lastLastBlockTime, lastBlockTime);
-                        console.log(lastRequestTime, +requestTime.data[0]);
-                        lastLastBlockTime = lastBlockTime;
                         lastRequestTime = +requestTime.data[0];
                         decreaseRequestTimer = setInterval(() => {
                             if ($scope.waitOraclesRemains > 0) {
@@ -175,20 +175,28 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         }, 1000);
                     }
 
-                    if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
-                        clearInterval(decreaseRequestTimer);
-                        $scope.waitOraclesRemains = RATE_PERIOD - (lastBlockTime - +requestTime.data[0]);
-                        console.log(lastLastBlockTime, lastBlockTime);
-                        console.log(lastRequestTime, +requestTime.data[0]);
+                    if (deadline == 0) {
+                        // we need to get deadline only once
+                        getContractData("deadline").then((_deadline) => {
+                            deadline = _deadline;    
+                        })
+                    } else {
+                        if (lastLastBlockTime != lastBlockTime) {
+                            clearInterval(deadlineTimer);
+                            $scope.deadlineRemains = +deadline.data[0] - lastBlockTime;
+                            deadlineTimer = setInterval(() => {
+                                if ($scope.deadlineRemains > 0) {
+                                    $scope.deadlineRemains--;
+                                } else {
+                                    clearInterval(deadlineTimer);
+                                }
+                            }, 1000);
+                        }
+    
+                    }
+
+                    if (lastLastBlockTime != lastBlockTime) {
                         lastLastBlockTime = lastBlockTime;
-                        lastRequestTime = +requestTime.data[0];
-                        decreaseRatePeriodTimer = setInterval(() => {
-                            if ($scope.waitOraclesRemains > 0) {
-                                $scope.waitOraclesRemains--;
-                            } else {
-                                clearInterval(decreaseRatePeriodTimer);
-                            }
-                        }, 1000);
                     }
 
                     $scope.pendingOrderAllowCheck = false;

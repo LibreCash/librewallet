@@ -257,7 +257,7 @@
         {{ readyOracles }} of {{ oracleCount }} oracles have received data
       </div>
       <div class="col-sm-11">
-        Timeout: {{ waitOraclesRemains  | secondsToDateTime | date:'HH:mm:ss' }} remains
+        Timeout: {{ waitOraclesRemains | secondsToDateTime | date:'HH:mm:ss' }} remains
       </div>
       <div class="col-sm-11">&nbsp;</div>
       <div class="col-sm-11">
@@ -303,6 +303,13 @@
               ng-disabled="(RURPending || CRPending) || !CRAllowed">
           {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
         </button>
+      </div>
+    </section>
+    <section><!-- deadline section -->
+      <div class="col-sm-11">
+        <label>
+          Contract deadline in {{ deadlineRemains == 0 ? "" : (deadlineRemains | secondsToDateTime | date:'HH:mm:ss') }}
+        </label>
       </div>
     </section>
   </article>
