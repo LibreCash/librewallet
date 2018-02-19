@@ -73,8 +73,8 @@ var globalService = function($http, $httpParamSerializerJQLike) {
   },
   emission: {
     id: 9,
-    name: "NAV_BuyLibre",
-    url: "emission-librecash",
+    name: "NAV_Exchange",
+    url: "exchange",
     mew: true,
     cx: true
   },
