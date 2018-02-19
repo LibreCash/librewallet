@@ -23,12 +23,12 @@
                         </a>
                     </td>
                 </tr>
-                <tr ng-repeat="(name, info) in contractData">
-                    <td translate="{{ info.translate }}">{{ info.default }}</td>
-                    <td ng-hide="(info.data.data.indexOf('0x') == 0) && (info.data.data.length == 42)">{{ info.data.error ? info.data.message : info.data.data }}</td>
-                    <td ng-show="(info.data.data.indexOf('0x') == 0) && (info.data.data.length == 42)">
-                        <a ng-href="{{ info.data.error ? '#' : ajaxReq.blockExplorerAddr.replace('[[address]]', info.data.data) }}" target="_blank"
-                            rel="noopener noreferrer">{{ info.data.error ? info.data.message : info.data.data }}&hellip;</a>
+            <tr ng-repeat="item in contractData">
+                     <td translate="{{ item.translate }}">{{ item.varName }}</td>
+                     <td ng-hide="(item.data.indexOf('0x') == 0) && (item.data.length == 42)">{{ item.error ? item.message : item.data }}</td>
+                     <td ng-show="(item.data.indexOf('0x') == 0) && (item.data.length == 42)">
+                         <a ng-href="{{ item.error ? '#' : ajaxReq.blockExplorerAddr.replace('[[address]]', item.data) }}" target="_blank"
+                             rel="noopener noreferrer">{{ item.error ? item.message : item.data }}&hellip;</a>
                     </td>
                 </tr>
             </table>
@@ -46,13 +46,13 @@
                 </tr>
                 </thead>
                 
-                <tr ng-repeat="(address, info) in oracles">
+                <tr ng-repeat="oracle in oracles">
                     <td><a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank"
-                     rel="noopener noreferrer">{{ address | limitTo: 15 }}&hellip;</a></td>
-                    <td>{{ info.name }}</td>
-                    <td>{{ info.type }}</td>
-                    <td>{{ info.updateTime }}</td>
-                    <td>{{ info.rate }}</td>
+                     rel="noopener noreferrer">{{ oracle.address | limitTo: 15 }}&hellip;</a></td>
+                    <td>{{ oracle.name }}</td>
+                    <td>{{ oracle.type }}</td>
+                    <td>{{ oracle.updateTime }}</td>
+                    <td>{{ oracle.rate }}</td>
                 </tr>
             </table>
         </div>

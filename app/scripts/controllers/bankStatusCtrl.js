@@ -24,32 +24,28 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     var oracles = {},
     varsObject = {
         tokenAddress: {
-            default: "LibreCash Contract",
+            default: "LibreCash",
             translate: "VAR_tokenAddress"
         },
         buyRate: {
             default: "Buy Rate",
             translate: "VAR_buyRate",
-            process: normalizeRate
+            process: (data)=>`${normalizeRate(data)} LIBRE/ETH`
         },
         sellRate: {
             default: "Sell Rate",
             translate: "VAR_sellRate",
-            process: normalizeRate
+            process: (data)=>`${normalizeRate(data)} LIBRE/ETH`
         },
         buyFee: {
             default: "Buy Fee",
             translate: "VAR_buyFee",
-            process: function(data) {
-                return "{0} %".replace("{0}", data / 100);
-            }
+            process: (data) =>`${data/100} %`
         },
         sellFee: {
             default: "Sell Fee",
             translate: "VAR_sellFee",
-            process: function(data) {
-                return "{0} %".replace("{0}", data / 100);
-            }
+            process: (data) =>`${data/100} %`
         },
         oracleCount: {
             default: "Oracle Count",
@@ -58,7 +54,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         requestPrice:{
            default:"Request price",
            translate: "VAR_requestPrice", // translate later
-           process: (price) => etherUnits.toEther(price, 'wei')
+           process: (price) => `${etherUnits.toEther(price, 'wei')} ETH`
         },
         getState: {
             default: "State",
@@ -68,40 +64,21 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         requestTime:{
             default: "Request time",
             translate: "VAR_requestTime", //append later
-            process: toUnixtime
+            process: (timestamp)=> timestamp == 0 ? '-' : toUnixtime(timestamp)
         },
         calcTime: {
             default: "Calc time",
             translate: "VAR_calcTime", //append later
-            process: toUnixtime
+            process: (timestamp)=> timestamp == 0 ? '-' : toUnixtime(timestamp)
         },
         tokenBalance: {
             default: "Exchanger token balance",
             translate: "VAR_tokenBalance",
-            process: (tokens) => tokens / Math.pow(10, libreService.coeff.tokenDecimals)
+            process: (tokens) => `${tokens / Math.pow(10, libreService.coeff.tokenDecimals)} LIBRE`
         }
     };
     
     $scope.address = bankAddress;
-
-    var bankPromises = [];
-    for (var prop in varsObject) {
-        let bankPromise = getContractData(prop);
-        bankPromises.push(bankPromise);
-    } // for
-    Promise.all(bankPromises).then(bankData => {
-        bankData.forEach(data => {
-            if (varsObject[data.varName].process != null) {
-                data.data = varsObject[data.varName].process(data.data);
-            } else {
-                data.data = data.data[0];
-            }
-            varsObject[data.varName].data = data;
-        });
-    }).catch(e => {
-        console.log(e);
-    });
-
     $scope.contractData = varsObject;
 
     const oraclesStruct = {
@@ -115,32 +92,69 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     };
 
 
-    function getOracleData (number,limit) {
-        getContractData("getOracleData", [number]).then((res) => {
-            let oracle = res.data;
-            if (libreService.coeff.isDebug) console.log(`Oracle data: ${JSON.stringify(oracle)}s`);
+    
+    function getData(varsObject){
+        let promises = Object.keys(varsObject).map((key)=>getContractData(key));
+        return Promise.all(promises);
+    }
 
-            oracles[oracle[oraclesStruct.address]] = {
-                name: hexToString(oracle[oraclesStruct.name]),
-                type: hexToString(oracle[oraclesStruct.type]),
-                updateTime: toUnixtime(oracle[oraclesStruct.updateTime]),
-                waiting: oracle[oraclesStruct.waitQuery],
-                rate: normalizeRate(oracle[oraclesStruct.rate])
+    function processData(bankData,varsObject) {
+        return Promise.resolve(bankData.map(item => {
+            let 
+                varItem = varsObject[item.varName];
+                
+            return {
+                data:varItem.process? varItem.process(item.data) : item.data[0],
+                translate:varItem.translate,
+                default:varItem.default
             };
+        }));
+    }
 
-            number++;
+    function fillData(varsObject) {
+        return getData(varsObject)
+                .catch((e)=>console.log(e))
+                .then((data)=>processData(data,varsObject))
+                .then((data)=>{
+                    console.log(data);
+                    $scope.contractData = data;
+                });
+    }
 
-            if (number < limit) {
-                getOracleData(number,limit);
-            } else {
-                $scope.oracles = oracles;
-            }
+    function oracleData(res) {
+        let oracle = res.data;
+
+        return Promise.resolve({
+            address:oracle[oraclesStruct.address],
+            name: hexToString(oracle[oraclesStruct.name]),
+            type: hexToString(oracle[oraclesStruct.type]),
+            updateTime: toUnixtime(oracle[oraclesStruct.updateTime]),
+            waiting: oracle[oraclesStruct.waitQuery],
+            rate: normalizeRate(oracle[oraclesStruct.rate])
+        });
+    }
+
+    function getOracle(number) {
+        return getContractData("getOracleData", [number]).then(oracleData);
+    }
+
+    function fillOracles() {
+        getContractData("oracleCount")
+        .then((res) => {
+            let 
+                count = res.data[0],
+                oraclePromise = [];
+            for(let i=0; i<count;i++) oraclePromise.push(getOracle(i));
+            return Promise.all(oraclePromise);
+        })
+        .then((result)=>{
+            console.log(result);
+            $scope.oracles = result;
         })
     }
 
-    getContractData("oracleCount").then((res) => {
-        let count = res.data[0];
-        getOracleData(1,count);
-    });
+    fillData(varsObject);
+    fillOracles();
+
 };
 module.exports = bankStatusCtrl;
