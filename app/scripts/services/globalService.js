@@ -40,8 +40,8 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     id: 4,
     name: "NAV_Contracts",
     url: "contracts",
-    mew: true,
-    cx: true
+    mew: false,
+    cx: false
   },
   ens: {
     id:5,
