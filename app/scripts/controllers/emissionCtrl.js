@@ -110,6 +110,13 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         getCashDataProcess("allowance", setAllowance, [walletService.wallet.getAddressString(), bankAddress]);
     }
 
+    function stateWatcher(newState) {
+        if (newState == libreService.coeff.statesENUM.PROCESSING_ORDERS) {
+            console.log("new rates");
+            updateContractData();
+        }
+    }
+
     var decreaseCalcTimer, decreaseRequestTimer, decreaseRatePeriodTimer, lastCalcTime, lastRequestTime, lastLastBlockTime,
         deadline = 0, deadlineTimer;
     $scope.pendingOrderAllowCheck = false;
@@ -142,6 +149,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         requestTime = values[6];
 
                     let stateDec = +state.data[0];
+                    if ($scope.state != stateDec) {
+                        stateWatcher(stateDec);
+                    }
                     $scope.state = stateDec;
 
                     $scope.readyOracles = +readyOracles.data[0];
@@ -244,9 +254,10 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                 gasRUR;
     }, function() {
         $scope.gasPrice.gwei = globalFuncs.localStorage.getItem(gasPriceKey, null) ? +(globalFuncs.localStorage.getItem(gasPriceKey)) : 20;
-        $scope.txFees.Emission = 1111;//$scope.gasPrice.gwei * gasEmission;
-        $scope.txFees.Remission = 2222;//$scope.gasPrice.gwei * gasRemission;
-        $scope.txFees.RUR = 3333;//$scope.gasPrice.gwei * gasRUR;    
+        // -9 in the next line because of gigawei
+        $scope.txFees.Emission = $scope.gasPrice.gwei * gasEmission / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        $scope.txFees.Remission = $scope.gasPrice.gwei * gasRemission / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        $scope.txFees.RUR = $scope.gasPrice.gwei * gasRUR / Math.pow(10, libreService.coeff.tokenDecimals - 9);    
     });
 
     function isEnough(valA, valB) {
@@ -355,7 +366,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.tx.value = etherUnits.toEther(+oracleDeficit.data[0], 'wei');
             $scope.tx.unit = 'ether';
     
-            libreTransaction($scope, "RURPending", "RUR", $translate, updateContractData);
+            libreTransaction($scope, "RURPending", "RUR", $translate, null);
         });
     }
 
@@ -371,7 +382,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         $scope.tx.value = 0;
         $scope.tx.unit = 'ether';
 
-        libreTransaction($scope, "CRPending", "CR", $translate, updateContractData);
+        libreTransaction($scope, "CRPending", "CR", $translate, null);
     }
 
     $scope.transferAllBalance = function() {

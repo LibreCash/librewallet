@@ -266,10 +266,12 @@ var libreService = function(walletService, $translate) {
                             }
                             if (isCheckingTx) return; // fixing doubling success messages
                             isCheckingTx = true;
+                            console.log("resp", resp);
                             ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
                                 if (receipt.error) {
                                     _scope[pendingName] = false;
                                     _scope.notifier.danger(receipt.msg, 0);
+                                    console.log("receipt", receipt);
                                 } else {
                                     if (receipt.data == null) {
                                         isCheckingTx = false;
@@ -280,7 +282,9 @@ var libreService = function(walletService, $translate) {
                                         translator(`LIBRE${opPrefix}_txOk`).then((msg) => {
                                             _scope.notifier.success(msg, 0);
                                         });
-                                        updater();
+                                        if (updater != null) {
+                                            updater();
+                                        }
                                     } else {
                                         translator(`LIBRE${opPrefix}_txFail`).then((msg) => {
                                             _scope.notifier.danger(msg, 0);
