@@ -305,10 +305,10 @@
         </button>
       </div>
     </section>
-    <section><!-- deadline section -->
+    <section ng-show="deadlineRemains != 0"><!-- deadline section -->
       <div class="col-sm-11">
         <label>
-          Contract deadline in {{ deadlineRemains == 0 ? "" : (deadlineRemains | secondsToDateTime | date:'HH:mm:ss') }}
+          Contract deadline in {{ deadlineDays }} {{ 'LIBRE_days' | translate }} {{ deadlineRemains | secondsToDateTime | date:'HH:mm:ss' }}
         </label>
       </div>
     </section>

@@ -269,7 +269,7 @@ var libreService = function(walletService, $translate) {
                             ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
                                 if (receipt.error) {
                                     _scope[pendingName] = false;
-                                    _scope.notifier.danger(receipt.msg);
+                                    _scope.notifier.danger(receipt.msg, 0);
                                 } else {
                                     if (receipt.data == null) {
                                         isCheckingTx = false;

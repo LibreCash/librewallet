@@ -184,6 +184,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         if (lastLastBlockTime != lastBlockTime) {
                             clearInterval(deadlineTimer);
                             $scope.deadlineRemains = +deadline.data[0] - lastBlockTime;
+                            $scope.deadlineDays = Math.floor($scope.deadlineRemains / (60 * 60 * 24));
                             deadlineTimer = setInterval(() => {
                                 if ($scope.deadlineRemains > 0) {
                                     $scope.deadlineRemains--;

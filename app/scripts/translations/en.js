@@ -512,6 +512,7 @@ LIBREFE_RURCost                 :  'Request Rates cost:',
 LIBRE_errorValidatingRates      :  'Error validating rates',
 LIBRE_RURCost                   :  'Update rates cost',
 LIBRE_exchangerLocked           :  'The exchanger is locked',
+LIBRE_days                      :  'days',
 
 NODE_CTA                        :  'Save & Use Custom Node',
 NODE_Name                       :  'Node Name',
