@@ -17,12 +17,15 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         rateMultiplier = libreService.coeff.rateMultiplier,
         gasEmission = libreService.coeff.gasEmission,
         gasRemission = libreService.coeff.gasRemission,
+        gasRUR = libreService.coeff.gasRUR,
         gasApprove = libreService.coeff.gasApprove,
         fillStateData = libreService.methods.fillStateData,
         libreTransaction = libreService.methods.libreTransaction,
         canOrder = libreService.methods.canOrder,
         canRequest = libreService.methods.canRequest,
         canCalc = libreService.methods.canCalc;
+
+    var gasPriceKey = "gasPrice";
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
@@ -47,6 +50,8 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.MIN_READY_ORACLES = 2;
 
     $scope.deadlineRemains = 0;
+    $scope.gasPrice = {};
+    $scope.txFees = {};
 
     //$scope.allTokens = 'Loading';
     $scope.approvePending = false;
@@ -61,7 +66,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.changedEth = 0;
     $scope.emissionLimit = gasEmission;
     $scope.remissionLimit = gasRemission;
-    $scope.urLimit = libreService.coeff.gasRUR;
+    $scope.urLimit = gasRUR;
     // modals
     $scope.buyModal = new Modal(document.getElementById('buyTx'));
     $scope.sellModal = new Modal(document.getElementById('sellTx'));
@@ -232,6 +237,18 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         }
     });
 
+    $scope.$watch(function() {
+        return +globalFuncs.localStorage.getItem(gasPriceKey, null) +
+                gasEmission +
+                gasRemission +
+                gasRUR;
+    }, function() {
+        $scope.gasPrice.gwei = globalFuncs.localStorage.getItem(gasPriceKey, null) ? +(globalFuncs.localStorage.getItem(gasPriceKey)) : 20;
+        $scope.txFees.Emission = 1111;//$scope.gasPrice.gwei * gasEmission;
+        $scope.txFees.Remission = 2222;//$scope.gasPrice.gwei * gasRemission;
+        $scope.txFees.RUR = 3333;//$scope.gasPrice.gwei * gasRUR;    
+    });
+
     function isEnough(valA, valB) {
         return new BigNumber(valA).lte(new BigNumber(valB));
     }
@@ -334,7 +351,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
 
             $scope.tx.to = bankAddress;
-            $scope.tx.gasLimit = libreService.coeff.gasRUR;
+            $scope.tx.gasLimit = gasRUR;
             $scope.tx.value = etherUnits.toEther(+oracleDeficit.data[0], 'wei');
             $scope.tx.unit = 'ether';
     

@@ -28,12 +28,12 @@
             </tr>
             <tr>
               <td class="small text-right">Gas Price:</td>
-              <td class="small text-left mono">{{gas}} GWEI</small>
+              <td class="small text-left mono">{{gasPrice.gwei}} GWEI</small>
               </td>
             </tr>
             <tr>
               <td class="small text-right">Max TX Fee:</td>
-              <td class="small text-left mono"> {{txFee.eth}} ETH</td>
+              <td class="small text-left mono"> {{txFees.Emission}} ETH</td>
             </tr>
 
           </tbody>
