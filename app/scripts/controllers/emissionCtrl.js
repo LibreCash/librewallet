@@ -137,7 +137,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     getContractData("calcTime"),
                     getContractData("readyOracles"),
                     getContractData("oracleCount"),
-                    getContractData("requestTime")
+                    getContractData("requestTime"),
+                    getTokenData("balanceOf", [walletService.wallet.getAddressString()]),
+                    getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress])            
                 ]).then((values) => {
                     let 
                         state = values[0],
@@ -146,13 +148,17 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         calcTime = values[3],
                         readyOracles = values[4],
                         oracleCount = values[5],
-                        requestTime = values[6];
+                        requestTime = values[6],
+                        tokenBalance = values[7],
+                        allowedTokens = values[8];
 
                     let stateDec = +state.data[0];
                     if ($scope.state != stateDec) {
                         stateWatcher(stateDec);
                     }
                     $scope.state = stateDec;
+                    $scope.allowedTokens = allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                    $scope.allTokens = tokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
 
                     $scope.readyOracles = +readyOracles.data[0];
                     $scope.oracleCount = +oracleCount.data[0];
@@ -221,7 +227,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     
 
         }
-    }, 1000);
+    }, 5000);
 
     function applyScope() {
         if (!$scope.$$phase) $scope.$apply();
