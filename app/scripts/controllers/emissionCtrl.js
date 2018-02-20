@@ -148,13 +148,13 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                 ]).then((values) => {
                     let 
                         state = values[0],
-                        balance = values[1],
+                        exchangerTokenBalance = values[1],
                         RURCost = values[2],
                         calcTime = values[3],
                         readyOracles = values[4],
                         oracleCount = values[5],
                         requestTime = values[6],
-                        tokenBalance = values[7],
+                        userTokenBalance = values[7],
                         allowedTokens = values[8];
 
                     let stateDec = +state.data[0];
@@ -163,7 +163,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     }
                     $scope.state = stateDec;
                     $scope.allowedTokens = allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-                    $scope.allTokens = tokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                    $scope.allTokens = userTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+
+                    $scope.tokenBalance = +exchangerTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
 
                     $scope.readyOracles = +readyOracles.data[0];
                     $scope.oracleCount = +oracleCount.data[0];

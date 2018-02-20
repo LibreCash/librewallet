@@ -80,11 +80,14 @@
       </div>
       <div class="col-sm-11">
         <br/><!-- todo br -> margin/padding? -->
-        <span>Buy rate</span>: {{ buyRate }}</a>
+        <span>Buy rate</span>: {{ buyRate }}
         <br/>
-        <span>Sell rate</span>: {{ sellRate }}</a>
+        <span>Sell rate</span>: {{ sellRate }}
         <br/>
-        <span>Rates are actual for</span>: {{ rateActualTime | secondsToDateTime | date:'HH:mm:ss' }}</a>
+        <span>Rates are actual for</span>: {{ rateActualTime | secondsToDateTime | date:'HH:mm:ss' }}
+        <br/>
+        <br/>
+        <span>Contract has</span>: {{ tokenBalance }} Libre
         <!-- todo hours, minutes + translation -->
       </div>
 

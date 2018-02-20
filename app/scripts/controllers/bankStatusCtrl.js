@@ -9,6 +9,8 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         balanceBank = 0,
         stateMsg = {};
 
+    $scope.loading = true;
+
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
             $scope.notifier.danger(msg);
@@ -19,6 +21,10 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     ajaxReq.getBalance(bankAddress, function(balanceData) {
         balanceBank = etherUnits.toEther(balanceData.data.balance, 'wei');
     });
+
+    function applyScope() {
+        if (!$scope.$$phase) $scope.$apply();
+    }
 
     $scope.ajaxReq = ajaxReq;
 
@@ -97,7 +103,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     };
 
     function getData(varsObject){
-        let promises = Object.keys(varsObject).map((key)=>getContractData(key));
+        let promises = Object.keys(varsObject).map((key) => getContractData(key));
         return Promise.all(promises);
     }
 
@@ -116,9 +122,9 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
 
     function fillData(varsObject) {
         return getData(varsObject)
-                .catch((e)=>console.log(e))
-                .then((data)=>processData(data,varsObject))
-                .then((data)=>{
+                .catch((e) => console.log(e))
+                .then((data) => processData(data, varsObject))
+                .then((data) => {
                     console.log(data);
                     $scope.contractData = data;
                 });
@@ -131,7 +137,9 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
             address: oracle[oraclesStruct.address],
             name: hexToString(oracle[oraclesStruct.name]),
             type: hexToString(oracle[oraclesStruct.type]),
+            waitQuery: oracle[oraclesStruct.waitQuery],
             updateTime: toUnixtime(oracle[oraclesStruct.updateTime]),
+            callbackTime: toUnixtime(oracle[oraclesStruct.callbackTime]),
             waiting: oracle[oraclesStruct.waitQuery],
             rate: normalizeRate(oracle[oraclesStruct.rate])
         });
@@ -147,12 +155,14 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
             let 
                 count = res.data[0],
                 oraclePromise = [];
-            for(let i=0; i<count;i++) oraclePromise.push(getOracle(i));
+            for (let i=0; i<count; i++) oraclePromise.push(getOracle(i));
             return Promise.all(oraclePromise);
         })
-        .then((result)=>{
-            console.log(result);
+        .then((result) => {
             $scope.oracles = result;
+            $scope.loading = false;
+            applyScope();
+            
         })
     }
 
