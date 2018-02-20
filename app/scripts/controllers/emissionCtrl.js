@@ -141,9 +141,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     getContractData("readyOracles"),
                     getContractData("oracleCount"),
                     getContractData("requestTime"),
-                    walletService.wallet == null ? 0 :
+                    walletService.wallet == null ? { data: 0} :
                         getTokenData("balanceOf", [walletService.wallet.getAddressString()]),
-                    walletService.wallet == null ? 0 :
+                    walletService.wallet == null ? { data: 0 } :
                         getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress])            
                 ]).then((values) => {
                     let 
