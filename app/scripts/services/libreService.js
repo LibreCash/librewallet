@@ -259,6 +259,9 @@ var libreService = function(walletService, $translate) {
                         });
 
                         var isCheckingTx = false,
+                        noTxCounter = 0,
+                        receiptInterval = 5000,
+                        txCheckingTimeout = 60 * 1000,
                         checkingTx = setInterval(() => {
                             if (!_scope[pendingName]) {
                                 clearInterval(checkingTx);
@@ -269,9 +272,18 @@ var libreService = function(walletService, $translate) {
                             console.log("resp", resp);
                             ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
                                 if (receipt.error) {
-                                    _scope[pendingName] = false;
-                                    _scope.notifier.danger(receipt.msg, 0);
-                                    console.log("receipt", receipt);
+                                    if (receipt.msg == "unknown transaction") {
+                                        console.log("tx not presented yet");
+                                        noTxCounter++;
+                                        if (noTxCounter > txCheckingTimeout / receiptInterval) {
+                                            _scope[pendingName] = false;
+                                            _scope.notifier.danger(receipt.msg, 0);
+                                        }
+                                        console.log("receipt", receipt);
+                                    } else {
+                                        _scope[pendingName] = false;
+                                        _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
+                                    }
                                 } else {
                                     if (receipt.data == null) {
                                         isCheckingTx = false;
@@ -294,7 +306,7 @@ var libreService = function(walletService, $translate) {
                                 }
                                 isCheckingTx = false;
                             });
-                        }, 2000);
+                        }, receiptInterval);
                     });
                 });
             } catch (e) {

@@ -469,6 +469,7 @@ LIBRE_orderAmount               :  'Amount',
 LIBRE_orderTimestamp            :  'Timestamp',
 LIBRE_orderLimit                :  'Rate Limit',
 LIBRE_orderNoOrders             :  'You have no orders',
+LIBRE_nullWallet                :  'Wallet variable is null',
 // do not rename LIBRE*_txOk, LIBRE*_txFail
 LIBREALLOWANCE_equal            :  'Allowance is equal to the value you want to set',
 LIBREALLOWANCE_txOk             :  'The approve transaction confirmed',
