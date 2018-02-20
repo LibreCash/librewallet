@@ -106,6 +106,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     function updateBalanceAndAllowance() {
+        if (walletService.wallet == null) {
+            return;
+        }
         getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
         getCashDataProcess("allowance", setAllowance, [walletService.wallet.getAddressString(), bankAddress]);
     }
@@ -138,8 +141,10 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     getContractData("readyOracles"),
                     getContractData("oracleCount"),
                     getContractData("requestTime"),
-                    getTokenData("balanceOf", [walletService.wallet.getAddressString()]),
-                    getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress])            
+                    walletService.wallet == null ? 0 :
+                        getTokenData("balanceOf", [walletService.wallet.getAddressString()]),
+                    walletService.wallet == null ? 0 :
+                        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress])            
                 ]).then((values) => {
                     let 
                         state = values[0],
@@ -310,6 +315,12 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     var approveTx = function() {
+        if (walletService.wallet == null) {
+            $translate("LIBRE_nullWallet").then((msg) => {
+                $scope.notifier.danger(msg);
+            })
+            return;
+        }
         getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]).then((allowanceData) => {
             if (allowanceData.error) {
                 $scope.notifier.danger(allowanceData.msg);
