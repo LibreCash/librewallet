@@ -141,7 +141,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         if ($scope.rateActualTime > 0) {
             $scope.rateActualTime--;
         }
-        applyScope();
+        if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
+            applyScope();
+        }
     }, 1000);
 
     var decreaseCalcTimer, decreaseRequestTimer, decreaseRatePeriodTimer, lastCalcTime, lastRequestTime, lastLastBlockTime,
