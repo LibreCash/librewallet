@@ -120,6 +120,30 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         }
     }
 
+    // on-page timers decreasing
+    setInterval(() => {
+        if ($scope.waitOraclesRemains > 0) {
+            $scope.waitOraclesRemains--;
+        }
+
+        let deadlineDays = $scope.deadlineRemains / (60 * 60 * 24),
+            antiMinute = 1 / (24 * 60); // 
+
+        if ($scope.deadlineRemains > 0) {
+            $scope.deadlineRemains--;
+        }
+
+        if (deadlineDays % 1 < antiMinute || deadlineDays % 1 > 1 - antiMinute) {
+            // if decimal part of days is less than ..., it comes to day changing
+            $scope.deadlineDays = Math.floor(deadlineDays);
+        }
+
+        if ($scope.rateActualTime > 0) {
+            $scope.rateActualTime--;
+        }
+        applyScope();
+    }, 1000);
+
     var decreaseCalcTimer, decreaseRequestTimer, decreaseRatePeriodTimer, lastCalcTime, lastRequestTime, lastLastBlockTime,
         deadline = 0, deadlineTimer;
     $scope.pendingOrderAllowCheck = false;
@@ -176,29 +200,13 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     }
 
                     if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
-                        clearInterval(decreaseCalcTimer);
                         $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
                         lastCalcTime = +calcTime.data[0];
-                        decreaseCalcTimer = setInterval(() => {
-                            if ($scope.rateActualTime > 0) {
-                                $scope.rateActualTime--;
-                            } else {
-                                clearInterval(decreaseCalcTimer);
-                            }
-                        }, 1000);
                     }
 
                     if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
-                        clearInterval(decreaseRequestTimer);
                         $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
-                        lastRequestTime = +requestTime.data[0];
-                        decreaseRequestTimer = setInterval(() => {
-                            if ($scope.waitOraclesRemains > 0) {
-                                $scope.waitOraclesRemains--;
-                            } else {
-                                clearInterval(decreaseRequestTimer);
-                            }
-                        }, 1000);
+                        lastRequestTime = +requestTime.data[0]
                     }
 
                     if (deadline == 0) {
@@ -208,18 +216,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         })
                     } else {
                         if (lastLastBlockTime != lastBlockTime) {
-                            clearInterval(deadlineTimer);
                             $scope.deadlineRemains = +deadline.data[0] - lastBlockTime;
                             $scope.deadlineDays = Math.floor($scope.deadlineRemains / (60 * 60 * 24));
-                            deadlineTimer = setInterval(() => {
-                                if ($scope.deadlineRemains > 0) {
-                                    $scope.deadlineRemains--;
-                                } else {
-                                    clearInterval(deadlineTimer);
-                                }
-                            }, 1000);
                         }
-    
                     }
 
                     if (lastLastBlockTime != lastBlockTime) {
