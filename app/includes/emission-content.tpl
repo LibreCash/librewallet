@@ -85,12 +85,15 @@
         <span>Sell rate</span>: {{ sellRate }}
         <br/>
         <span>Rates are actual for</span>: {{ rateActualTime | secondsToDateTime | date:'HH:mm:ss' }}
-        <br/>
-        <br/>
-        <span>Contract has</span>: {{ tokenBalance }} Libre
         <!-- todo hours, minutes + translation -->
       </div>
-
+      <div class="col-sm-11">
+        <span>Contract balances</span>:<br/>
+        {{ tokenBalance | number: 3 }} Libre<br/>
+        {{ ethBalance | number: 3 }} ETH
+        <!-- todo hours, minutes + translation -->
+      </div>
+      
       <!-- buy section -->
       <section ng-show="buyOrSell">
         <div class="col-sm-11">
@@ -106,7 +109,7 @@
                     ng-model="buyTXValue"
                     ng-disabled="tx.readOnly || checkTxReadOnly"
                     ng-class="Validator.isPositiveNumber(buyTXValue) ? 'is-valid' : 'is-invalid'"
-                    ng-change="changedTokens = buyTXValue * buyRate"/>
+                    ng-change="changedTokens = Validator.isPositiveNumber(buyTXValue) ? buyTXValue * buyRate : 0"/>
             <div class="input-group-btn">
               <span style="min-width: 170px"
                     class="btn btn-default"
@@ -133,7 +136,7 @@
               class="btn btn-default"
               data-toggle="modal"
               data-target="#buyTx"
-              ng-disabled="buyPending || !orderAllowed">
+              ng-disabled="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue) || changedTokens > tokenBalance">
             <strong>
               {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
             </strong>
@@ -175,7 +178,7 @@
               <div class="input-group-btn">
                 <button style="min-width: 170px"
                   class="btn btn-default"
-                  ng-disabled="approvePending"
+                  ng-disabled="approvePending || !Validator.isPositiveNumber(tokensToAllow)"
                   ng-click="generateApproveTx()">
                   <strong>
                     {{ approvePending ? 'LIBRE_txPending' : 'LIBRE_approve' | translate }}
@@ -215,7 +218,7 @@
                         ng-model="tokenValue"
                         ng-disabled="tx.readOnly || checkTxReadOnly"
                         ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"
-                        ng-change="changedEth = tokenValue / sellRate"/>
+                        ng-change="changedEth = Validator.isPositiveNumber(tokenValue) ? tokenValue / sellRate : 0"/>
                 <div class="input-group-btn">
                   <span style="min-width: 170px"
                         class="btn btn-default"
@@ -230,9 +233,9 @@
           
                 <!-- Amount to Send - Transfer Entire Balance -->
             <p class="col-xs-12" ng-hide="tx.readOnly">
-              <a ng-click="tokenValue = allowedTokens; changedEth = tokenValue / sellRate">
+              <a ng-click="tokenValue = (allowedTokens <= allTokens) ? allowedTokens : allTokens; changedEth = tokenValue / sellRate">
                 <span class="strong" translate="LIBRE_sellAllApproved">
-                  Sell All Approved
+                  Sell All Available Tokens
                 </span>
               </a>
             </p>
@@ -242,7 +245,7 @@
                 class="btn btn-default"
                 data-toggle="modal"
                 data-target="#sellTx"
-                ng-disabled="sellPending || !orderAllowed">
+                ng-disabled="sellPending || !orderAllowed || !Validator.isPositiveNumber(tokenValue) || changedEth > ethBalance">
                 <strong>
                   {{ sellPending ? 'LIBRE_txPending' : 'LIBRE_sell' | translate }}
                 </strong>

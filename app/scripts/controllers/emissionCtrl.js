@@ -157,6 +157,10 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         userTokenBalance = values[7],
                         allowedTokens = values[8];
 
+                    ajaxReq.getBalance(bankAddress, function(balanceData) {
+                        $scope.ethBalance = etherUnits.toEther(balanceData.data.balance, 'wei');
+                    });
+
                     let stateDec = +state.data[0];
                     if ($scope.state != stateDec) {
                         stateWatcher(stateDec);
