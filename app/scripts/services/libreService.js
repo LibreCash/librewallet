@@ -257,7 +257,8 @@ var libreService = function(walletService, $translate) {
                         _scope.wallet.setBalance(function() {
                             if (!_scope.$$phase) _scope.$apply();
                         });
-
+                        console.log("resp", resp);
+                        
                         var isCheckingTx = false,
                         noTxCounter = 0,
                         receiptInterval = 5000,
@@ -269,7 +270,6 @@ var libreService = function(walletService, $translate) {
                             }
                             if (isCheckingTx) return; // fixing doubling success messages
                             isCheckingTx = true;
-                            console.log("resp", resp);
                             ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
                                 if (receipt.error) {
                                     if (receipt.msg == "unknown transaction") {
@@ -285,6 +285,7 @@ var libreService = function(walletService, $translate) {
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
                                 } else {
+                                    console.log("receipt no error", receipt);
                                     if (receipt.data == null) {
                                         isCheckingTx = false;
                                         return; // next interval

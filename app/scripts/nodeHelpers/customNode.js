@@ -55,6 +55,15 @@ customNode.prototype.getTransactionReceipt = function(txHash, callback) {
         else callback({ error: false, msg: '', data: data.result });
     });
 }
+customNode.prototype.getLatestBlockData = function(callback) {
+    this.post({
+        method: 'eth_getBlockByNumber',
+        params: ['latest', false] // false means getting less tx data
+    }, function(data) {
+        if (data.error) callback({ error: true, msg: data.error.message, data: '' });
+        else callback({ error: false, msg: '', data: data.result });
+    });
+}
 customNode.prototype.getTransactionData = function(addr, callback) {
     var response = { error: false, msg: '', data: { address: addr, balance: '', gasprice: '', nonce: '' } };
     var parentObj = this;
