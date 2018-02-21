@@ -6,7 +6,7 @@ var libreService = function(walletService, $translate) {
         cash = getContract("LibreCash");
 
     const 
-        IS_DEBUG = false,
+        IS_DEBUG = true,
         MIN_READY_ORACLES = 2,
         states = [
             'LOCKED',
@@ -103,12 +103,12 @@ var libreService = function(walletService, $translate) {
     }
 
     function getDataAsync(to, abi, _var, params = []) {
-        if(IS_DEBUG) {
-        console.log({
-            from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
-            data: getDataString(abi[_var], params),
-            to
-        });
+        if (IS_DEBUG) {
+            console.log({
+                from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
+                data: getDataString(abi[_var], params),
+                to
+            });
         }
 
         return getEthCall({
@@ -116,7 +116,7 @@ var libreService = function(walletService, $translate) {
             data: getDataString(abi[_var], params),
             to
         })
-        .then((res)=>{
+        .then((res) => {
             res.varName = _var;
             res.data = encodeData(abi[_var],res.data);
             res.params = params;
@@ -257,7 +257,7 @@ var libreService = function(walletService, $translate) {
                         _scope.wallet.setBalance(function() {
                             if (!_scope.$$phase) _scope.$apply();
                         });
-                        console.log("resp", resp);
+                        if (IS_DEBUG) console.log("resp", resp);
                         
                         var isCheckingTx = false,
                         noTxCounter = 0,
@@ -273,19 +273,19 @@ var libreService = function(walletService, $translate) {
                             ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
                                 if (receipt.error) {
                                     if (receipt.msg == "unknown transaction") {
-                                        console.log("tx not presented yet");
+                                        if (IS_DEBUG) console.log("tx not presented yet");
                                         noTxCounter++;
                                         if (noTxCounter > txCheckingTimeout / receiptInterval) {
                                             _scope[pendingName] = false;
                                             _scope.notifier.danger(receipt.msg, 0);
                                         }
-                                        console.log("receipt", receipt);
+                                        if (IS_DEBUG) console.log("receipt", receipt);
                                     } else {
                                         _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
                                 } else {
-                                    console.log("receipt no error", receipt);
+                                    if (IS_DEBUG) console.log("receipt no error", receipt);
                                     if (receipt.data == null) {
                                         isCheckingTx = false;
                                         return; // next interval
@@ -386,7 +386,7 @@ var libreService = function(walletService, $translate) {
         return new Promise((resolve,reject)=>{
             ajaxReq.getLatestBlockData((res)=>{
                 if(res.error) reject(res);
-                if(IS_DEBUG) console.log(res);
+                if (IS_DEBUG) console.log(res);
                 resolve(res);
             }) 
         })     
@@ -449,7 +449,7 @@ var libreService = function(walletService, $translate) {
         return new Promise((resolve,reject)=>{
             ajaxReq.getLatestBlockData((res)=>{
                 if(res.error) reject(res);
-                if(IS_DEBUG) console.log(res);
+                if (IS_DEBUG) console.log(res);
                 resolve(res);
             }) 
         })
