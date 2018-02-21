@@ -31,7 +31,7 @@ customNode.prototype.getChainId = function(callback) {
 customNode.prototype.getBalance = function(addr, callback) {
     this.post({
         method: 'eth_getBalance',
-        params: [addr, 'pending']
+        params: [addr, 'latest']
     }, function(data) {
         if (data.error) callback({ error: true, msg: data.error.message, data: '' });
         else callback({ error: false, msg: '', data: { address: addr, balance: new BigNumber(data.result).toString() } });
@@ -55,13 +55,22 @@ customNode.prototype.getTransactionReceipt = function(txHash, callback) {
         else callback({ error: false, msg: '', data: data.result });
     });
 }
+customNode.prototype.getLatestBlockData = function(callback) {
+    this.post({
+        method: 'eth_getBlockByNumber',
+        params: ['latest', false] // false means getting less tx data
+    }, function(data) {
+        if (data.error) callback({ error: true, msg: data.error.message, data: '' });
+        else callback({ error: false, msg: '', data: data.result });
+    });
+}
 customNode.prototype.getTransactionData = function(addr, callback) {
     var response = { error: false, msg: '', data: { address: addr, balance: '', gasprice: '', nonce: '' } };
     var parentObj = this;
     var reqObj = [
-        { "id": parentObj.getRandomID(), "jsonrpc": "2.0", "method": "eth_getBalance", "params": [addr, 'pending'] },
+        { "id": parentObj.getRandomID(), "jsonrpc": "2.0", "method": "eth_getBalance", "params": [addr, 'latest'] },
         { "id": parentObj.getRandomID(), "jsonrpc": "2.0", "method": "eth_gasPrice", "params": [] },
-        { "id": parentObj.getRandomID(), "jsonrpc": "2.0", "method": "eth_getTransactionCount", "params": [addr, 'pending'] }
+        { "id": parentObj.getRandomID(), "jsonrpc": "2.0", "method": "eth_getTransactionCount", "params": [addr, 'latest'] }
     ];
     this.rawPost(reqObj, function(data) {
         for (var i in data) {
@@ -115,7 +124,8 @@ customNode.prototype.getEthCall = function(txobj, callback) {
             });
         }, 500);
     }
-    ethCallArr.calls.push({ "id": parentObj.getRandomID(), "jsonrpc": "2.0", "method": "eth_call", "params": [{ to: txobj.to, data: txobj.data }, 'pending'] });
+    ethCallArr.calls.push({ "id": parentObj.getRandomID(), "jsonrpc": "2.0", "method": "eth_call",
+        "params": [{ to: txobj.to, data: txobj.data }, 'latest'] });
     ethCallArr.callbacks.push(callback);
 }
 customNode.prototype.getTraceCall = function(txobj, callback) {
