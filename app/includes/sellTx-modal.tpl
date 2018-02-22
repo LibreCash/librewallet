@@ -46,10 +46,10 @@
         </p>
         <br />
         <button class="btn btn-default" data-dismiss="modal" translate="SENDModal_No">
-          No, get me out of here!
+          Yes, confirm
         </button>
         <button class="btn btn-primary" ng-click="generateSellLibreTx()" translate="SENDModal_Yes">
-          Yes, I am sure! Make transaction.
+          No, cancel
         </button>
       </div>
 

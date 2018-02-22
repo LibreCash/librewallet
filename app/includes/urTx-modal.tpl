@@ -6,8 +6,8 @@
 
         <button type="button" class="close" data-dismiss="modal" aria-label="Close Dialog">&times;</button>
 
-        <h2 class="modal-title text-center">
-            requestRates()
+        <h2 class="modal-title text-center" translate="MODAL_requestRates">
+            Request Rates
         </h2>
 
         <br />
@@ -46,18 +46,12 @@
         </p>
         <br />
         <button class="btn btn-default" data-dismiss="modal" translate="SENDModal_No">
-          No, get me out of here!
+          Yes. Confirm
         </button>
         <button class="btn btn-primary" ng-click="generateRURTx()" translate="SENDModal_Yes">
-          Yes, I am sure! Make transaction.
+          No. Cancel
         </button>
       </div>
-
-      <p class="small text-center" style="padding: 0px 5px;">
-        <a href="https://myetherwallet.github.io/knowledge-base/transactions/transactions-not-showing-or-pending.html" target="_blank" ref="noopener noreferrer">
-          The network is a bit overloaded. If you're having issues with TXs, please read me.
-        </a>
-      </p>
 
 
 
