@@ -23,7 +23,8 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         libreTransaction = libreService.methods.libreTransaction,
         canOrder = libreService.methods.canOrder,
         canRequest = libreService.methods.canRequest,
-        canCalc = libreService.methods.canCalc;
+        canCalc = libreService.methods.canCalc,
+        IS_DEBUG = libreService.IS_DEBUG;
 
     var gasPriceKey = "gasPrice";
 
@@ -115,7 +116,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     function stateWatcher(newState) {
         if (newState == libreService.coeff.statesENUM.PROCESSING_ORDERS) {
-            console.log("new rates");
+            if (IS_DEBUG) console.log("new rates");
             updateContractData();
         }
     }
@@ -192,8 +193,8 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         stateWatcher(stateDec);
                     }
                     $scope.state = stateDec;
-                    $scope.allowedTokens = allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-                    $scope.allTokens = userTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                    $scope.allowedTokens = +allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                    $scope.allTokens = +userTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
 
                     $scope.tokenBalance = +exchangerTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
 

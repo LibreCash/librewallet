@@ -7,6 +7,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         hexToString = libreService.methods.hexToString,
         stateName = libreService.methods.getStateName,
         balanceBank = 0,
+        IS_DEBUG = libreService.IS_DEBUG,
         stateMsg = {};
 
     $scope.loading = true;
@@ -125,7 +126,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
                 .catch((e) => console.log(e))
                 .then((data) => processData(data, varsObject))
                 .then((data) => {
-                    console.log(data);
+                    if (IS_DEBUG) console.log(data);
                     $scope.contractData = data;
                 });
     }

@@ -72,20 +72,26 @@
           </strong>
       </div>
       <div class="col-sm-11">
-        <span>LibreBank</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', bankAddress) }}" target="_blank" rel="noopener noreferrer">{{ bankAddress }}</a>
-        <br/>
-        <span>LibreCash</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', cashAddress) }}" target="_blank" rel="noopener noreferrer">{{ cashAddress }}</a>
-        <br/>
-        <span translate="LIBRE_checkLegit">Please, check its legitimity.</span>
+        <p>
+          <span>LibreBank</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', bankAddress) }}" target="_blank" rel="noopener noreferrer">{{ bankAddress }}</a>
+        </p>
+        <p>
+          <span>LibreCash</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', cashAddress) }}" target="_blank" rel="noopener noreferrer">{{ cashAddress }}</a>
+        </p>
+        <p>
+          <span translate="LIBRE_checkLegit">Please, check contracts legitimity.</span>
+        </p>
       </div>
       <div class="col-sm-11">
-        <br/><!-- todo br -> margin/padding? -->
-        <span>Buy rate</span>: {{ buyRate }}
-        <br/>
-        <span>Sell rate</span>: {{ sellRate }}
-        <br/>
-        <span>Rates are actual for</span>: {{ rateActualTime | secondsToDateTime | date:'HH:mm:ss' }}
-        <!-- todo hours, minutes + translation -->
+        <p>
+          <span>Buy rate</span>: {{ buyRate }}
+        </p>
+        <p>
+          <span>Sell rate</span>: {{ sellRate }}
+        </p>
+        <p>
+          <span>Rates are actual for</span>: {{ rateActualTime | secondsToDateTime | date:'HH:mm:ss' }}
+        </p>
       </div>
       <div class="col-sm-11">
         <span>Contract balances</span>:<br/>

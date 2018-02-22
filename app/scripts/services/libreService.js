@@ -485,7 +485,8 @@ var libreService = function(walletService, $translate) {
             canOrder: canOrder,
             getGasPrice: getGasPrice
         },
-        networkType: "rinkeby"
+        networkType: "rinkeby",
+        IS_DEBUG: IS_DEBUG
     };
 };
 module.exports = libreService;
