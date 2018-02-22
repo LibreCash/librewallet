@@ -290,6 +290,7 @@
         <button class="btn btn-block"
               data-toggle="modal"
               data-target="#urTx"
+              ng-click="estimateRURTx()"
               ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
               ng-disabled="(RURPending || CRPending) || !RURAllowed">
           {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}

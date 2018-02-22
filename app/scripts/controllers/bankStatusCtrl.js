@@ -6,11 +6,15 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         normalizeRate = libreService.methods.normalizeRate,
         hexToString = libreService.methods.hexToString,
         stateName = libreService.methods.getStateName,
+        getLatestBlockData = libreService.methods.getLatestBlockData,
         balanceBank = 0,
         IS_DEBUG = libreService.IS_DEBUG,
-        stateMsg = {};
+        stateMsg = {},
+        latestBlockTime = 0;
 
     $scope.loading = true;
+
+    const ORACLE_ACTUAL = 10 * 60; // todo fix constant
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
@@ -18,6 +22,13 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         });
         return;
     }
+
+    function updateLastBlockTime() {
+        getLatestBlockData().then((blockData) => {
+            latestBlockTime = parseInt(blockData.data.timestamp, 16);
+        });
+    }
+    updateLastBlockTime();
 
     ajaxReq.getBalance(bankAddress, function(balanceData) {
         balanceBank = etherUnits.toEther(balanceData.data.balance, 'wei');
@@ -114,9 +125,9 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
                 varItem = varsObject[item.varName];
                 
             return {
-                data:varItem.process ? varItem.process(item.data) : item.data[0],
-                translate:varItem.translate,
-                default:varItem.default
+                data: varItem.process ? varItem.process(item.data) : item.data[0],
+                translate: varItem.translate,
+                default: varItem.default
             };
         }));
     }
@@ -142,6 +153,8 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
             updateTime: toUnixtime(oracle[oraclesStruct.updateTime]),
             callbackTime: toUnixtime(oracle[oraclesStruct.callbackTime]),
             waiting: oracle[oraclesStruct.waitQuery],
+            outdated: oracle[oraclesStruct.waitQuery] &&
+                        (+oracle[oraclesStruct.updateTime] + ORACLE_ACTUAL < latestBlockTime),
             rate: normalizeRate(oracle[oraclesStruct.rate])
         });
     }

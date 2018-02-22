@@ -56,7 +56,7 @@
                         <td>{{ oracle.name }}</td>
                         <!--td>{{ oracle.type }}</td-->
                         <td>{{ oracle.updateTime }}</td>
-                        <td>{{ oracle.waiting ? ('LIBRE_waiting' | translate) : oracle.rate }}</td>
+                        <td>{{ oracle.outdated ? 'outdated' : (oracle.waiting ? ('LIBRE_waiting' | translate) : oracle.rate + 'Libre/ETH' ) }}</td>
                     </tr>
                 </table>
             </div>

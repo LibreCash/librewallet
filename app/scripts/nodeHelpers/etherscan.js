@@ -114,6 +114,7 @@ etherscan.getEstimatedGas = function(txobj, callback) {
         data: txobj.data,
         from: txobj.from
     }, function(data) {
+        console.log("eth gas data", data);
         if (data.error) callback({ error: true, msg: data.error.message, data: '' });
         else callback({ error: false, msg: '', data: data.result });
     });

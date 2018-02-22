@@ -222,8 +222,19 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    function libreTransaction (_scope, pendingName, opPrefix, translator, updater) {
-        _scope[pendingName] = true;
+    function getEstimatedGas(addr, txData) {
+        return new Promise((resolve, reject) => {
+            ajaxReq.getEstimatedGas(addr, (data) => {
+                console.log("addr", addr);
+                console.log("data", data);
+                if (data.error) reject(data);
+                resolve(data);
+            });
+        });
+    }
+
+    function libreTransaction (_scope, pendingName, opPrefix, translator, updater, justGetRaw = false) {
+        if (pendingName != null) _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
         
@@ -235,15 +246,18 @@ var libreService = function(walletService, $translate) {
                 if (IS_DEBUG) console.log(txData);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     if (rawTx.isError) {
-                        _scope[pendingName] = false;
+                        if (pendingName != null) _scope[pendingName] = false;
                         _scope.notifier.danger("generateTx: " + rawTx.error);
                         return;
+                    }
+                    if (justGetRaw) {
+                        return rawTx;
                     }
                     _scope.rawTx = rawTx.rawTx;
                     _scope.signedTx = rawTx.signedTx;
                     uiFuncs.sendTx(_scope.signedTx, function(resp) {
                         if (resp.isError) {
-                            _scope[pendingName] = false;
+                            if (pendingName != null) _scope[pendingName] = false;
                             _scope.notifier.danger("sendTx: " + resp.error);
                             return;
                         }
@@ -276,12 +290,12 @@ var libreService = function(walletService, $translate) {
                                         if (IS_DEBUG) console.log("tx not presented yet");
                                         noTxCounter++;
                                         if (noTxCounter > txCheckingTimeout / receiptInterval) {
-                                            _scope[pendingName] = false;
+                                            if (pendingName != null) _scope[pendingName] = false;
                                             _scope.notifier.danger(receipt.msg, 0);
                                         }
                                         if (IS_DEBUG) console.log("receipt", receipt);
                                     } else {
-                                        _scope[pendingName] = false;
+                                        if (pendingName != null) _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
                                 } else {
@@ -290,7 +304,7 @@ var libreService = function(walletService, $translate) {
                                         isCheckingTx = false;
                                         return; // next interval
                                     }
-                                    _scope[pendingName] = false;
+                                    if (pendingName != null) _scope[pendingName] = false;
                                     if (receipt.data.status == "0x1") { 
                                         translator(`LIBRE${opPrefix}_txOk`).then((msg) => {
                                             _scope.notifier.success(msg, 0);
@@ -303,7 +317,7 @@ var libreService = function(walletService, $translate) {
                                             _scope.notifier.danger(msg, 0);
                                         });
                                     }
-                                    _scope[pendingName] = false;
+                                    if (pendingName != null) _scope[pendingName] = false;
                                 }
                                 isCheckingTx = false;
                             });
@@ -311,7 +325,7 @@ var libreService = function(walletService, $translate) {
                     });
                 });
             } catch (e) {
-                _scope[pendingName] = false;
+                if (pendingName != null) _scope[pendingName] = false;
                 _scope.notifier.danger("getTransactionData: " + e);
             }
         });
@@ -483,7 +497,9 @@ var libreService = function(walletService, $translate) {
             canRequest: canRequest,
             canCalc: canCalc,
             canOrder: canOrder,
-            getGasPrice: getGasPrice
+            getGasPrice: getGasPrice,
+            getLatestBlockData: getLatestBlockData,
+            getEstimatedGas: getEstimatedGas
         },
         networkType: "rinkeby",
         IS_DEBUG: IS_DEBUG

@@ -24,6 +24,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         canOrder = libreService.methods.canOrder,
         canRequest = libreService.methods.canRequest,
         canCalc = libreService.methods.canCalc,
+        getEstimatedGas = libreService.methods.getEstimatedGas,
         IS_DEBUG = libreService.IS_DEBUG;
 
     var gasPriceKey = "gasPrice";
@@ -315,6 +316,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         $scope.tx.value = $scope.buyTXValue;
 
         libreTransaction($scope, "buyPending", "BUY", $translate, updateBalanceAndAllowance);
+        //libreTransaction($scope, "buyPending", "BUY", $translate, updateBalanceAndAllowance, true);
     }
 
 
@@ -392,6 +394,24 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.tx.unit = 'ether';
     
             libreTransaction($scope, "RURPending", "RUR", $translate, null);
+        });
+    }
+
+    $scope.estimateRURTx = function() {
+        if (IS_DEBUG) console.log("estimating");
+        getContractData("requestPrice", []).then((oracleDeficit) => {
+            $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
+
+            $scope.tx.to = bankAddress;
+            $scope.tx.gasLimit = gasRUR;
+            $scope.tx.value = etherUnits.toEther(+oracleDeficit.data[0], 'wei');
+            $scope.tx.unit = 'ether';
+    
+            let rawTx = libreTransaction($scope, null, "RUR", $translate, null, true);
+            getEstimatedGas($scope.wallet.getAddressString(), rawTx).then(function(gas) {
+                console.log("gas", gas);
+                $scope.URGas = +gas.data;
+            })
         });
     }
 
