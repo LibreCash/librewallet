@@ -130,7 +130,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
             type: hexToString(oracle[oraclesStruct.type]),
             updateTime: toUnixtime(oracle[oraclesStruct.updateTime]),
             waiting: oracle[oraclesStruct.waitQuery],
-            rate: normalizeRate(oracle[oraclesStruct.rate])
+            rate: `${normalizeRate(oracle[oraclesStruct.rate])} Libre/ETH`
         });
     }
 
