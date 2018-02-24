@@ -55,6 +55,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.deadlineRemains = 0;
     $scope.gasPrice = {};
     $scope.txFees = {};
+    $scope.txModal = { modalFunc: null };
 
     //$scope.allTokens = 'Loading';
     $scope.approvePending = false;
@@ -74,6 +75,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.buyModal = new Modal(document.getElementById('buyTx'));
     $scope.sellModal = new Modal(document.getElementById('sellTx'));
     $scope.urModal = new Modal(document.getElementById('urTx'));
+    $scope.txModal = new Modal(document.getElementById('txModal'));
 
     //$scope.allTokens = 'Loading';
     $scope.Validator = Validator;
@@ -269,30 +271,14 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     $scope.$watch(function() {
         return +globalFuncs.localStorage.getItem(gasPriceKey, null) +
-                gasEmission +
-                gasRemission +
-                gasUpdateRates +
-                $scope.updateRatesEstimatedGas +
-                $scope.buyEstimatedGas +
-                $scope.sellEstimatedGas;
+                $scope.txModal.maximumGas +
+                $scope.txModal.estimatedGas;
     }, function() {
         $scope.gasPrice.gwei = globalFuncs.localStorage.getItem(gasPriceKey, null) ? +(globalFuncs.localStorage.getItem(gasPriceKey)) : 20;
-        // -9 in the next line because of gigawei
-        $scope.txFees.buy = $scope.gasPrice.gwei * gasEmission / Math.pow(10, libreService.coeff.tokenDecimals - 9);
-        $scope.txFees.sell = $scope.gasPrice.gwei * gasRemission / Math.pow(10, libreService.coeff.tokenDecimals - 9);
-        $scope.txFees.updateRates = $scope.gasPrice.gwei * gasUpdateRates / Math.pow(10, libreService.coeff.tokenDecimals - 9);
-        if ($scope.updateRatesEstimatedGas == undefined) {
-            $scope.updateRatesEstimatedGas = 0;
-        }
-        if ($scope.buyEstimatedGas == undefined) {
-            $scope.buyEstimatedGas = 0;
-        }
-        if ($scope.sellEstimatedGas == undefined) {
-            $scope.sellEstimatedGas = 0;
-        }
-        $scope.txFees.updateRatesEstimated = $scope.gasPrice.gwei * $scope.updateRatesEstimatedGas / Math.pow(10, libreService.coeff.tokenDecimals - 9);
-        $scope.txFees.buyEstimated = $scope.gasPrice.gwei * $scope.buyEstimatedGas / Math.pow(10, libreService.coeff.tokenDecimals - 9);
-        $scope.txFees.sellEstimated = $scope.gasPrice.gwei * $scope.sellEstimatedGas / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        // -9 in the next lines because of gigawei
+        $scope.txModal.estimatedFee = $scope.gasPrice.gwei * $scope.txModal.estimatedGas / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        $scope.txModal.maximumFee = $scope.gasPrice.gwei * $scope.txModal.maximumGas / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        applyScope();
     });
 
     function isEnough(valA, valB) {
@@ -334,44 +320,71 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     $scope.generateApproveTx = function() {
-        approveTx();
+        $scope.approveTx();
     }
 
-    var approveTx = function() {
-        if (walletService.wallet == null) {
-            $translate("LIBRE_nullWallet").then((msg) => {
-                $scope.notifier.danger(msg);
-            })
-            return;
-        }
-        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]).then((allowanceData) => {
-            if (allowanceData.error) {
-                $scope.notifier.danger(allowanceData.msg);
-                return;
-            }
-            var allowance = +allowanceData.data[0];
+    $scope.approveModal = function() {
+        $scope.txModal.open();
+        $scope.txModal.cost = 0;
+        $scope.txModal.maximumGas = gasApprove;
+        $scope.txModal.modalClick = $scope.approveTx;
+    }
 
-            var tokensToAllowCount = $scope.tokensToAllow * Math.pow(10, libreService.coeff.tokenDecimals);
-            if (allowance == tokensToAllowCount) {
-                $translate("LIBREALLOWANCE_equal").then((msg) => {
-                    $scope.notifier.danger(msg);
+    function prepareApproveTx() {
+        return new Promise((resolve, reject) => {
+            if (walletService.wallet == null) {
+                $translate("LIBRE_nullWallet").then((msg) => {
+                    reject(msg);
                 })
-                return;
-            } else if (tokensToAllowCount < allowance) {
-                $scope.tx.data = getDataString(
-                    cashAbiRefactor["decreaseApproval"], [bankAddress, allowance - tokensToAllowCount]
-                );
-            } else {
-                // tokensToAllowCount > allowance
-                $scope.tx.data = getDataString(
-                    cashAbiRefactor["increaseApproval"], [bankAddress, tokensToAllowCount - allowance]
-                );
             }
-            $scope.tx.to = cashAddress;
-            $scope.tx.gasLimit = gasApprove;
-            $scope.tx.value = 0;
+            getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]).then((allowanceData) => {
+                if (allowanceData.error) {
+                    reject(allowanceData.msg);
+                }
+                var allowance = +allowanceData.data[0];
+                var tokensToAllowCount = $scope.tokensToAllow * Math.pow(10, libreService.coeff.tokenDecimals);
+                if (allowance == tokensToAllowCount) {
+                    $translate("LIBREALLOWANCE_equal").then((msg) => {
+                        reject(msg);
+                    })
+                } else if (tokensToAllowCount < allowance) {
+                    $scope.tx.data = getDataString(
+                        cashAbiRefactor["decreaseApproval"], [bankAddress, allowance - tokensToAllowCount]
+                    );
+                } else {
+                    // tokensToAllowCount > allowance
+                    $scope.tx.data = getDataString(
+                        cashAbiRefactor["increaseApproval"], [bankAddress, tokensToAllowCount - allowance]
+                    );
+                }
+                $scope.tx.to = cashAddress;
+                $scope.tx.gasLimit = gasApprove;
+                $scope.tx.value = 0;
+                resolve();
+            });
+        });
+    }
 
-            libreTransaction($scope, "approvePending", "ALLOWANCE", $translate, updateBalanceAndAllowance);
+    $scope.approveTx = function(estimate = false) {
+        if (!estimate) $scope.txModal.close();
+        prepareApproveTx().then(function() {
+            if (!estimate) {
+                libreTransaction($scope, "approvePending", "ALLOWANCE", $translate, updateBalanceAndAllowance);
+            } else {
+                console.log("EST~IMATING APPROve");
+                getLibreRawTx($scope).then((rawTx) => {
+                    console.log("rawtx", rawTx);
+                    return getEstimatedGas(rawTx);
+                }).then(function(gas) {
+                    console.log("gas", gas);
+                    $scope.txModal.estimatedGas = +gas.data;
+                }, function(error) {
+                    $scope.notifier.danger(error.msg);
+                });
+            }
+        },
+        function(err) {
+            $scope.notifier.danger(err);
         });
     }
 
@@ -408,6 +421,15 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     
             libreTransaction($scope, "updateRatesPending", "RUR", $translate, null);
         });
+    }
+
+    $scope.prepareModal = function() {
+        $scope.txModal.title = "";
+        $scope.txModal.cost = "-";
+        $scope.txModal.estimatedGas = "-";
+        $scope.txModal.maximumGas = "-";
+        $scope.txModal.estimatedFee = "-";
+        $scope.txModal.maximumFee = "-";
     }
 
     $scope.estimateUpdateRatesTx = function() {
@@ -448,7 +470,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     $scope.estimateBuyTx = function() {
-        console.log("est buy");
         let txData = getDataString(bankAbiRefactor["buyTokens"], [$scope.wallet.getAddressString()]);
 
         $scope.tx.data = txData;

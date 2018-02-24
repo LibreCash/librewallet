@@ -33,6 +33,8 @@
       @@if (site === 'mew' ) { @@include( './emission-content.tpl', { "site": "mew" } ) }
       @@if (site === 'cx'  ) { @@include( './emission-content.tpl', { "site": "cx"  } ) }
 
+      @@if (site === 'mew' ) { @@include( './tx-modal.tpl',   { "site": "mew" } ) }
+      @@if (site === 'cx'  ) { @@include( './tx-modal.tpl',   { "site": "cx"  } ) }
       @@if (site === 'mew' ) { @@include( './buyTx-modal.tpl',   { "site": "mew" } ) }
       @@if (site === 'cx'  ) { @@include( './buyTx-modal.tpl',   { "site": "cx"  } ) }
       @@if (site === 'mew' ) { @@include( './sellTx-modal.tpl',   { "site": "mew" } ) }

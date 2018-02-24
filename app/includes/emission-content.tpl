@@ -186,7 +186,7 @@
                 <button style="min-width: 170px"
                   class="btn btn-default"
                   ng-disabled="approvePending || !Validator.isPositiveNumber(tokensToAllow)"
-                  ng-click="generateApproveTx()">
+                  ng-click="prepareModal(); approveModal(); approveTx(true);">
                   <strong>
                     {{ approvePending ? 'LIBRE_txPending' : 'LIBRE_approve' | translate }}
                   </strong>
@@ -316,7 +316,7 @@
               ng-click="generateCalcRatesTx()"
               ng-class="calcRatesAllowed ? 'btn-success' : 'btn-default'"
               ng-disabled="(updateRatesPending || calcRatesPending) || !calcRatesAllowed">
-          {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
+          {{ calcRatesPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
         </button>
       </div>
     </section>

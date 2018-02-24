@@ -104,11 +104,12 @@ var libreService = function(walletService, $translate) {
 
     function getDataAsync(to, abi, _var, params = []) {
         if (IS_DEBUG) {
-            console.log({
-                from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
-                data: getDataString(abi[_var], params),
-                to
-            });
+            //console.log({
+            //    from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
+            //    data: getDataString(abi[_var], params),
+            //    to
+            //});
+            console.log(`[CALL ${getDataString(abi[_var], params)}]`);
         }
 
         return getEthCall({
@@ -246,6 +247,7 @@ var libreService = function(walletService, $translate) {
                         _scope.notifier.danger("generateTx: " + rawTx.error);
                         reject(rawTx);
                     }
+                    console.log("RAW   ", rawTx);
                     resolve(rawTx);
                 });
             });
