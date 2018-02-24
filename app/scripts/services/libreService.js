@@ -28,8 +28,8 @@ var libreService = function(walletService, $translate) {
             gasEmission: 300000, // TODO:Actualize it
             gasRemission: 300000, //TODO:Actualize it
             gasApprove: 70000,
-            gasRUR: 1000000, // Actualize it
-            gasCR: 300000,
+            gasUpdateRates: 1000000, // Actualize it
+            gasCalcRates: 300000,
             statesENUM: statesENUM,
             isDebug: IS_DEBUG
         };
@@ -214,18 +214,17 @@ var libreService = function(walletService, $translate) {
     }
 
     function getTransactionData(addr) {
-        return new Promise((resolve,reject)=>{
-            ajaxReq.getTransactionData(addr,(data)=>{
+        return new Promise((resolve,reject) => {
+            ajaxReq.getTransactionData(addr, (data) => {
                 if(data.error) reject(data);
                 resolve(data);
             });
         });
     }
 
-    function getEstimatedGas(addr, txData) {
+    function getEstimatedGas(txData) {
         return new Promise((resolve, reject) => {
-            ajaxReq.getEstimatedGas(addr, (data) => {
-                console.log("addr", addr);
+            ajaxReq.getEstimatedGas(txData, (data) => {
                 console.log("data", data);
                 if (data.error) reject(data);
                 resolve(data);
@@ -233,7 +232,27 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    function libreTransaction (_scope, pendingName, opPrefix, translator, updater, justGetRaw = false) {
+    function getLibreRawTx(_scope) {
+        return new Promise((resolve, reject) => {
+            if (_scope.wallet == null) throw globalFuncs.errorMsgs[3];
+            else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
+            let userWallet = _scope.wallet.getAddressString();
+            getTransactionData(userWallet).then((data) => {
+                var txData = uiFuncs.getTxData(_scope);
+                console.log("txData", txData);
+                uiFuncs.generateTx(txData, function(rawTx) {
+                    if (rawTx.isError) {
+                        if (pendingName != null) _scope[pendingName] = false;
+                        _scope.notifier.danger("generateTx: " + rawTx.error);
+                        reject(rawTx);
+                    }
+                    resolve(rawTx);
+                });
+            });
+        });    
+    }
+
+    function libreTransaction(_scope, pendingName, opPrefix, translator, updater, justGetRaw = false) {
         if (pendingName != null) _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
@@ -248,9 +267,10 @@ var libreService = function(walletService, $translate) {
                     if (rawTx.isError) {
                         if (pendingName != null) _scope[pendingName] = false;
                         _scope.notifier.danger("generateTx: " + rawTx.error);
-                        return;
+                        return 0;
                     }
                     if (justGetRaw) {
+                        console.log("rraw", rawTx);
                         return rawTx;
                     }
                     _scope.rawTx = rawTx.rawTx;
@@ -397,9 +417,9 @@ var libreService = function(walletService, $translate) {
     };
 
     function getLatestBlockData() {
-        return new Promise((resolve,reject)=>{
-            ajaxReq.getLatestBlockData((res)=>{
-                if(res.error) reject(res);
+        return new Promise((resolve, reject) => {
+            ajaxReq.getLatestBlockData((res) => {
+                if (res.error) reject(res);
                 if (IS_DEBUG) console.log(res);
                 resolve(res);
             }) 
@@ -449,7 +469,7 @@ var libreService = function(walletService, $translate) {
                 from: options.from,
                 data: options.data,
                 to:options.to
-            },(res)=>{
+            }, (res) => {
                 if(!res.error && res.data != '0x'){
                     resolve(res);
                 } else {
@@ -460,9 +480,9 @@ var libreService = function(walletService, $translate) {
     }
 
     function getLatestBlockData() {
-        return new Promise((resolve,reject)=>{
-            ajaxReq.getLatestBlockData((res)=>{
-                if(res.error) reject(res);
+        return new Promise((resolve, reject) => {
+            ajaxReq.getLatestBlockData((res) => {
+                if (res.error) reject(res);
                 if (IS_DEBUG) console.log(res);
                 resolve(res);
             }) 
@@ -494,6 +514,7 @@ var libreService = function(walletService, $translate) {
             getStateName: getStateName,
             fillStateData: fillStateData,
             libreTransaction: libreTransaction,
+            getLibreRawTx: getLibreRawTx,
             canRequest: canRequest,
             canCalc: canCalc,
             canOrder: canOrder,

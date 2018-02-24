@@ -142,6 +142,7 @@
               class="btn btn-default"
               data-toggle="modal"
               data-target="#buyTx"
+              ng-click="estimateBuyTx()"
               ng-disabled="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue) || changedTokens > tokenBalance">
             <strong>
               {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
@@ -251,6 +252,7 @@
                 class="btn btn-default"
                 data-toggle="modal"
                 data-target="#sellTx"
+                ng-click="estimateSellTx()"
                 ng-disabled="sellPending || !orderAllowed || !Validator.isPositiveNumber(tokenValue) || changedEth > ethBalance">
                 <strong>
                   {{ sellPending ? 'LIBRE_txPending' : 'LIBRE_sell' | translate }}
@@ -282,18 +284,18 @@
     </section>
   
     <section ng-show="state == states.REQUEST_RATES">
-      <div class="col-sm-11" ng-show="RURAllowed">
-        <span translate="LIBRE_RURCost">Update rates cost</span>: {{ RURCost }} ETH
+      <div class="col-sm-11" ng-show="updateRatesAllowed">
+        <span translate="LIBRE_RURCost">Update rates cost</span>: {{ updateRatesCost }} ETH
       </div>
 
       <div class="col-sm-5">
         <button class="btn btn-block"
               data-toggle="modal"
               data-target="#urTx"
-              ng-click="estimateRURTx()"
-              ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
-              ng-disabled="(RURPending || CRPending) || !RURAllowed">
-          {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
+              ng-click="estimateUpdateRatesTx()"
+              ng-class="updateRatesAllowed ? 'btn-success' : 'btn-default'"
+              ng-disabled="(updateRatesPending || calcRatesPending) || !updateRatesAllowed">
+          {{ updateRatesPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
         </button>
       </div>
     </section>
@@ -311,9 +313,9 @@
       </div>
       <div class="col-sm-5">
         <button class="btn btn-block"
-              ng-click="generateCRTx()"
-              ng-class="CRAllowed ? 'btn-success' : 'btn-default'"
-              ng-disabled="(RURPending || CRPending) || !CRAllowed">
+              ng-click="generateCalcRatesTx()"
+              ng-class="calcRatesAllowed ? 'btn-success' : 'btn-default'"
+              ng-disabled="(updateRatesPending || calcRatesPending) || !calcRatesAllowed">
           {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
         </button>
       </div>

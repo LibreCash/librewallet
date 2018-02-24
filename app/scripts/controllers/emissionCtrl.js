@@ -17,10 +17,11 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         rateMultiplier = libreService.coeff.rateMultiplier,
         gasEmission = libreService.coeff.gasEmission,
         gasRemission = libreService.coeff.gasRemission,
-        gasRUR = libreService.coeff.gasRUR,
+        gasUpdateRates = libreService.coeff.gasUpdateRates,
         gasApprove = libreService.coeff.gasApprove,
         fillStateData = libreService.methods.fillStateData,
         libreTransaction = libreService.methods.libreTransaction,
+        getLibreRawTx = libreService.methods.getLibreRawTx,
         canOrder = libreService.methods.canOrder,
         canRequest = libreService.methods.canRequest,
         canCalc = libreService.methods.canCalc,
@@ -41,7 +42,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     $scope.cashAddress = cashAddress;
     $scope.bankAddress = bankAddress;
-    $scope.RURCost = 'n/a';
+    $scope.updateRatesCost = 'n/a';
     $scope.buyOrSell = true;
 
     $scope.states = libreService.coeff.statesENUM;
@@ -61,14 +62,14 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.buyPending = false;
     $scope.orderAllowed = false;
     $scope.CRPending = false;
-    $scope.RURPending = false;
-    $scope.RURAllowed = false;
-    $scope.CRAllowed = false;
+    $scope.updateRatesPending = false;
+    $scope.updateRatesAllowed = false;
+    $scope.calcRatesAllowed = false;
     $scope.changedTokens = 0;
     $scope.changedEth = 0;
-    $scope.emissionLimit = gasEmission;
-    $scope.remissionLimit = gasRemission;
-    $scope.urLimit = gasRUR;
+    $scope.buyLimit = gasEmission;
+    $scope.sellLimit = gasRemission;
+    $scope.updateRatesLimit = gasUpdateRates;
     // modals
     $scope.buyModal = new Modal(document.getElementById('buyTx'));
     $scope.sellModal = new Modal(document.getElementById('sellTx'));
@@ -148,8 +149,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         }
     }, 1000);
 
-    var decreaseCalcTimer, decreaseRequestTimer, decreaseRatePeriodTimer, lastCalcTime, lastRequestTime, lastLastBlockTime,
-        deadline = 0, deadlineTimer;
+    var lastCalcTime, lastRequestTime, lastLastBlockTime, deadline = 0;
     $scope.pendingOrderAllowCheck = false;
     setInterval(() => {
         if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
@@ -169,7 +169,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     getContractData("readyOracles"),
                     getContractData("oracleCount"),
                     getContractData("requestTime"),
-                    walletService.wallet == null ? { data: 0} :
+                    walletService.wallet == null ? { data: 0 } :
                         getTokenData("balanceOf", [walletService.wallet.getAddressString()]),
                     walletService.wallet == null ? { data: 0 } :
                         getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress])            
@@ -177,7 +177,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     let 
                         state = values[0],
                         exchangerTokenBalance = values[1],
-                        RURCost = values[2],
+                        updateRatesCost = values[2],
                         calcTime = values[3],
                         readyOracles = values[4],
                         oracleCount = values[5],
@@ -203,10 +203,10 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     $scope.oracleCount = +oracleCount.data[0];
 
                     $scope.orderAllowed = (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS);
-                    $scope.RURAllowed = (stateDec == libreService.coeff.statesENUM.REQUEST_RATES);
-                    $scope.CRAllowed = (stateDec == libreService.coeff.statesENUM.CALC_RATES);
-                    if ($scope.RURAllowed) {
-                        $scope.RURCost = RURCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                    $scope.updateRatesAllowed = (stateDec == libreService.coeff.statesENUM.REQUEST_RATES);
+                    $scope.calcRatesAllowed = (stateDec == libreService.coeff.statesENUM.CALC_RATES);
+                    if ($scope.updateRatesAllowed) {
+                        $scope.updateRatesCost = updateRatesCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
                     }
 
                     if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
@@ -271,13 +271,28 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         return +globalFuncs.localStorage.getItem(gasPriceKey, null) +
                 gasEmission +
                 gasRemission +
-                gasRUR;
+                gasUpdateRates +
+                $scope.updateRatesEstimatedGas +
+                $scope.buyEstimatedGas +
+                $scope.sellEstimatedGas;
     }, function() {
         $scope.gasPrice.gwei = globalFuncs.localStorage.getItem(gasPriceKey, null) ? +(globalFuncs.localStorage.getItem(gasPriceKey)) : 20;
         // -9 in the next line because of gigawei
-        $scope.txFees.Emission = $scope.gasPrice.gwei * gasEmission / Math.pow(10, libreService.coeff.tokenDecimals - 9);
-        $scope.txFees.Remission = $scope.gasPrice.gwei * gasRemission / Math.pow(10, libreService.coeff.tokenDecimals - 9);
-        $scope.txFees.RUR = $scope.gasPrice.gwei * gasRUR / Math.pow(10, libreService.coeff.tokenDecimals - 9);    
+        $scope.txFees.buy = $scope.gasPrice.gwei * gasEmission / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        $scope.txFees.sell = $scope.gasPrice.gwei * gasRemission / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        $scope.txFees.updateRates = $scope.gasPrice.gwei * gasUpdateRates / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        if ($scope.updateRatesEstimatedGas == undefined) {
+            $scope.updateRatesEstimatedGas = 0;
+        }
+        if ($scope.buyEstimatedGas == undefined) {
+            $scope.buyEstimatedGas = 0;
+        }
+        if ($scope.sellEstimatedGas == undefined) {
+            $scope.sellEstimatedGas = 0;
+        }
+        $scope.txFees.updateRatesEstimated = $scope.gasPrice.gwei * $scope.updateRatesEstimatedGas / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        $scope.txFees.buyEstimated = $scope.gasPrice.gwei * $scope.buyEstimatedGas / Math.pow(10, libreService.coeff.tokenDecimals - 9);
+        $scope.txFees.sellEstimated = $scope.gasPrice.gwei * $scope.sellEstimatedGas / Math.pow(10, libreService.coeff.tokenDecimals - 9);
     });
 
     function isEnough(valA, valB) {
@@ -316,9 +331,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         $scope.tx.value = $scope.buyTXValue;
 
         libreTransaction($scope, "buyPending", "BUY", $translate, updateBalanceAndAllowance);
-        //libreTransaction($scope, "buyPending", "BUY", $translate, updateBalanceAndAllowance, true);
     }
-
 
     $scope.generateApproveTx = function() {
         approveTx();
@@ -379,55 +392,92 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         libreTransaction($scope, "sellPending", "SELL", $translate, updateBalanceAndAllowance);
     }
 
-    $scope.generateRURTx = function() {
-        canRequest($scope, RURTx);
+    $scope.generateUpdateRatesTx = function() {
+        canRequest($scope, updateRatesTx);
     }
 
-    var RURTx = function() {
+    var updateRatesTx = function() {
         $scope.urModal.close();
         getContractData("requestPrice", []).then((oracleDeficit) => {
             $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
 
             $scope.tx.to = bankAddress;
-            $scope.tx.gasLimit = gasRUR;
+            $scope.tx.gasLimit = gasUpdateRates;
             $scope.tx.value = etherUnits.toEther(+oracleDeficit.data[0], 'wei');
             $scope.tx.unit = 'ether';
     
-            libreTransaction($scope, "RURPending", "RUR", $translate, null);
+            libreTransaction($scope, "updateRatesPending", "RUR", $translate, null);
         });
     }
 
-    $scope.estimateRURTx = function() {
-        if (IS_DEBUG) console.log("estimating");
+    $scope.estimateUpdateRatesTx = function() {
         getContractData("requestPrice", []).then((oracleDeficit) => {
-            $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
 
+            $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
             $scope.tx.to = bankAddress;
-            $scope.tx.gasLimit = gasRUR;
+            $scope.tx.gasLimit = gasUpdateRates;
             $scope.tx.value = etherUnits.toEther(+oracleDeficit.data[0], 'wei');
             $scope.tx.unit = 'ether';
     
-            let rawTx = libreTransaction($scope, null, "RUR", $translate, null, true);
-            getEstimatedGas($scope.wallet.getAddressString(), rawTx).then(function(gas) {
-                console.log("gas", gas);
-                $scope.URGas = +gas.data;
-            })
+            return getLibreRawTx($scope);
+        }).then((rawTx) => {
+            return getEstimatedGas(rawTx);
+        }).then(function(gas) {
+            $scope.updateRatesEstimatedGas = +gas.data;
+        }, function(error) {
+            $scope.notifier.danger(error.msg);
         });
     }
 
-    $scope.generateCRTx = function() {
-        canCalc($scope, CRTx);
+    $scope.estimateSellTx = function() {
+        var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals)
+        $scope.tx.data = getDataString(bankAbiRefactor["sellTokens"], 
+            [$scope.wallet.getAddressString(), tokenCount]);
+
+        $scope.tx.to = bankAddress;
+        $scope.tx.gasLimit = gasRemission;
+        $scope.tx.value = 0;
+
+        getLibreRawTx($scope).then((rawTx) => {
+            return getEstimatedGas(rawTx);
+        }).then(function(gas) {
+            $scope.sellEstimatedGas = +gas.data;
+        }, function(error) {
+            $scope.notifier.danger(error.msg);
+        });
     }
 
-    var CRTx = function () {
+    $scope.estimateBuyTx = function() {
+        console.log("est buy");
+        let txData = getDataString(bankAbiRefactor["buyTokens"], [$scope.wallet.getAddressString()]);
+
+        $scope.tx.data = txData;
+        $scope.tx.to = bankAddress;
+        $scope.tx.gasLimit = gasEmission;
+        $scope.tx.value = $scope.buyTXValue;
+
+        getLibreRawTx($scope).then((rawTx) => {
+            return getEstimatedGas(rawTx);
+        }).then(function(gas) {
+            $scope.buyEstimatedGas = +gas.data;
+        }, function(error) {
+            $scope.notifier.danger(error.msg);
+        });
+    }
+
+    $scope.generateCalcRatesTx = function() {
+        canCalc($scope, calcRatesTx);
+    }
+
+    var calcRatesTx = function () {
         $scope.tx.data = getDataString(bankAbiRefactor["calcRates"], []);
 
         $scope.tx.to = bankAddress;
-        $scope.tx.gasLimit = libreService.coeff.gasCR;
+        $scope.tx.gasLimit = libreService.coeff.gasCalcRates;
         $scope.tx.value = 0;
         $scope.tx.unit = 'ether';
 
-        libreTransaction($scope, "CRPending", "CR", $translate, null);
+        libreTransaction($scope, "calcRatesPending", "CR", $translate, null);
     }
 
     $scope.transferAllBalance = function() {

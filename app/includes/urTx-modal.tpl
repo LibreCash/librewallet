@@ -10,31 +10,35 @@
             requestRates()
         </h2>
 
-        <br />
-        est {{URGas}}
-
         <table class="table small table-condensed table-hover">
           <tbody>
             <tr>
               <td class="small text-right">Method cost:</td>
-              <td class="small text-left mono">{{RURCost}} ETH</td>
+              <td class="small text-left mono">{{updateRatesCost}} ETH</td>
             </tr>
             <tr>
               <td class="small text-right">Account Balance:</td>
               <td class="small text-left mono">{{wallet.balance}}</td>
             </tr>
             <tr>
-              <td class="small text-right">Gas Limit:</td>
-              <td class="small text-left mono">{{urLimit}}</td>
-            </tr>
-            <tr>
               <td class="small text-right">Gas Price:</td>
-              <td class="small text-left mono">{{gasPrice.gwei}} GWEI</small>
-              </td>
+              <td class="small text-left mono">{{gasPrice.gwei}} GWEI</td>
             </tr>
             <tr>
-              <td class="small text-right">Max TX Fee:</td>
-              <td class="small text-left mono"> {{txFees.RUR}} ETH</td>
+              <td class="small text-right">Estimated Gas:</td>
+              <td class="small text-left mono">{{updateRatesEstimatedGas}}</td>
+            </tr>
+            <tr>
+              <td class="small text-right">Maximum Gas:</td>
+              <td class="small text-left mono">{{updateRatesLimit}}</td>
+            </tr>
+            <tr>
+              <td class="small text-right">Estimated TX Fee:</td>
+              <td class="small text-left mono">{{txFees.updateRatesEstimated}} ETH</td>
+            </tr>  
+            <tr>
+              <td class="small text-right">Maximum TX Fee:</td>
+              <td class="small text-left mono">{{txFees.updateRates}} ETH</td>
             </tr>
 
           </tbody>
@@ -49,7 +53,7 @@
         <button class="btn btn-default" data-dismiss="modal" translate="SENDModal_No">
           No, get me out of here!
         </button>
-        <button class="btn btn-primary" ng-click="generateRURTx()" translate="SENDModal_Yes">
+        <button class="btn btn-primary" ng-click="generateUpdateRatesTx()" translate="SENDModal_Yes">
           Yes, I am sure! Make transaction.
         </button>
       </div>

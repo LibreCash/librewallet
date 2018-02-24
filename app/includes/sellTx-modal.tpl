@@ -23,19 +23,25 @@
               <td class="small text-left mono">{{wallet.balance}}</td>
             </tr>
             <tr>
-              <td class="small text-right">Gas Limit:</td>
-              <td class="small text-left mono">{{remissionLimit}}</td>
-            </tr>
-            <tr>
               <td class="small text-right">Gas Price:</td>
-              <td class="small text-left mono">{{gasPrice.gwei}} GWEI</small>
-              </td>
+              <td class="small text-left mono">{{gasPrice.gwei}} GWEI</td>
             </tr>
             <tr>
-              <td class="small text-right">Max TX Fee:</td>
-              <td class="small text-left mono"> {{txFees.Remission}} ETH</td>
+              <td class="small text-right">Estimated Gas:</td>
+              <td class="small text-left mono">{{sellEstimatedGas}}</td>
             </tr>
-
+            <tr>
+              <td class="small text-right">Maximum Gas:</td>
+              <td class="small text-left mono">{{sellLimit}}</td>
+            </tr>
+            <tr>
+              <td class="small text-right">Estimated TX Fee:</td>
+              <td class="small text-left mono"> {{txFees.sellEstimated}} ETH</td>
+            </tr>  
+            <tr>
+              <td class="small text-right">Maximum TX Fee:</td>
+              <td class="small text-left mono"> {{txFees.sell}} ETH</td>
+            </tr>
           </tbody>
         </table>
       </div>
