@@ -1,5 +1,5 @@
 'use strict';
-var bankStatusCtrl = function($scope, libreService, $translate) {
+var statusCtrl = function($scope, libreService, $translate) {
     var bankAddress = libreService.bank.address,
         getContractData = libreService.methods.getContractData,
         toUnixtime = libreService.methods.toUnixtime,
@@ -184,4 +184,4 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     fillOracles();
 
 };
-module.exports = bankStatusCtrl;
+module.exports = statusCtrl;

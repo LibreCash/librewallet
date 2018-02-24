@@ -1,5 +1,5 @@
-<!-- Bank Status Page -->
-<main class="tab-pane active" ng-if="globalService.currentTab==globalService.tabs.bankStatus.id" ng-controller='bankStatusCtrl' ng-cloak>
+<!-- Status Page -->
+<main class="tab-pane active" ng-if="globalService.currentTab==globalService.tabs.status.id" ng-controller='statusCtrl' ng-cloak>
     <div class="row justify-content-md-center">
         <section ng-show="loading">
             Loading...
@@ -8,8 +8,8 @@
             <nav class="container nav-container">
                 <div class="nav-scroll">
                 <ul class="nav-inner">
-                    <li class="nav-item {{ showOracles ? '' : 'active' }}" ng-click="showOracles=!showOracles"><a translate="BANKSTATUS_contractStatus">Contract status</a></li>
-                    <li class="nav-item {{ showOracles ? 'active' : '' }}" ng-click="showOracles=!showOracles"><a translate="BANKSTATUS_oraclesStatus">Oracles</a></li>
+                    <li class="nav-item {{ showOracles ? '' : 'active' }}" ng-click="showOracles=!showOracles"><a translate="LIBRESTATUS_contractStatus">Contract status</a></li>
+                    <li class="nav-item {{ showOracles ? 'active' : '' }}" ng-click="showOracles=!showOracles"><a translate="LIBRESTATUS_oraclesStatus">Oracles</a></li>
                 </ul>
                 </div>
             </nav>
@@ -17,10 +17,10 @@
 
             </div>
             <div class="col-lg-10 col-lg-offset-1" ng-hide="showOracles">
-                <h1 translate="BANKSTATUS_contractStatus">Contract Status</h1>
+                <h1 translate="LIBRESTATUS_contractStatus">Contract Status</h1>
                 <table class="table">
                     <tr>
-                        <td translate="BANKSTATUS_bankContractAddress">Bank contract address</td>
+                        <td translate="LIBRESTATUS_bankContractAddress">Bank contract address</td>
                         <td>
                             <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank" rel="noopener noreferrer">
                                 {{ address }}
@@ -38,15 +38,15 @@
                 </table>
             </div>   
             <div class="col-lg-10 col-lg-offset-1" ng-show="showOracles">
-                <h1 translate="BANKSTATUS_oraclesStatus">Oracles status</h1>
+                <h1 translate="LIBRESTATUS_oraclesStatus">Oracles status</h1>
                 <table class="table">
                     <thead>
                     <tr>
-                        <th translate="BANKSTATUS_address">Address</th>
-                        <th translate="BANKSTATUS_name">Name</th>
-                        <!--th translate="BANKSTATUS_type">Type</th-->
-                        <th translate="BANKSTATUS_updateTime">Update Time</th>
-                        <th translate="BANKSTATUS_rate">Rate</th>
+                        <th translate="LIBRESTATUS_address">Address</th>
+                        <th translate="LIBRESTATUS_name">Name</th>
+                        <!--th translate="LIBRESTATUS_type">Type</th-->
+                        <th translate="LIBRESTATUS_updateTime">Update Time</th>
+                        <th translate="LIBRESTATUS_rate">Rate</th>
                     </tr>
                     </thead>
                     
@@ -63,4 +63,4 @@
         </section>
     </div>
 </main>
-<!-- / Bank Status Page -->
+<!-- / Status Page -->
