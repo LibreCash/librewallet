@@ -311,7 +311,7 @@
       </div>
       <div class="col-sm-5">
         <button class="btn btn-block"
-              ng-click="generateCalcRatesTx()"
+              ng-click="calcRatesModal()"
               ng-class="calcRatesAllowed ? 'btn-success' : 'btn-default'"
               ng-disabled="(updateRatesPending || calcRatesPending) || !calcRatesAllowed">
           {{ calcRatesPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}

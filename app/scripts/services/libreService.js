@@ -346,44 +346,32 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    function canOrder(_scope, transactionFunc, rates = [0, 0]) {
-        if (rates[0] == 0 && rates[1] == 0) {
-            $translate("LIBRE_errorValidatingRates").then((msg) => {
-                _scope.notifier.danger(msg);
-            });
-            return;
-        }
-        return Promise.all([
-            getContractData("getState"),
-            getContractData("tokenBalance"),
-            getContractData(rates[0] != 0 ? "buyRate" : "sellRate"),
-            getLatestBlockData()
-        ])
-        .then((values) => {
-            let 
-                state = values[0],
-                balance = values[1],
-                rate = values[2],
-                blockData = values[3];
-
-            let time = parseInt(blockData.data.timestamp, 16);
-            let _rate = rates[0] != 0 ? rates[0] : rates[1];
-            if (rate.data[0] / coeff.rateMultiplier != _rate) {
-                $translate("LIBRE_errorValidatingRates").then((msg) => {
-                    _scope.notifier.danger(msg);
-                });
-                return;
+    function canOrder(rates = [0, 0]) {
+        return new Promise((resolve, reject) => {
+            if (rates[0] == 0 && rates[1] == 0) {
+                $translate("LIBRE_errorValidatingRates").then((msg) => reject(msg));
             }
-
-            let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
-
-            if (canOrder)
-                transactionFunc();
-            else {
-                $translate("LIBRE_orderNotAllowed").then((msg) => {
-                    _scope.notifier.danger(msg);
-                });
-            }
+            return Promise.all([
+                getContractData("getState"),
+                getContractData(rates[0] != 0 ? "buyRate" : "sellRate")
+            ])
+            .then((values) => {
+                let 
+                    state = values[0],
+                    rate = values[1];
+    
+                let _rate = rates[0] != 0 ? rates[0] : rates[1];
+                if (rate.data[0] / coeff.rateMultiplier != _rate) {
+                    $translate("LIBRE_errorValidatingRates").then((msg) => reject(msg));
+                }
+    
+                let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
+                if (canOrder)
+                    resolve();
+                else {
+                    $translate("LIBRE_orderNotAllowed").then((msg) => reject(msg));
+                }
+            });    
         });
     }
 
@@ -405,6 +393,27 @@ var libreService = function(walletService, $translate) {
         });
     };
 
+    function canCalc() {
+        const MIN_READY_ORACLES = 2;
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                getContractData("getState")
+            ]).then((values) => {
+                let 
+                    state = values[0]; // Append user balance checking later
+
+                let allowedState = (+state.data[0] == statesENUM.CALC_RATES);
+                if (allowedState) {
+                    resolve();
+                } else {
+                    $translate("LIBRE_CRNotAllowed").then((msg) => {
+                        reject(msg);
+                    });
+                }
+            });
+        });
+    }
+
     function getLatestBlockData() {
         return new Promise((resolve, reject) => {
             ajaxReq.getLatestBlockData((res) => {
@@ -413,29 +422,6 @@ var libreService = function(walletService, $translate) {
                 resolve(res);
             }) 
         })     
-    }
-
-    function canCalc(_scope, transactionFunc) {
-        const MIN_READY_ORACLES = 2;
-        return Promise.all([
-            getContractData("getState"),
-            getLatestBlockData()
-        ]).then((values) => {
-            let 
-                state = values[0],
-                blockData = values[1]; // Append user balance checking later
-
-            let lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            let allowedState = (+state.data[0] == statesENUM.CALC_RATES);
-            
-            if (allowedState) {
-                transactionFunc();           
-            } else {
-                $translate("LIBRE_CRNotAllowed").then((msg) => {
-                    _scope.notifier.danger(msg);
-                });
-            }
-        });
     }
 
     function toUnixtimeObject(obj) {
