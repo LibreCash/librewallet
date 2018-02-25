@@ -186,7 +186,7 @@
                 <button style="min-width: 170px"
                   class="btn btn-default"
                   ng-disabled="approvePending || !Validator.isPositiveNumber(tokensToAllow)"
-                  ng-click="prepareModal(); approveModal(); approveTx(true);">
+                  ng-click="approveModal()">
                   <strong>
                     {{ approvePending ? 'LIBRE_txPending' : 'LIBRE_approve' | translate }}
                   </strong>
@@ -290,9 +290,7 @@
 
       <div class="col-sm-5">
         <button class="btn btn-block"
-              data-toggle="modal"
-              data-target="#urTx"
-              ng-click="estimateUpdateRatesTx()"
+              ng-click="updateRatesModal()"
               ng-class="updateRatesAllowed ? 'btn-success' : 'btn-default'"
               ng-disabled="(updateRatesPending || calcRatesPending) || !updateRatesAllowed">
           {{ updateRatesPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}

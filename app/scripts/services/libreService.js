@@ -109,7 +109,7 @@ var libreService = function(walletService, $translate) {
             //    data: getDataString(abi[_var], params),
             //    to
             //});
-            console.log(`[CALL ${getDataString(abi[_var], params)}]`);
+            //console.log(`[CALL ${getDataString(abi[_var], params)}]`);
         }
 
         return getEthCall({
@@ -240,21 +240,21 @@ var libreService = function(walletService, $translate) {
             let userWallet = _scope.wallet.getAddressString();
             getTransactionData(userWallet).then((data) => {
                 var txData = uiFuncs.getTxData(_scope);
-                console.log("txData", txData);
+                //console.log("txData", txData);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     if (rawTx.isError) {
                         if (pendingName != null) _scope[pendingName] = false;
                         _scope.notifier.danger("generateTx: " + rawTx.error);
                         reject(rawTx);
                     }
-                    console.log("RAW   ", rawTx);
+                    //console.log("RAW   ", rawTx);
                     resolve(rawTx);
                 });
             });
         });    
     }
 
-    function libreTransaction(_scope, pendingName, opPrefix, translator, updater, justGetRaw = false) {
+    function libreTransaction(_scope, pendingName, opPrefix, translator, updater) {
         if (pendingName != null) _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
@@ -270,10 +270,6 @@ var libreService = function(walletService, $translate) {
                         if (pendingName != null) _scope[pendingName] = false;
                         _scope.notifier.danger("generateTx: " + rawTx.error);
                         return 0;
-                    }
-                    if (justGetRaw) {
-                        console.log("rraw", rawTx);
-                        return rawTx;
                     }
                     _scope.rawTx = rawTx.rawTx;
                     _scope.signedTx = rawTx.signedTx;
@@ -309,19 +305,16 @@ var libreService = function(walletService, $translate) {
                             ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
                                 if (receipt.error) {
                                     if (receipt.msg == "unknown transaction") {
-                                        if (IS_DEBUG) console.log("tx not presented yet");
                                         noTxCounter++;
                                         if (noTxCounter > txCheckingTimeout / receiptInterval) {
                                             if (pendingName != null) _scope[pendingName] = false;
                                             _scope.notifier.danger(receipt.msg, 0);
                                         }
-                                        if (IS_DEBUG) console.log("receipt", receipt);
                                     } else {
                                         if (pendingName != null) _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
                                 } else {
-                                    if (IS_DEBUG) console.log("receipt no error", receipt);
                                     if (receipt.data == null) {
                                         isCheckingTx = false;
                                         return; // next interval
@@ -394,27 +387,21 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    function canRequest(_scope, transactionFunc) {    
-        return Promise.all([
-            getContractData("getState"),
-            getContractData("requestPrice"),
-            getLatestBlockData()
-        ]).then((values) => {
-            let 
-                state = values[0],
-                requestPrice = values[1], // Append user balance checking later
-                blockData = values[2];
-
-            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-
-            let сanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
-
-            if (сanRequest) {
-                transactionFunc(requestPrice.data[0]);
-            } else {
-                $translate("LIBRE_RURNotAllowed").then((msg) => 
-                    _scope.notifier.danger(msg));
-            }
+    function canRequest() {
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                getContractData("getState")
+            ]).then((values) => {
+                let 
+                    state = values[0];
+    
+                let сanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
+                if (сanRequest) {
+                    resolve();
+                } else {
+                    $translate("LIBRE_RURNotAllowed").then((msg) => reject(msg));
+                }
+            });
         });
     };
 

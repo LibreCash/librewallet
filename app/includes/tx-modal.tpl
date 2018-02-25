@@ -14,7 +14,7 @@
           <tbody>
             <tr>
               <td class="small text-right">Method cost:</td>
-              <td class="small text-left mono">{{ txModal.cost }} ETH</td>
+              <td class="small text-left mono">{{ tx.value }} ETH</td>
             </tr>
             <tr>
               <td class="small text-right">Account Balance:</td>
@@ -22,7 +22,7 @@
             </tr>
             <tr>
               <td class="small text-right">Gas Price:</td>
-              <td class="small text-left mono">{{ txModal.gasPrice }} GWEI</td>
+              <td class="small text-left mono">{{ gasPrice.gwei }} GWEI</td>
             </tr>
             <tr>
               <td class="small text-right">Estimated Gas:</td>
