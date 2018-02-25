@@ -17,6 +17,9 @@ body {
   color: @text-color;
   background-color: @body-bg;
   height: 100%;
+  @media screen and (max-width: @screen-sm) {
+    font-size: @font-size-small;
+  }
 }
 
 input,

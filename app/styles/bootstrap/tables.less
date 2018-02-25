@@ -26,6 +26,7 @@ th {
   width: 100%;
   max-width: 100%;
   margin-bottom: @line-height-computed;
+  background-color: @white;
   // Cells
   > thead,
   > tbody,
@@ -33,17 +34,24 @@ th {
     > tr {
       > th,
       > td {
-        padding: @table-cell-padding;
+        padding: @table-cell-padding 40px;
         line-height: @line-height-base;
         vertical-align: top;
         border-top: 1px solid @table-border-color;
+        @media screen and (max-width: @screen-lg) {
+          padding: @table-condensed-cell-padding 20px;
+          font-size: @font-size-small;
+        }
       }
     }
   }
   // Bottom align for column headings
   > thead > tr > th {
     vertical-align: bottom;
-    border-bottom: 2px solid @table-border-color;
+    border-bottom: 1px solid @table-border-color;
+    font-size: @font-size-small;
+    font-weight: 400;
+    color: @ether-gray;
   }
   // Remove top border from thead by default
   > caption + thead,
@@ -64,6 +72,12 @@ th {
   // Nesting
   .table {
     background-color: @body-bg;
+  }
+  .table__wallet {
+    color: @brand-primary;
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 

@@ -7,54 +7,57 @@
   <article class="block__wrap gen__1" ng-show="!wallet && !showGetAddress">
 
     <section class="block__main gen__1--inner">
-      <br />
-      <h1 translate="NAV_GenerateWallet" aria-live="polite">
-        Create New Wallet
-      </h1>
-      <h4 translate="GEN_Label_1">
-        Enter password
-      </h4>
-      <div class="input-group">
-        <input name="password"
-             class="form-control"
-             type="{{showPass && 'password' || 'text'}}"
-             placeholder="{{'GEN_Placeholder_1' | translate }}"
-             ng-model="password"
-             ng-class="isStrongPass() ? 'is-valid' : 'is-invalid'"
-             aria-label="{{'GEN_Label_1' | translate}}"/>
-        <span tabindex="0"
-              aria-label="make password visible"
-              role="button"
-              class="input-group-addon eye"
-              ng-click="showPass=!showPass">
-        </span>
-      </div>
-      <a tabindex="0"
-         role="button"
-         class="btn btn-primary"
-         ng-click="genNewWallet()"
-         translate="NAV_GenerateWallet">
-           Generate Wallet
-      </a>
-      <p translate="x_PasswordDesc"></p>
-      <div class="text-center">
-        <strong>
-          <a href="https://myetherwallet.github.io/knowledge-base/getting-started/creating-a-new-wallet-on-myetherwallet.html"
-             target="_blank"
-             rel="noopener noreferrer"
-             translate="GEN_Help_5">
-               How to Create a Wallet
+      <div class="row">
+        <div class="col-sm-12">
+          <h1 translate="NAV_GenerateWallet" aria-live="polite">
+            Create New Wallet
+          </h1>
+        </div>
+        <div class="col-sm-12">
+          <h4 translate="GEN_Label_1" class="black-text">
+            Enter password
+          </h4>
+        </div>
+        <div class="col-sm-12">
+          <div class="input-group">
+            <input name="password"
+                 class="form-control"
+                 type="{{showPass && 'password' || 'text'}}"
+                 placeholder="{{'GEN_Placeholder_1' | translate }}"
+                 ng-model="password"
+                 ng-class="isStrongPass() ? 'is-valid' : 'is-invalid'"
+                 aria-label="{{'GEN_Label_1' | translate}}"/>
+          </div>
+        </div>
+        <div class="col-sm-12">
+          <a tabindex="0"
+             role="button"
+             class="btn btn-primary btn-wide"
+             ng-click="genNewWallet()"
+             translate="NAV_GenerateWallet">
+               Generate Wallet
           </a>
-          &nbsp;&nbsp;&middot;&nbsp;&nbsp;
-          <a href="https://myetherwallet.github.io/knowledge-base/getting-started/getting-started-new.html"
-             target="_blank"
-             rel="noopener noreferrer"
-             translate="GEN_Help_6">
-               Getting Started
-          </a>
-        </strong>
+        </div>
+        <div class="col-sm-12">
+          <p translate="x_PasswordDesc"></p>
+        </div>
+        <div class="col-sm-12">
+          <strong class="getting-started">
+            <a href="https://myetherwallet.github.io/knowledge-base/getting-started/creating-a-new-wallet-on-myetherwallet.html"
+               target="_blank"
+               rel="noopener noreferrer"
+               translate="GEN_Help_5">
+                 How to Create a Wallet
+            </a>
+            <a href="https://myetherwallet.github.io/knowledge-base/getting-started/getting-started-new.html"
+               target="_blank"
+               rel="noopener noreferrer"
+               translate="GEN_Help_6">
+                 Getting Started
+            </a>
+          </strong>
+        </div>
       </div>
-      <br>
     </section>
 
     <section class="block__help">
@@ -145,50 +148,59 @@
   <article role="main" class="block__wrap gen__2" ng-show="wallet && !showPaperWallet" > <!-- -->
 
     <section class="block__main gen__2--inner">
-      <br />
-      <h1 translate="GEN_Label_2">
-        Save your Keystore File (UTC / JSON)
-      </h1>
-
-      <a tabindex="0" role="button"
-         class="btn btn-primary"
-         href="{{blobEnc}}"
-         download="{{encFileName}}"
-         aria-label="{{'x_Download'|translate}} {{'x_Keystore'|translate}}"
-         aria-describedby="x_KeystoreDesc"
-         ng-click="downloaded()"
-         target="_blank" rel="noopener noreferrer">
-        <span translate="x_Download">
-          DOWNLOAD
-        </span>
-        <span translate="x_Keystore2">
-          Keystore File (UTC / JSON)
-        </span>
-      </a>
-
-      <div class="warn">
-        <p class="GEN_Warning_1">
-          **Do not lose it!** It cannot be recovered if you lose it.
-        </p>
-        <p class="GEN_Warning_2">
-          **Do not share it!** Your funds will be stolen if you use this file on a malicious/phishing site.
-        </p>
-        <p class="GEN_Warning_3">
-          **Make a backup!** Secure it like the millions of dollars it may one day be worth.
-        </p>
-      </div>
-
-      <p>
-        <a tabindex="0"
-           role="button"
-           class="btn btn-danger"
-           ng-class="fileDownloaded ? '' : 'disabled' "
-           ng-click="continueToPaper()">
-            <span translate="GET_ConfButton">
-              I understand. Continue.
+      <div class="row">
+        <div class="col-sm-12">
+          <h1 translate="GEN_Label_2">
+            Save your Keystore File (UTC / JSON)
+          </h1>
+        </div>
+        
+        <div class="col-sm-12">
+          <a tabindex="0" role="button"
+             class="btn btn-primary"
+             href="{{blobEnc}}"
+             download="{{encFileName}}"
+             aria-label="{{'x_Download'|translate}} {{'x_Keystore'|translate}}"
+             aria-describedby="x_KeystoreDesc"
+             ng-click="downloaded()"
+             target="_blank" rel="noopener noreferrer">
+            <span translate="x_Download">
+              DOWNLOAD
             </span>
-        </a>
-      </p>
+            <span translate="x_Keystore2">
+              Keystore File (UTC / JSON)
+            </span>
+          </a>
+        </div>
+        
+        <div class="col-sm-12">
+          <div class="warn">
+            <p class="GEN_Warning_1">
+              **Do not lose it!** It cannot be recovered if you lose it.
+            </p>
+            <p class="GEN_Warning_2">
+              **Do not share it!** Your funds will be stolen if you use this file on a malicious/phishing site.
+            </p>
+            <p class="GEN_Warning_3">
+              **Make a backup!** Secure it like the millions of dollars it may one day be worth.
+            </p>
+          </div>
+        </div>
+        
+        <div class="col-sm-12">
+          <p>
+            <a tabindex="0"
+               role="button"
+               class="btn btn-danger"
+               ng-class="fileDownloaded ? '' : 'disabled' "
+               ng-click="continueToPaper()">
+                <span translate="GET_ConfButton">
+                  I understand. Continue.
+                </span>
+            </a>
+          </p>
+        </div>
+      </div>
 
     </section>
 
@@ -242,45 +254,50 @@
 
     <section class="block__main gen__3--inner">
 
-      <br />
-
-      <h1 translate="GEN_Label_5"> Save your Private Key</h1>
-      <input aria-label="{{'x_PrivKey'|translate}}" aria-describedby="x_PrivKeyDesc"
-             value="{{wallet.getPrivateKeyString()}}"
-             class="form-control"
-             type="text"
-             readonly="readonly"
-             style="max-width: 50rem;margin: auto;"/>
-
-      <br />
-
-      <a tabindex="0"
-         aria-label="{{'x_Print'|translate}}"
-         aria-describedby="x_PrintDesc"
-         role="button"
-         class="btn btn-primary"
-         ng-click="printQRCode()"
-         translate="x_Print">
-          PRINT
-      </a>
-
-      <div class="warn">
-        <p>
-          **Do not lose it!** It cannot be recovered if you lose it.
-        </p>
-        <p>
-          **Do not share it!** Your funds will be stolen if you use this file on a malicious/phishing site.
-        </p>
-        <p>
-          **Make a backup!** Secure it like the millions of dollars it may one day be worth.
-        </p>
+      <div class="row">
+        <div class="col-sm-12">
+          <h1 translate="GEN_Label_5"> Save your Private Key</h1>
+        </div>
+        <div class="col-sm-12">
+          <input aria-label="{{'x_PrivKey'|translate}}" aria-describedby="x_PrivKeyDesc"
+                 value="{{wallet.getPrivateKeyString()}}"
+                 class="form-control"
+                 type="text"
+                 readonly="readonly"/>
+        </div>
+        
+        <div class="col-sm-12">
+          <a tabindex="0"
+             aria-label="{{'x_Print'|translate}}"
+             aria-describedby="x_PrintDesc"
+             role="button"
+             class="btn btn-primary"
+             ng-click="printQRCode()"
+             translate="x_Print">
+              PRINT
+          </a>
+        </div>
+        
+        <div class="col-sm-12">
+          <div class="warn">
+            <p>
+              **Do not lose it!** It cannot be recovered if you lose it.
+            </p>
+            <p>
+              **Do not share it!** Your funds will be stolen if you use this file on a malicious/phishing site.
+            </p>
+            <p>
+              **Make a backup!** Secure it like the millions of dollars it may one day be worth.
+            </p>
+          </div>
+        </div>
+        
+        <div class="col-sm-12">
+          <a class="btn btn-default btn-sm" ng-click="getAddress()">
+            <span translate="GEN_Label_3"> Save your Address </span> →
+          </a>
+        </div>
       </div>
-
-      <br />
-
-      <a class="btn btn-default btn-sm" ng-click="getAddress()">
-        <span translate="GEN_Label_3"> Save your Address </span> →
-      </a>
 
     </section>
 
@@ -326,10 +343,14 @@
   <article class="text-left" ng-show="showGetAddress">
     <div class="clearfix collapse-container">
 
-      <div ng-click="wd = !wd">
-        <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
-        <h1 traslate="GEN_Unlock">Unlock your wallet to see your address</h1>
-        <p translate="x_AddessDesc"></p>
+      <div class="row">
+        <div class="col-md-6 col-sm-12">
+          <div ng-click="wd = !wd">
+            <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
+            <h1 traslate="GEN_Unlock">Unlock your wallet to see your address</h1>
+            <p translate="x_AddessDesc" class="unlock-text"></p>
+          </div>
+        </div>
       </div>
 
       <div ng-show="!wd">

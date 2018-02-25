@@ -1,40 +1,53 @@
 <!-- Bank Status Page -->
 <main class="tab-pane active" ng-if="globalService.currentTab==globalService.tabs.bankStatus.id" ng-controller='bankStatusCtrl' ng-cloak>
     <div class="row justify-content-md-center">
-        <nav class="container nav-container">
-            <div class="nav-scroll">
-            <ul class="nav-inner">
-                <li class="nav-item {{ showOracles ? '' : 'active' }}" ng-click="showOracles=!showOracles"><a translate="BANKSTATUS_contractStatus">Contract status</a></li>
-                <li class="nav-item {{ showOracles ? 'active' : '' }}" ng-click="showOracles=!showOracles"><a translate="BANKSTATUS_oraclesStatus">Oracles</a></li>
-            </ul>
-            </div>
-        </nav>
-        <div class="col-lg-10 col-lg-offset-1">
 
+        <div class="tab-content__inner">
+            <nav class="bank-status-nav">
+                <ul class="bank-status-nav__list">
+                    <li class="bank-status-nav__item {{ showOracles ? '' : 'active' }}" ng-click="showOracles=!showOracles"><a translate="BANKSTATUS_contractStatus">Contract status</a></li>
+                    <li class="bank-status-nav__item {{ showOracles ? 'active' : '' }}" ng-click="showOracles=!showOracles"><a translate="BANKSTATUS_oraclesStatus">Oracles</a></li>
+                </ul>
+            </nav>
         </div>
-        <div class="col-lg-10 col-lg-offset-1" ng-hide="showOracles">
-            <h1 translate="BANKSTATUS_contractStatus">Contract Status</h1>
-            <table class="table">
-                <tr>
-                    <td translate="BANKSTATUS_bankContractAddress">Bank contract address</td>
-                    <td>
-                        <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank" rel="noopener noreferrer">
-                            {{ address }}
-                        </a>
-                    </td>
-                </tr>
-            <tr ng-repeat="item in contractData">
-                     <td translate="{{ item.translate }}">{{ item.varName }}</td>
-                     <td ng-hide="(item.data.indexOf('0x') == 0) && (item.data.length == 42)">{{ item.error ? item.message : item.data }}</td>
-                     <td ng-show="(item.data.indexOf('0x') == 0) && (item.data.length == 42)">
-                         <a ng-href="{{ item.error ? '#' : ajaxReq.blockExplorerAddr.replace('[[address]]', item.data) }}" target="_blank"
-                             rel="noopener noreferrer">{{ item.error ? item.message : item.data }}&hellip;</a>
-                    </td>
-                </tr>
-            </table>
+
+        <div class="col-lg-12 bank-status__wrapper" ng-hide="showOracles">
+            <!-- <h1 translate="BANKSTATUS_contractStatus">Contract Status</h1> -->
+            <div class="contract-status">
+
+                <div class="contract-status__BCA">
+                    <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank" rel="noopener noreferrer" class="contract-status__BCA-link">
+                        {{ address }}
+                    </a>
+                    <p translate="BANKSTATUS_bankContractAddress" class="contract-status__BCA-bottom">Bank contract address</p>
+                    <button class="contract-status__copy-btn">copy</button>
+                </div>
+                <div class="contract-status__LCC">
+                    <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank" rel="noopener noreferrer" class="contract-status__BCA-link">
+                        {{ address }}
+                    </a>
+                    <p translate="BANKSTATUS_bankContractAddress" class="contract-status__BCA-bottom">LibreCash Contract</p>
+                    <button class="contract-status__copy-btn">copy</button>
+                </div>
+
+                <div class="contract-status__table">
+                    <div ng-repeat="(name, info) in contractData" class="contract-status__table-item">
+                        <div ng-hide="(info.data.data.indexOf('0x') == 0) && (info.data.data.length == 42)" class="contract-status__table-item-data">938</div>
+
+                        <!-- Raw block -->
+                        <!-- <div ng-hide="(info.data.data.indexOf('0x') == 0) && (info.data.data.length == 42)">{{ info.data.error ? info.data.message : info.data.data }}</div> -->
+
+                        <div ng-show="(info.data.data.indexOf('0x') == 0) && (info.data.data.length == 42)">
+                            <a ng-href="{{ info.data.error ? '#' : ajaxReq.blockExplorerAddr.replace('[[address]]', info.data.data) }}" target="_blank"
+                                rel="noopener noreferrer">{{ info.data.error ? info.data.message : info.data.data }}&hellip;</a>
+                        </div>
+                        <div translate="{{ info.translate }}" class="contract-status__table-item-name">{{ info.default }}</div>
+                    </div>
+                </div>
+            </div>
         </div>   
-        <div class="col-lg-10 col-lg-offset-1" ng-show="showOracles">
-            <h1 translate="BANKSTATUS_oraclesStatus">Oracles status</h1>
+        <div class="col-lg-12" ng-show="showOracles">
+            <!-- <h1 translate="BANKSTATUS_oraclesStatus">Oracles status</h1> -->
             <table class="table">
                 <thead>
                 <tr>
@@ -44,15 +57,43 @@
                     <th translate="BANKSTATUS_updateTime">Update Time</th>
                     <th translate="BANKSTATUS_rate">Rate</th>
                 </tr>
+                <tr>
+                    <td class="table__wallet">0x874432166d96e72394827398562938523749823</td>
+                    <td>Bitfinex Oraclize Async</td>
+                    <td>ETHUSD</td>
+                    <td>23/01/2018, 23:11:27</td>
+                    <td>939.25</td>
+                </tr>
+                <tr>
+                    <td class="table__wallet">0x874432166d96e…</td>
+                    <td>Bitfinex Oraclize Async</td>
+                    <td>ETHUSD</td>
+                    <td>23/01/2018, 23:11:27</td>
+                    <td>939.25</td>
+                </tr>
+                <tr>
+                    <td class="table__wallet">0x874432166d96e…</td>
+                    <td>Bitfinex Oraclize Async</td>
+                    <td>ETHUSD</td>
+                    <td>23/01/2018, 23:11:27</td>
+                    <td>939.25</td>
+                </tr>
+                <tr>
+                    <td class="table__wallet">0x874432166d96e…</td>
+                    <td>Bitfinex Oraclize Async</td>
+                    <td>ETHUSD</td>
+                    <td>23/01/2018, 23:11:27</td>
+                    <td>939.25</td>
+                </tr>
                 </thead>
                 
-                <tr ng-repeat="oracle in oracles">
+                <tr ng-repeat="(address, info) in oracles">
                     <td><a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank"
-                     rel="noopener noreferrer">{{ oracle.address | limitTo: 15 }}&hellip;</a></td>
-                    <td>{{ oracle.name }}</td>
-                    <td>{{ oracle.type }}</td>
-                    <td>{{ oracle.updateTime }}</td>
-                    <td>{{ oracle.rate }}</td>
+                     rel="noopener noreferrer">{{ address | limitTo: 15 }}&hellip;</a></td>
+                    <td>{{ info.name }}</td>
+                    <td>{{ info.type }}</td>
+                    <td>{{ info.updateTime }}</td>
+                    <td>{{ info.rate }}</td>
                 </tr>
             </table>
         </div>

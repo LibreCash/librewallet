@@ -1,32 +1,47 @@
 // Colors
 @ether-navy                                  : #163151;
 @ether-navy-dark                             : #102138;
+@ether-dark                                  : #3C3636;
+@ether-darken                                : #383232;
 @ether-blue                                  : #0e97c0;
+@ether-yellow                                : #FBC055;
+@ether-gray                                  : #4F4F4F;
+@white                                       : #fff;
+@black                                       : #000;
 
 @gray-base                                   : #000;
 @gray-darker                                 : lighten(@gray-base, 13.5%);
 @gray-dark                                   : lighten(@gray-base, 20%);
 @gray                                        : #737373;
-@gray-light                                  : #9A9A9A;
+@gray-light                                  : #828282;
 @gray-lighter                                : #ECECEC;
 @gray-lightest                               : #FAFAFA;
 
-@brand-primary                               : @ether-blue;
+@brand-primary                               : @ether-yellow;
 @brand-success                               : #5dba5a;
 @brand-info                                  : @ether-navy;
 @brand-warning                               : #ff9800;
 @brand-orangered                             : #ff5722;
 @brand-danger                                : #ea4b40;
 
-@body-bg                                     : #fbfbfb;
-@text-color                                  : @gray-dark;
+@body-bg                                     : #ffffff;
+@body-bg-darken                              : #fafafa;
+@text-color                                  : @gray-light;
+@text-color-strong                           : @black;
+@text-color-white                            : @white;
 
 @link-color                                  : @brand-primary;
 @link-hover-color                            : darken(@link-color, 5%);
 @link-hover-decoration                       : none;
 
+@link-color-white                            : @white;
+@link-hover-color-white                      : lighten(@link-color-white, 5%);
+@link-hover-decoration-white                 : none;
+
+@label-radio-color                           : #9D9A9A;
+
 // Typography
-@font-family-sans-serif                      : 'Lato', sans-serif;
+@font-family-sans-serif                      : 'Roboto', sans-serif;
 @font-family-serif                           : Georgia, "Times New Roman", Times, serif;
 @font-family-monospace                       : Menlo, Monaco, Consolas, "Courier New", monospace;
 @font-family-base                            : @font-family-sans-serif;
@@ -38,8 +53,10 @@
 
 @font-size-large-bump                        : 2.25rem; // 33.75
 @font-size-large                             : 1.90rem; // 28.5
+@font-size-medium-large                      : 1.60rem; // 24
 @font-size-medium-bump                       : 1.50rem; // 22.5
-@font-size-medium                            : 1.30rem; // 19.5
+@font-size-medium-big                        : 1.30rem; // 19.5
+@font-size-medium                            : 1.20rem; // 18
 @font-size-bump-more                         : 1.15rem; // 17.25
 @font-size-bump                              : 1.07rem; // 16.05
 @font-size-base                              : 1.00rem; // 15
@@ -49,11 +66,11 @@
 @font-size-h1                                : @font-size-large-bump;
 @font-size-h2                                : @font-size-large;
 @font-size-h3                                : @font-size-medium-bump;
-@font-size-h4                                : @font-size-medium;
-@font-size-h5                                : @font-size-bump-more;
-@font-size-h6                                : @font-size-bump;
+@font-size-h4                                : @font-size-bump;
+@font-size-h5                                : @font-size-base;
+@font-size-h6                                : @font-size-small;
 
-@line-height-base                            : 1.4;
+@line-height-base                            : 1.5;
 @line-height-computed                        : 1.4;
 
 @headings-font-family                        : inherit;
@@ -72,6 +89,8 @@
 @space                                       : 1.00rem;
 @space-lg                                    : 1.50rem;
 @space-xl                                    : 2.00rem;
+@space-xxl                                   : 4.00rem;
+@space-xxxl                                  : 6.00rem;
 
 @padding-base-vertical                       : @space*.75;
 @padding-base-horizontal                     : @space-lg;
@@ -88,7 +107,7 @@
 @line-height-large                           : 1.2;
 @line-height-small                           : 1.5;
 
-@border-radius                               : 0px;
+@border-radius                               : 4px;
 
 @component-active-color                      : #fff;
 @component-active-bg                         : @brand-primary;
@@ -97,13 +116,13 @@
 @caret-width-large                           : @space-xs;
 
 // Tables
-@table-cell-padding                          : @space-sm;
-@table-condensed-cell-padding                : @space-xs;
+@table-cell-padding                          : @space-xl;
+@table-condensed-cell-padding                : @space-md;
 @table-bg                                    : transparent;
 @table-bg-accent                             : #f9f9f9;
 @table-bg-hover                              : @gray-lightest;
 @table-bg-active                             : @table-bg-hover;
-@table-border-color                          : #ddd;
+@table-border-color                          : #EBEBEB;
 
 // Buttons
 @btn-font-weight                             : normal;
@@ -112,7 +131,7 @@
 @btn-default-bg                              : #c3c3c3;
 @btn-default-border                          : #bdbdbd;
 
-@btn-primary-color                           : #fff;
+@btn-primary-color                           : #000;
 @btn-primary-bg                              : @brand-primary;
 @btn-primary-border                          : @btn-primary-bg;
 

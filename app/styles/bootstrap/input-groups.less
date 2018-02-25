@@ -6,8 +6,6 @@
 // -------------------------
 .input-group {
   position: relative;
-  display: table;
-  border-collapse: separate;
   > * {
     margin-bottom: 0;
     margin-top: 0;
@@ -21,9 +19,12 @@
 
   .form-control {
     position: relative;
-    z-index: 2;
-    float: left;
+    z-index: 0;
     width: 100%;
+    font-size: @font-size-base;
+    @media screen and (max-width: @screen-sm) {
+      font-size: @font-size-small;
+    }
   }
   .dropdown-toggle {
     padding-right: @space-md;
@@ -50,7 +51,7 @@
 .input-group-addon,
 .input-group-btn,
 .input-group .form-control {
-  display: table-cell;
+  
 }
 // Addon and addon wrapper for buttons
 .input-group-addon,

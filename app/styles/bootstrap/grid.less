@@ -9,13 +9,18 @@
 
 .container {
   width: 100%;
-  margin-right: auto;
-  margin-left: auto;
-  max-width: @cont-width;
+  height: 100%;
+  box-sizing: border-box;
   padding: 0 @grid-gutter-width*2.5;
+  padding-left: 340px;
+  padding-right: 0;
   &:extend(.clearfix all);
   @media screen and (max-width: @screen-lg) {
-    padding: 0 3%;
+    padding-right: 0;
+    padding-left: 340px;
+  }
+  @media screen and (max-width: @screen-sm) {
+    padding: 0;
   }
 }
 

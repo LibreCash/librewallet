@@ -1,0 +1,28 @@
+.header {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	top: 0;
+	height: 80px;
+	&__title {
+		display: block;
+		text-transform: uppercase;
+		font-size: @font-size-small;
+		margin-left: 40px;
+		color: @text-color;
+	}
+	&__left {
+		@media screen and (max-width: @screen-lg) {
+	    display: none;
+	  }
+	}
+	&__right {
+		display: flex;
+		@media screen and (max-width: @screen-lg) {
+	    margin-left: 50px;
+	    margin-left: 0;
+	    flex-direction: column;
+	    width: 100%;
+	  }
+	}
+}
