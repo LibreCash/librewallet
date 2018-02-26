@@ -7,7 +7,6 @@ var libreService = function(walletService, $translate) {
 
     const 
         IS_DEBUG = true,
-        MIN_READY_ORACLES = 2,
         states = [
             'LOCKED',
             'PROCESSING_ORDERS',
@@ -25,13 +24,16 @@ var libreService = function(walletService, $translate) {
         coeff = {
             tokenDecimals: 18,
             rateMultiplier: 1000,
-            gasEmission: 300000, // TODO:Actualize it
-            gasRemission: 300000, //TODO:Actualize it
-            gasApprove: 70000,
-            gasRUR: 1000000, // Actualize it
-            gasCR: 300000,
+            gasEmission: 90000,
+            gasRemission: 90000,
+            gasApprove: 50000,
+            gasUpdateRates: 1000000,
+            gasCalcRates: 170000,
             statesENUM: statesENUM,
-            isDebug: IS_DEBUG
+            isDebug: IS_DEBUG,
+            minReadyOracles: 2,
+            oracleActual: 10 * 60,
+            oracleTimeout: 10 * 60
         };
         
     if (IS_DEBUG) {
@@ -104,11 +106,7 @@ var libreService = function(walletService, $translate) {
 
     function getDataAsync(to, abi, _var, params = []) {
         if (IS_DEBUG) {
-            console.log({
-                from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
-                data: getDataString(abi[_var], params),
-                to
-            });
+            console.log(`[CALL ${getDataString(abi[_var], params)}]`);
         }
 
         return getEthCall({
@@ -214,15 +212,44 @@ var libreService = function(walletService, $translate) {
     }
 
     function getTransactionData(addr) {
-        return new Promise((resolve,reject)=>{
-            ajaxReq.getTransactionData(addr,(data)=>{
+        return new Promise((resolve,reject) => {
+            ajaxReq.getTransactionData(addr, (data) => {
                 if(data.error) reject(data);
                 resolve(data);
             });
         });
     }
 
-    function libreTransaction (_scope, pendingName, opPrefix, translator, updater) {
+    function getEstimatedGas(txData) {
+        txData.value = +txData.value; // make integer for full compatibility
+        return new Promise((resolve, reject) => {
+            ajaxReq.getEstimatedGas(txData, (data) => {
+                if (data.error) reject(data);
+                resolve(data);
+            });
+        });
+    }
+
+    function getLibreRawTx(_scope) {
+        return new Promise((resolve, reject) => {
+            if (_scope.wallet == null) throw globalFuncs.errorMsgs[3];
+            else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
+            let userWallet = _scope.wallet.getAddressString();
+            getTransactionData(userWallet).then((data) => {
+                var txData = uiFuncs.getTxData(_scope);
+                uiFuncs.generateTx(txData, function(rawTx) {
+                    if (rawTx.isError) {
+                        if (pendingName != null) _scope[pendingName] = false;
+                        _scope.notifier.danger("generateTx: " + rawTx.error);
+                        reject(rawTx);
+                    }
+                    resolve(rawTx);
+                });
+            });
+        });    
+    }
+
+    function libreTransaction(_scope, pendingName, opPrefix, translator, updater) {
         _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
@@ -273,19 +300,16 @@ var libreService = function(walletService, $translate) {
                             ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
                                 if (receipt.error) {
                                     if (receipt.msg == "unknown transaction") {
-                                        if (IS_DEBUG) console.log("tx not presented yet");
                                         noTxCounter++;
                                         if (noTxCounter > txCheckingTimeout / receiptInterval) {
                                             _scope[pendingName] = false;
                                             _scope.notifier.danger(receipt.msg, 0);
                                         }
-                                        if (IS_DEBUG) console.log("receipt", receipt);
                                     } else {
                                         _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
                                 } else {
-                                    if (IS_DEBUG) console.log("receipt no error", receipt);
                                     if (receipt.data == null) {
                                         isCheckingTx = false;
                                         return; // next interval
@@ -317,102 +341,81 @@ var libreService = function(walletService, $translate) {
         });
     }
 
-    function canOrder(_scope, transactionFunc, rates = [0, 0]) {
-        if (rates[0] == 0 && rates[1] == 0) {
-            $translate("LIBRE_errorValidatingRates").then((msg) => {
-                _scope.notifier.danger(msg);
-            });
-            return;
-        }
-        return Promise.all([
-            getContractData("getState"),
-            getContractData("tokenBalance"),
-            getContractData(rates[0] != 0 ? "buyRate" : "sellRate"),
-            getLatestBlockData()
-        ])
-        .then((values) => {
-            let 
-                state = values[0],
-                balance = values[1],
-                rate = values[2],
-                blockData = values[3];
-
-            let time = parseInt(blockData.data.timestamp, 16);
-            let _rate = rates[0] != 0 ? rates[0] : rates[1];
-            if (rate.data[0] / coeff.rateMultiplier != _rate) {
-                $translate("LIBRE_errorValidatingRates").then((msg) => {
-                    _scope.notifier.danger(msg);
-                });
-                return;
+    function canOrder(rates = [0, 0]) {
+        return new Promise((resolve, reject) => {
+            if (rates[0] == 0 && rates[1] == 0) {
+                $translate("LIBRE_errorValidatingRates").then((msg) => reject(msg));
             }
-
-            let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
-
-            if (canOrder)
-                transactionFunc();
-            else {
-                $translate("LIBRE_orderNotAllowed").then((msg) => {
-                    _scope.notifier.danger(msg);
-                });
-            }
+            return Promise.all([
+                getContractData("getState"),
+                getContractData(rates[0] != 0 ? "buyRate" : "sellRate")
+            ])
+            .then((values) => {
+                let 
+                    state = values[0],
+                    rate = values[1];
+    
+                let prevRate = rates[0] != 0 ? rates[0] : rates[1];
+                if (rate.data[0] / coeff.rateMultiplier != prevRate) {
+                    $translate("LIBRE_errorValidatingRates").then((msg) => reject(msg));
+                }
+    
+                let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
+                if (canOrder)
+                    resolve();
+                else {
+                    $translate("LIBRE_orderNotAllowed").then((msg) => reject(msg));
+                }
+            });    
         });
     }
 
-    function canRequest(_scope, transactionFunc) {    
-        return Promise.all([
-            getContractData("getState"),
-            getContractData("requestPrice"),
-            getLatestBlockData()
-        ]).then((values) => {
-            let 
-                state = values[0],
-                requestPrice = values[1], // Append user balance checking later
-                blockData = values[2];
-
-            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-
-            let сanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
-
-            if (сanRequest) {
-                transactionFunc(requestPrice.data[0]);
-            } else {
-                $translate("LIBRE_RURNotAllowed").then((msg) => 
-                    _scope.notifier.danger(msg));
-            }
+    function canRequest() {
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                getContractData("getState")
+            ]).then((values) => {
+                let 
+                    state = values[0];
+    
+                let сanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
+                if (сanRequest) {
+                    resolve();
+                } else {
+                    $translate("LIBRE_RURNotAllowed").then((msg) => reject(msg));
+                }
+            });
         });
     };
 
+    function canCalc() {
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                getContractData("getState")
+            ]).then((values) => {
+                let 
+                    state = values[0]; // Append user balance checking later
+
+                let allowedState = (+state.data[0] == statesENUM.CALC_RATES);
+                if (allowedState) {
+                    resolve();
+                } else {
+                    $translate("LIBRE_CRNotAllowed").then((msg) => {
+                        reject(msg);
+                    });
+                }
+            });
+        });
+    }
+
     function getLatestBlockData() {
-        return new Promise((resolve,reject)=>{
-            ajaxReq.getLatestBlockData((res)=>{
-                if(res.error) reject(res);
+        return new Promise((resolve, reject) => {
+            ajaxReq.getLatestBlockData((res) => {
+                if (res.error) reject(res);
                 if (IS_DEBUG) console.log(res);
                 resolve(res);
             }) 
         })     
-    }
-
-    function canCalc(_scope, transactionFunc) {
-        const MIN_READY_ORACLES = 2;
-        return Promise.all([
-            getContractData("getState"),
-            getLatestBlockData()
-        ]).then((values) => {
-            let 
-                state = values[0],
-                blockData = values[1]; // Append user balance checking later
-
-            let lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            let allowedState = (+state.data[0] == statesENUM.CALC_RATES);
-            
-            if (allowedState) {
-                transactionFunc();           
-            } else {
-                $translate("LIBRE_CRNotAllowed").then((msg) => {
-                    _scope.notifier.danger(msg);
-                });
-            }
-        });
     }
 
     function toUnixtimeObject(obj) {
@@ -435,7 +438,7 @@ var libreService = function(walletService, $translate) {
                 from: options.from,
                 data: options.data,
                 to:options.to
-            },(res)=>{
+            }, (res) => {
                 if(!res.error && res.data != '0x'){
                     resolve(res);
                 } else {
@@ -446,9 +449,9 @@ var libreService = function(walletService, $translate) {
     }
 
     function getLatestBlockData() {
-        return new Promise((resolve,reject)=>{
-            ajaxReq.getLatestBlockData((res)=>{
-                if(res.error) reject(res);
+        return new Promise((resolve, reject) => {
+            ajaxReq.getLatestBlockData((res) => {
+                if (res.error) reject(res);
                 if (IS_DEBUG) console.log(res);
                 resolve(res);
             }) 
@@ -480,12 +483,16 @@ var libreService = function(walletService, $translate) {
             getStateName: getStateName,
             fillStateData: fillStateData,
             libreTransaction: libreTransaction,
+            getLibreRawTx: getLibreRawTx,
             canRequest: canRequest,
             canCalc: canCalc,
             canOrder: canOrder,
-            getGasPrice: getGasPrice
+            getGasPrice: getGasPrice,
+            getLatestBlockData: getLatestBlockData,
+            getEstimatedGas: getEstimatedGas
         },
-        networkType: "rinkeby"
+        networkType: "rinkeby",
+        IS_DEBUG: IS_DEBUG
     };
 };
 module.exports = libreService;
