@@ -104,12 +104,7 @@ var libreService = function(walletService, $translate) {
 
     function getDataAsync(to, abi, _var, params = []) {
         if (IS_DEBUG) {
-            //console.log({
-            //    from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
-            //    data: getDataString(abi[_var], params),
-            //    to
-            //});
-            //console.log(`[CALL ${getDataString(abi[_var], params)}]`);
+            console.log(`[CALL ${getDataString(abi[_var], params)}]`);
         }
 
         return getEthCall({
@@ -224,9 +219,9 @@ var libreService = function(walletService, $translate) {
     }
 
     function getEstimatedGas(txData) {
+        txData.value = +txData.value; // make integer for full compatibility
         return new Promise((resolve, reject) => {
             ajaxReq.getEstimatedGas(txData, (data) => {
-                console.log("data", data);
                 if (data.error) reject(data);
                 resolve(data);
             });
@@ -240,14 +235,12 @@ var libreService = function(walletService, $translate) {
             let userWallet = _scope.wallet.getAddressString();
             getTransactionData(userWallet).then((data) => {
                 var txData = uiFuncs.getTxData(_scope);
-                //console.log("txData", txData);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     if (rawTx.isError) {
                         if (pendingName != null) _scope[pendingName] = false;
                         _scope.notifier.danger("generateTx: " + rawTx.error);
                         reject(rawTx);
                     }
-                    //console.log("RAW   ", rawTx);
                     resolve(rawTx);
                 });
             });

@@ -13,7 +13,7 @@
         <table class="table small table-condensed table-hover">
           <tbody>
             <tr>
-              <td class="small text-right">Method cost:</td>
+              <td class="small text-right">ETH to send:</td>
               <td class="small text-left mono">{{ tx.value }} ETH</td>
             </tr>
             <tr>

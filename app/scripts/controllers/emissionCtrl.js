@@ -298,10 +298,8 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     $scope.updateGas = function() {
         getLibreRawTx($scope).then((rawTx) => {
-            //console.log("rawtx", rawTx);
             return getEstimatedGas(rawTx);
         }).then(function(gas) {
-            //console.log("gas", gas);
             $scope.txModal.estimatedGas = +gas.data;
         }, function(error) {
             $scope.notifier.danger(error.msg);
@@ -321,56 +319,36 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
     updateContractData();
 
-    $scope.generateBuyLibreTx = function() {
-        $scope.buyModal.close();
-        canOrder([$scope.buyRate, 0]).then(function() {
-            buyLibreTx();
-        }).catch(function(err) {
-            $scope.notifier.danger(err);
-        });
-    };
-
-    function buyLibreTx() {
-        let txData = getDataString(bankAbiRefactor["buyTokens"], [$scope.wallet.getAddressString()]);
-
-        $scope.tx.data = txData;
-        $scope.tx.to = bankAddress;
-        $scope.tx.gasLimit = gasEmission;
-        $scope.tx.value = $scope.buyTXValue;
-
-        libreTransaction($scope, "buyPending", "BUY", $translate, updateBalanceAndAllowance);
-    }
-
-    function setOpenModal(maxGas, action) {
+    function setOpenModal(maxGas, action, title) {
         $scope.txModal.maximumFee = "...";
         $scope.txModal.maximumGas = maxGas;
         $scope.tx.value = "...";
         $scope.txModal.estimatedFee = "...";
         $scope.txModal.estimatedGas = "...";
         $scope.txModal.modalClick = action;
-        $scope.txModal.title = "Set Allowance";
+        $scope.txModal.title = title;
         $scope.txModal.open();
         action(/* estimate = */ true);
     }
 
     $scope.updateRatesModal = function() {
-        setOpenModal(gasUpdateRates, $scope.updateRatesTx);
+        setOpenModal(gasUpdateRates, $scope.updateRatesTx, "Update Rates");
     }
 
     $scope.approveModal = function() {
-        setOpenModal(gasApprove, $scope.approveTx);
+        setOpenModal(gasApprove, $scope.approveTx, "Set Allowance");
     }
 
     $scope.calcRatesModal = function() {
-        setOpenModal(gasCalcRates, $scope.calcRatesTx);
+        setOpenModal(gasCalcRates, $scope.calcRatesTx, "Calc Rates");
     }
 
     $scope.buyModal = function() {
-        setOpenModal(gasEmission, $scope.buyTx);
+        setOpenModal(gasEmission, $scope.buyTx, "Buy Transaction");
     }
 
     $scope.sellModal = function() {
-        setOpenModal(gasRemission, $scope.sellTx);
+        setOpenModal(gasRemission, $scope.sellTx, "Sell Transaction");
     }
 
     function prepareApproveTx() {
@@ -420,27 +398,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         function(err) {
             $scope.notifier.danger(err);
         });
-    }
-
-    $scope.generateSellLibreTx = function() {
-        $scope.sellModal.close();
-        canOrder([0, $scope.sellRate]).then(function() {
-            sellLibreTx();
-        }).catch(function(err) {
-            $scope.notifier.danger(err);
-        });
-    }
-
-    var sellLibreTx = function() {
-        var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals)
-        $scope.tx.data = getDataString(bankAbiRefactor["sellTokens"], 
-            [$scope.wallet.getAddressString(), tokenCount]);
-
-        $scope.tx.to = bankAddress;
-        $scope.tx.gasLimit = gasRemission;
-        $scope.tx.value = 0;
-
-        libreTransaction($scope, "sellPending", "SELL", $translate, updateBalanceAndAllowance);
     }
 
     function prepareUpdateRatesTx() {
@@ -493,40 +450,49 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         });
     }
 
-    $scope.estimateSellTx = function() {
-        var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals)
-        $scope.tx.data = getDataString(bankAbiRefactor["sellTokens"], 
-            [$scope.wallet.getAddressString(), tokenCount]);
+    $scope.sellTx = function(estimate = false) {
+        if (!estimate) $scope.txModal.close();
+        canOrder([0, $scope.sellRate]).then(function() {
+            var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals)
+            $scope.tx.data = getDataString(bankAbiRefactor["sellTokens"], 
+                [$scope.wallet.getAddressString(), tokenCount]);
+    
+            $scope.tx.to = bankAddress;
+            $scope.tx.gasLimit = gasRemission;
+            $scope.tx.value = 0;
+            $scope.tx.from = walletService.wallet.getAddressString();
 
-        $scope.tx.to = bankAddress;
-        $scope.tx.gasLimit = gasRemission;
-        $scope.tx.value = 0;
-
-        getLibreRawTx($scope).then((rawTx) => {
-            return getEstimatedGas(rawTx);
-        }).then(function(gas) {
-            $scope.sellEstimatedGas = +gas.data;
-        }, function(error) {
-            $scope.notifier.danger(error.msg);
+            if (!estimate) {
+                libreTransaction($scope, "sellPending", "SELL", $translate, updateBalanceAndAllowance);
+            } else {
+                $scope.updateGas();
+            }
+        }).catch(function(err) {
+            $scope.notifier.danger(err);
         });
     }
 
-    $scope.estimateBuyTx = function() {
-        let txData = getDataString(bankAbiRefactor["buyTokens"], [$scope.wallet.getAddressString()]);
+    $scope.buyTx = function(estimate = false) {
+        if (!estimate) $scope.txModal.close();
+        canOrder([$scope.buyRate, 0]).then(function() {
+            let txData = getDataString(bankAbiRefactor["buyTokens"], [$scope.wallet.getAddressString()]);
 
-        $scope.tx.data = txData;
-        $scope.tx.to = bankAddress;
-        $scope.tx.gasLimit = gasEmission;
-        $scope.tx.value = $scope.buyTXValue;
+            $scope.tx.data = txData;
+            $scope.tx.to = bankAddress;
+            $scope.tx.gasLimit = gasEmission;
+            $scope.tx.value = $scope.buyTXValue;
 
-        getLibreRawTx($scope).then((rawTx) => {
-            return getEstimatedGas(rawTx);
-        }).then(function(gas) {
-            $scope.buyEstimatedGas = +gas.data;
-        }, function(error) {
-            $scope.notifier.danger(error.msg);
+            if (!estimate) {
+                libreTransaction($scope, "buyPending", "BUY", $translate, updateBalanceAndAllowance);
+            } else {
+                $scope.updateGas();
+            }
+        }).catch(function(err) {
+            $scope.notifier.danger(err);
         });
     }
+
+
 
 
 

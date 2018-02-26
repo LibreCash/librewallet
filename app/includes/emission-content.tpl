@@ -140,9 +140,7 @@
         <div class="col-sm-4">
           <button style="min-width: 170px"
               class="btn btn-default"
-              data-toggle="modal"
-              data-target="#buyTx"
-              ng-click="estimateBuyTx()"
+              ng-click="buyModal()"
               ng-disabled="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue) || changedTokens > tokenBalance">
             <strong>
               {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
@@ -250,9 +248,7 @@
             <div class="col-sm-8 offset-col-sm-2">
               <button style="min-width: 170px"
                 class="btn btn-default"
-                data-toggle="modal"
-                data-target="#sellTx"
-                ng-click="estimateSellTx()"
+                ng-click="sellModal()"
                 ng-disabled="sellPending || !orderAllowed || !Validator.isPositiveNumber(tokenValue) || changedEth > ethBalance">
                 <strong>
                   {{ sellPending ? 'LIBRE_txPending' : 'LIBRE_sell' | translate }}
