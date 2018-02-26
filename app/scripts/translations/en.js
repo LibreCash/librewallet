@@ -599,9 +599,9 @@ SENDModal_Content_1             :  'You are about to send',
 SENDModal_Content_2             :  'to address',
 SENDModal_Content_3             :  'Are you sure you want to do this?',
 SENDModal_Content_4             :  'NOTE: If you encounter an error, you most likely need to add ether to your account to cover the gas cost of sending tokens. Gas is paid in ether.',
-SENDModal_No                    :  'No, get me out of here!',
+SENDModal_No                    :  'No, cancel',
 SENDModal_Title                 :  'Warning!',
-SENDModal_Yes                   :  'Yes, I am sure! Make transaction.',
+SENDModal_Yes                   :  'Yes, confirm',
 
 sidebar_AccountAddr             :  'Account Address',
 sidebar_AccountBal              :  'Account Balance',
@@ -714,6 +714,7 @@ LIBRESTATUS_type                 :  'Type',
 LIBRESTATUS_updateTime           :  'Update Time',
 LIBRESTATUS_rate                 :  'Rate',
 
+MODAL_requestRates              :  'Request Rates',
 
 
 VIEWWALLET_HidePrivKey          :  '(hide)',
