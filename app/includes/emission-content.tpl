@@ -61,7 +61,8 @@
     <section  class="row form-group" ng-show="state != states.PROCESSING_ORDERS &&
                                               state != states.WAIT_ORACLES &&
                                               state != states.REQUEST_RATES &&
-                                              state != states.CALC_RATES">
+                                              state != states.CALC_RATES"
+                                              translate="LIBRE_loadingContractData">
                                                 Loading contract data...
                                             </section>
     <!-- buy/sell section -->
@@ -73,7 +74,7 @@
       </div>
       <div class="col-sm-11">
         <p>
-          <span>LibreBank</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', bankAddress) }}" target="_blank" rel="noopener noreferrer">{{ bankAddress }}</a>
+          <span translate="LIBRE_exchanger">Exchanger</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', bankAddress) }}" target="_blank" rel="noopener noreferrer">{{ bankAddress }}</a>
         </p>
         <p>
           <span>LibreCash</span>: <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', cashAddress) }}" target="_blank" rel="noopener noreferrer">{{ cashAddress }}</a>
@@ -84,20 +85,19 @@
       </div>
       <div class="col-sm-11">
         <p>
-          <span>Buy rate</span>: {{ buyRate }}
+          <span translate="LIBRE_buyRate">Buy rate</span>: {{ buyRate }}
         </p>
         <p>
-          <span>Sell rate</span>: {{ sellRate }}
+          <span translate="LIBRE_sellRate">Sell rate</span>: {{ sellRate }}
         </p>
         <p>
-          <span>Rates are actual for</span>: {{ rateActualTime | secondsToDateTime | date:'HH:mm:ss' }}
+          <span translate="LIBRE_whenActual">Rates are actual for</span>: {{ rateActualTime | secondsToDateTime | date:'HH:mm:ss' }}
         </p>
       </div>
       <div class="col-sm-11">
-        <span>Contract balances</span>:<br/>
+        <span translate="LIBRE_contractBalances">Contract balances</span>:<br/>
         {{ tokenBalance | number: 3 }} Libre<br/>
         {{ ethBalance | number: 3 }} ETH
-        <!-- todo hours, minutes + translation -->
       </div>
       
       <!-- buy section -->
@@ -157,9 +157,9 @@
           </label>
         </div>
         <p class="col-xs-12">
-          <span translate="LIBRE_allowed">Allowed: </span><span>{{ allowedTokens | number: 3 }}</span>
+          <span translate="LIBRE_allowed">Allowed:</span> <span>{{ allowedTokens | number: 3 }}</span>
           <br/>
-          <span>All tokens: </span><span>{{ allTokens | number: 3 }}</span>
+          <span translate="LIBRE_allTokens">All tokens:</span> <span>{{ allTokens | number: 3 }}</span>
         </p>
         <div ng-show="allTokens == 0" class="col-sm-11">
           <strong translate="LIBRE_noTokens">
@@ -202,7 +202,7 @@
         
           <section ng-hide="allowedTokens > 0">
             <div class="col-sm-11">
-              <label>
+              <label translate="LIBRE_needApprove">
                 You need to approve some tokens before selling them
               </label>
             </div>
@@ -260,21 +260,21 @@
       </section><!-- end sell section -->
     </section><!-- end buy/sell section -->
     <section ng-show="state == states.WAIT_ORACLES">
-      <div class="col-sm-11">
+      <div class="col-sm-11" translate="LIBRE_rateProcessing">
         Rate information processing from the oracles...
       </div>
       <div class="col-sm-11">
-        {{ readyOracles }} of {{ oracleCount }} oracles have received data
+        {{ readyOracles }} / {{ oracleCount }} <span translate="LIBRE_oraclesReceived">oracles have received data</span>
       </div>
       <div class="col-sm-11">
-        Timeout: {{ waitOraclesRemains | secondsToDateTime | date:'HH:mm:ss' }} remains
+        <span translate="LIBRE_timeout">Timeout</span>: {{ waitOraclesRemains | secondsToDateTime | date:'HH:mm:ss' }} <span translate="LIBRE_remains">remains</span>
       </div>
       <div class="col-sm-11">&nbsp;</div>
       <div class="col-sm-11">
-        Calculating rates is possible when:
+        <span translate="LIBRE_calculatingPossible">Calculating rates is possible when:</span>
         <ul>
-          <li>every oracle gets actual data</li>
-          <li>or timeout and at least {{ MIN_READY_ORACLES }} oracles get actual data</li>
+          <li><span translate="LIBRE_calculatingPossible1">every oracle gets actual data</span></li>
+          <li><span translate="LIBRE_calculatingPossible2">or timeout and at least</span> {{ MIN_READY_ORACLES }} <span translate="LIBRE_calculatingPossible3">oracles get actual data</span></li>
         </ul>
       </div>
     </section>
@@ -296,13 +296,14 @@
 
     <section ng-show="state == states.CALC_RATES">
       <div class="col-sm-11">
-        <label>
+        <label translate="LIBRE_oraclesActual">
           Oracles have actual data. You need to initiate calculating buy and sell rates
         </label>
       </div>
       <div class="col-sm-11">
         <label>
-            {{ readyOracles }} oracles of {{ oracleCount }} have actual data now. Each oracle's data is actual for 10 minutes. You need at least {{ MIN_READY_ORACLES }} actual oracles to calculate rates
+            {{ readyOracles }} / {{ oracleCount }} <span translate="LIBRE_oraclesActual1">oracles have actual data now. Each oracle's data is actual for 10 minutes.</span>
+            <span translate="LIBRE_oraclesActual2">You need at least</span> {{ MIN_READY_ORACLES }} <span translate="LIBRE_oraclesActual3">actual oracles to calculate rates</span>
         </label>
       </div>
       <div class="col-sm-5">
@@ -317,7 +318,8 @@
     <section ng-show="deadlineRemains != 0"><!-- deadline section -->
       <div class="col-sm-11">
         <label>
-          Contract deadline in {{ deadlineDays }} {{ 'LIBRE_days' | translate }} {{ deadlineRemains | secondsToDateTime | date:'HH:mm:ss' }}
+          <span translate="LIBRE_deadline1">Contract deadline in</span> {{ deadlineDays }} {{ 'LIBRE_days' | translate }} {{ deadlineRemains | secondsToDateTime | date:'HH:mm:ss' }}
+          <span translate="LIBRE_deadline2"></span>
         </label>
       </div>
     </section>

@@ -25,11 +25,11 @@ var libreService = function(walletService, $translate) {
         coeff = {
             tokenDecimals: 18,
             rateMultiplier: 1000,
-            gasEmission: 300000, // TODO:Actualize it
-            gasRemission: 300000, //TODO:Actualize it
-            gasApprove: 70000,
-            gasUpdateRates: 1000000, // Actualize it
-            gasCalcRates: 300000,
+            gasEmission: 90000,
+            gasRemission: 90000,
+            gasApprove: 50000,
+            gasUpdateRates: 1000000,
+            gasCalcRates: 170000,
             statesENUM: statesENUM,
             isDebug: IS_DEBUG
         };

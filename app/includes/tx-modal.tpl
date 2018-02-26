@@ -13,31 +13,31 @@
         <table class="table small table-condensed table-hover">
           <tbody>
             <tr>
-              <td class="small text-right">ETH to send:</td>
+              <td class="small text-right" translate="LIBRE_modalETHToSend">ETH to send:</td>
               <td class="small text-left mono">{{ tx.value }} ETH</td>
             </tr>
             <tr>
-              <td class="small text-right">Account Balance:</td>
+              <td class="small text-right" translate="LIBRE_modalAccountBalance">Account Balance:</td>
               <td class="small text-left mono">{{ wallet.balance }}</td>
             </tr>
             <tr>
-              <td class="small text-right">Gas Price:</td>
+              <td class="small text-right" translate="LIBRE_modalGasPrice">Gas Price:</td>
               <td class="small text-left mono">{{ gasPrice.gwei }} GWEI</td>
             </tr>
             <tr>
-              <td class="small text-right">Estimated Gas:</td>
+              <td class="small text-right" translate="LIBRE_modalEstimatedGas">Estimated Gas:</td>
               <td class="small text-left mono">{{ txModal.estimatedGas }}</td>
             </tr>
             <tr>
-              <td class="small text-right">Maximum Gas:</td>
-              <td class="small text-left mono">{{ txModal.maximumGas }}</td>
+              <td class="small text-right" translate="LIBRE_modalMaximumGas">Maximum Gas:</td>
+              <td class="small text-left mono">{{ tx.gasLimit }}</td>
             </tr>
             <tr>
-              <td class="small text-right">Estimated TX Fee:</td>
+              <td class="small text-right" translate="LIBRE_modalEstimatedTXFee">Estimated TX Fee:</td>
               <td class="small text-left mono">{{ txModal.estimatedFee }} ETH</td>
             </tr>  
             <tr>
-              <td class="small text-right">Maximum TX Fee:</td>
+              <td class="small text-right" translate="LIBRE_modalMaximumTXFee">Maximum TX Fee:</td>
               <td class="small text-left mono">{{ txModal.maximumFee }} ETH</td>
             </tr>
           </tbody>
