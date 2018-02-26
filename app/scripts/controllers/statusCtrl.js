@@ -1,19 +1,20 @@
 'use strict';
-var bankStatusCtrl = function($scope, libreService, $translate) {
+var statusCtrl = function($scope, libreService, $translate) {
     var bankAddress = libreService.bank.address,
         getContractData = libreService.methods.getContractData,
         toUnixtime = libreService.methods.toUnixtime,
         normalizeRate = libreService.methods.normalizeRate,
         hexToString = libreService.methods.hexToString,
         stateName = libreService.methods.getStateName,
+        getLatestBlockData = libreService.methods.getLatestBlockData,
         balanceBank = 0,
-        translateStatus = [
-          'LIBRE_LOCKED',
-          'LIBRE_PROCESSING_ORDERS',
-          'LIBRE_WAIT_ORACLES',
-          'LIBRE_CALC_RATES',
-          'LIBRE_REQUEST_RATES'
-        ];
+        IS_DEBUG = libreService.IS_DEBUG,
+        stateMsg = {},
+        latestBlockTime = 0;
+
+    $scope.loading = true;
+
+    const ORACLE_ACTUAL = libreService.coeff.oracleActual;
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
@@ -22,13 +23,20 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         return;
     }
 
-    for(let i=0; i < translateStatus.length; i++) {
-      $translate(translateStatus[i]).then(txt => translateStatus[i] = txt);
+    function updateLastBlockTime() {
+        getLatestBlockData().then((blockData) => {
+            latestBlockTime = parseInt(blockData.data.timestamp, 16);
+        });
     }
+    updateLastBlockTime();
 
     ajaxReq.getBalance(bankAddress, function(balanceData) {
         balanceBank = etherUnits.toEther(balanceData.data.balance, 'wei');
     });
+
+    function applyScope() {
+        if (!$scope.$$phase) $scope.$apply();
+    }
 
     $scope.ajaxReq = ajaxReq;
 
@@ -45,12 +53,12 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         buyRate: {
             default: "Buy Rate",
             translate: "VAR_buyRate",
-            process: (data)=>`${normalizeRate(data)} LIBRE/ETH`
+            process: (data)=>`${normalizeRate(data)} Libre/ETH`
         },
         sellRate: {
             default: "Sell Rate",
             translate: "VAR_sellRate",
-            process: (data)=>`${normalizeRate(data)} LIBRE/ETH`
+            process: (data)=>`${normalizeRate(data)} Libre/ETH`
         },
         buyFee: {
             default: "Buy Fee",
@@ -74,7 +82,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         getState: {
             default: "State",
             translate: "VAR_contractState",
-            process: data => translateStatus[data[0]]
+            process: (state) => stateMsg[stateName(state)]
         },
         requestTime:{
             default: "Request time",
@@ -89,7 +97,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         tokenBalance: {
             default: "Exchanger token balance",
             translate: "VAR_tokenBalance",
-            process: (tokens) => `${Math.round((tokens / Math.pow(10, libreService.coeff.tokenDecimals)) * 100)/100} LIBRE`
+            process: (tokens) => `${tokens / Math.pow(10, libreService.coeff.tokenDecimals)} Libre`
         }
     };
     
@@ -97,40 +105,44 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     $scope.tokenAddress = libreService.token.address;
     $scope.contractData = varsObject;
 
+    for (var state in libreService.coeff.statesENUM) {
+        $translate(`LIBRE_state${state}`).then(msg => {stateMsg[state] = msg});
+    }
+
     const oraclesStruct = {
-        address:0,
-        name:1,
-        type:2,
-        waitQuery:3,
-        updateTime:4,
-        callbackTime:5,
-        rate:6,
+        address: 0,
+        name: 1,
+        type: 2,
+        waitQuery: 3,
+        updateTime: 4,
+        callbackTime: 5,
+        rate: 6,
     };
 
     function getData(varsObject){
-        let promises = Object.keys(varsObject).map((key)=>getContractData(key));
+        let promises = Object.keys(varsObject).map((key) => getContractData(key));
         return Promise.all(promises);
     }
 
-    function processData(bankData,varsObject) {
+    function processData(bankData, varsObject) {
         return Promise.resolve(bankData.map(item => {
             let 
                 varItem = varsObject[item.varName];
                 
             return {
-                data:varItem.process? varItem.process(item.data) : item.data[0],
-                translate:varItem.translate,
-                default:varItem.default
+                data: varItem.process ? varItem.process(item.data) : item.data[0],
+                translate: varItem.translate,
+                default: varItem.default
             };
         }));
     }
 
     function fillData(varsObject) {
         return getData(varsObject)
-                .catch((e)=>console.log(e))
-                .then((data)=>processData(data,varsObject))
-                .then((data)=>{
-                    console.log(data);
+                .catch((e) => console.log(e))
+                .then((data) => processData(data, varsObject))
+                .then((data) => {
+                    if (IS_DEBUG) console.log(data);
                     $scope.contractData = data;
                 });
     }
@@ -139,12 +151,16 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         let oracle = res.data;
 
         return Promise.resolve({
-            address:oracle[oraclesStruct.address],
+            address: oracle[oraclesStruct.address],
             name: hexToString(oracle[oraclesStruct.name]),
             type: hexToString(oracle[oraclesStruct.type]),
+            waitQuery: oracle[oraclesStruct.waitQuery],
             updateTime: toUnixtime(oracle[oraclesStruct.updateTime]),
+            callbackTime: toUnixtime(oracle[oraclesStruct.callbackTime]),
             waiting: oracle[oraclesStruct.waitQuery],
-            rate: `${normalizeRate(oracle[oraclesStruct.rate])} Libre/ETH`
+            outdated: oracle[oraclesStruct.waitQuery] &&
+                        (+oracle[oraclesStruct.updateTime] + ORACLE_ACTUAL < latestBlockTime),
+            rate: normalizeRate(oracle[oraclesStruct.rate])
         });
     }
 
@@ -153,17 +169,24 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     }
 
     function fillOracles() {
-        getContractData("oracleCount")
+        getLatestBlockData().then((blockData) => {
+            latestBlockTime = parseInt(blockData.data.timestamp, 16);
+            return;
+        })
+        .then(() => {
+            return getContractData("oracleCount");
+        })
         .then((res) => {
             let 
                 count = res.data[0],
                 oraclePromise = [];
-            for(let i=0; i<count;i++) oraclePromise.push(getOracle(i));
+            for (let i = 0; i < count; i++) oraclePromise.push(getOracle(i));
             return Promise.all(oraclePromise);
         })
-        .then((result)=>{
-            console.log(result);
+        .then((result) => {
             $scope.oracles = result;
+            $scope.loading = false;
+            applyScope();
         })
     }
 
@@ -171,4 +194,4 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     fillOracles();
 
 };
-module.exports = bankStatusCtrl;
+module.exports = statusCtrl;

@@ -50,13 +50,11 @@ etherscan.getTransaction = function(txHash, callback) {
     });
 }
 etherscan.getTransactionReceipt = function(txHash, callback) {
-    console.log("txHash", txHash);
     this.post({
         module: 'proxy',
         action: 'eth_getTransactionReceipt',
         txhash: txHash,
     }, function(data) {
-        console.log("receipt data", data);
         if (data.error) callback({ error: true, msg: data.error.message, data: '' });
         else callback({ error: false, msg: '', data: data.result });
     });
