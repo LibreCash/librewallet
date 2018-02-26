@@ -57,44 +57,15 @@
                     <th translate="BANKSTATUS_updateTime">Update Time</th>
                     <th translate="BANKSTATUS_rate">Rate</th>
                 </tr>
-                <tr>
-                    <td class="table__wallet">0x874432166d96e72394827398562938523749823</td>
-                    <td>Bitfinex Oraclize Async</td>
-                    <td>ETHUSD</td>
-                    <td>23/01/2018, 23:11:27</td>
-                    <td>939.25</td>
-                </tr>
-                <tr>
-                    <td class="table__wallet">0x874432166d96e…</td>
-                    <td>Bitfinex Oraclize Async</td>
-                    <td>ETHUSD</td>
-                    <td>23/01/2018, 23:11:27</td>
-                    <td>939.25</td>
-                </tr>
-                <tr>
-                    <td class="table__wallet">0x874432166d96e…</td>
-                    <td>Bitfinex Oraclize Async</td>
-                    <td>ETHUSD</td>
-                    <td>23/01/2018, 23:11:27</td>
-                    <td>939.25</td>
-                </tr>
-                <tr>
-                    <td class="table__wallet">0x874432166d96e…</td>
-                    <td>Bitfinex Oraclize Async</td>
-                    <td>ETHUSD</td>
-                    <td>23/01/2018, 23:11:27</td>
-                    <td>939.25</td>
+                <tr ng-repeat="oracle in oracles">
+                    <td><a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', oracle.address) }}" target="_blank"
+                     rel="noopener noreferrer">{{ oracle.address | limitTo: 15 }}&hellip;</a></td>
+                    <td>{{ oracle.name }}</td>
+                    <td>{{ oracle.type }}</td>
+                    <td>{{ oracle.updateTime }}</td>
+                    <td>{{ oracle.rate }}</td>
                 </tr>
                 </thead>
-                
-                <tr ng-repeat="(address, info) in oracles">
-                    <td><a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank"
-                     rel="noopener noreferrer">{{ address | limitTo: 15 }}&hellip;</a></td>
-                    <td>{{ info.name }}</td>
-                    <td>{{ info.type }}</td>
-                    <td>{{ info.updateTime }}</td>
-                    <td>{{ info.rate }}</td>
-                </tr>
             </table>
         </div>
     </div>
