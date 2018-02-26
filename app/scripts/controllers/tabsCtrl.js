@@ -193,7 +193,7 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
                 if ($scope.tabNames[key].url == hval) {
                     $scope.activeTab = globalService.currentTab = $scope.tabNames[key].id;
                     $translate($scope.tabNames[key].name).then(translate => {
-                      $scope.activeTabName = translate;
+                      $scope.activeTabName = translate.replace(/&amp;/g, '&');
                     });
                     break;
                 }
@@ -212,7 +212,7 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
             if ($scope.tabNames[key].id == id) {
               location.hash = $scope.tabNames[key].url;
               $translate($scope.tabNames[key].name).then(translate => {
-                $scope.activeTabName = translate;
+                $scope.activeTabName = translate.replace(/&amp;/g, '&');
               });
             }
         }
