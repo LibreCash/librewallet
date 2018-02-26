@@ -157,9 +157,9 @@
           </label>
         </div>
         <p class="col-xs-12">
-          <span translate="LIBRE_allowed">Allowed:</span> <span>{{ allowedTokens | number: 3 }}</span>
+          <span translate="LIBRE_allowed">Allowed:</span> {{ allowedTokens | number: 3 }}
           <br/>
-          <span translate="LIBRE_allTokens">All tokens:</span> <span>{{ allTokens | number: 3 }}</span>
+          <span translate="LIBRE_allTokens">All tokens:</span> {{ allTokens | number: 3 }}
         </p>
         <div ng-show="allTokens == 0" class="col-sm-11">
           <strong translate="LIBRE_noTokens">

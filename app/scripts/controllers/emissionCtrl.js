@@ -39,20 +39,18 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     $scope.cashAddress = cashAddress;
     $scope.bankAddress = bankAddress;
-    $scope.updateRatesCost = 'n/a';
     $scope.buyOrSell = true;
 
-    $scope.states = libreService.coeff.statesENUM;
+    $scope.states = coeff.statesENUM;
 
-    const ORACLE_ACTUAL = 10 * 60; // todo fix constant
-    const ORACLE_TIMEOUT = 10 * 60;
-    const RATE_PERIOD = 10 * 60;
-    $scope.MIN_READY_ORACLES = 2;
+    var ORACLE_ACTUAL = coeff.oracleActual;
+    var ORACLE_TIMEOUT = coeff.oracleTimeout;
+    $scope.MIN_READY_ORACLES = coeff.minReadyOracles;
 
     $scope.deadlineRemains = 0;
     $scope.gasPrice = {};
     $scope.txFees = {};
-    $scope.txModal = { modalFunc: null };
+    $scope.txModal = {};
 
     //$scope.allTokens = 'Loading';
     $scope.approvePending = false;
@@ -70,7 +68,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     //$scope.allTokens = 'Loading';
     $scope.Validator = Validator;
-    $scope.gasLimitChanged = false;
     var currentTab = $scope.globalService.currentTab;
     var tabs = $scope.globalService.tabs;
 
@@ -365,7 +362,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     );
                 }
                 $scope.tx.to = cashAddress;
-                //$scope.tx.gasLimit = gasApprove;
                 $scope.tx.value = 0;
                 resolve();
             });
@@ -392,7 +388,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                 $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
     
                 $scope.tx.to = bankAddress;
-                //$scope.tx.gasLimit = gasUpdateRates;
                 $scope.tx.value = etherUnits.toEther(+oracleDeficit.data[0], 'wei');
                 $scope.tx.unit = 'ether';
                 resolve();
@@ -422,7 +417,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         canCalc().then(function() {
             $scope.tx.data = getDataString(bankAbiRefactor["calcRates"], []);
             $scope.tx.to = bankAddress;
-            //$scope.tx.gasLimit = gasCalcRates;
             $scope.tx.value = 0;
             $scope.tx.unit = 'ether';
     
@@ -444,7 +438,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                 [$scope.wallet.getAddressString(), tokenCount]);
     
             $scope.tx.to = bankAddress;
-            //$scope.tx.gasLimit = gasRemission;
             $scope.tx.value = 0;
             $scope.tx.from = walletService.wallet.getAddressString();
 
@@ -465,7 +458,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
             $scope.tx.data = txData;
             $scope.tx.to = bankAddress;
-            //$scope.tx.gasLimit = gasEmission;
             $scope.tx.value = $scope.buyTXValue;
 
             if (!estimate) {

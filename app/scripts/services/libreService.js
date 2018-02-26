@@ -7,7 +7,6 @@ var libreService = function(walletService, $translate) {
 
     const 
         IS_DEBUG = true,
-        MIN_READY_ORACLES = 2,
         states = [
             'LOCKED',
             'PROCESSING_ORDERS',
@@ -31,7 +30,10 @@ var libreService = function(walletService, $translate) {
             gasUpdateRates: 1000000,
             gasCalcRates: 170000,
             statesENUM: statesENUM,
-            isDebug: IS_DEBUG
+            isDebug: IS_DEBUG,
+            minReadyOracles: 2,
+            oracleActual: 10 * 60,
+            oracleTimeout: 10 * 60
         };
         
     if (IS_DEBUG) {
@@ -248,7 +250,7 @@ var libreService = function(walletService, $translate) {
     }
 
     function libreTransaction(_scope, pendingName, opPrefix, translator, updater) {
-        if (pendingName != null) _scope[pendingName] = true;
+        _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
         
@@ -260,15 +262,15 @@ var libreService = function(walletService, $translate) {
                 if (IS_DEBUG) console.log(txData);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     if (rawTx.isError) {
-                        if (pendingName != null) _scope[pendingName] = false;
+                        _scope[pendingName] = false;
                         _scope.notifier.danger("generateTx: " + rawTx.error);
-                        return 0;
+                        return;
                     }
                     _scope.rawTx = rawTx.rawTx;
                     _scope.signedTx = rawTx.signedTx;
                     uiFuncs.sendTx(_scope.signedTx, function(resp) {
                         if (resp.isError) {
-                            if (pendingName != null) _scope[pendingName] = false;
+                            _scope[pendingName] = false;
                             _scope.notifier.danger("sendTx: " + resp.error);
                             return;
                         }
@@ -300,11 +302,11 @@ var libreService = function(walletService, $translate) {
                                     if (receipt.msg == "unknown transaction") {
                                         noTxCounter++;
                                         if (noTxCounter > txCheckingTimeout / receiptInterval) {
-                                            if (pendingName != null) _scope[pendingName] = false;
+                                            _scope[pendingName] = false;
                                             _scope.notifier.danger(receipt.msg, 0);
                                         }
                                     } else {
-                                        if (pendingName != null) _scope[pendingName] = false;
+                                        _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
                                 } else {
@@ -312,7 +314,7 @@ var libreService = function(walletService, $translate) {
                                         isCheckingTx = false;
                                         return; // next interval
                                     }
-                                    if (pendingName != null) _scope[pendingName] = false;
+                                    _scope[pendingName] = false;
                                     if (receipt.data.status == "0x1") { 
                                         translator(`LIBRE${opPrefix}_txOk`).then((msg) => {
                                             _scope.notifier.success(msg, 0);
@@ -325,7 +327,7 @@ var libreService = function(walletService, $translate) {
                                             _scope.notifier.danger(msg, 0);
                                         });
                                     }
-                                    if (pendingName != null) _scope[pendingName] = false;
+                                    _scope[pendingName] = false;
                                 }
                                 isCheckingTx = false;
                             });
@@ -333,7 +335,7 @@ var libreService = function(walletService, $translate) {
                     });
                 });
             } catch (e) {
-                if (pendingName != null) _scope[pendingName] = false;
+                _scope[pendingName] = false;
                 _scope.notifier.danger("getTransactionData: " + e);
             }
         });
@@ -353,8 +355,8 @@ var libreService = function(walletService, $translate) {
                     state = values[0],
                     rate = values[1];
     
-                let _rate = rates[0] != 0 ? rates[0] : rates[1];
-                if (rate.data[0] / coeff.rateMultiplier != _rate) {
+                let prevRate = rates[0] != 0 ? rates[0] : rates[1];
+                if (rate.data[0] / coeff.rateMultiplier != prevRate) {
                     $translate("LIBRE_errorValidatingRates").then((msg) => reject(msg));
                 }
     
@@ -387,7 +389,6 @@ var libreService = function(walletService, $translate) {
     };
 
     function canCalc() {
-        const MIN_READY_ORACLES = 2;
         return new Promise((resolve, reject) => {
             Promise.all([
                 getContractData("getState")

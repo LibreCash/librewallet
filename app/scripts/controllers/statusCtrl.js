@@ -14,7 +14,7 @@ var statusCtrl = function($scope, libreService, $translate) {
 
     $scope.loading = true;
 
-    const ORACLE_ACTUAL = 10 * 60; // todo fix constant
+    const ORACLE_ACTUAL = libreService.coeff.oracleActual;
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
@@ -164,19 +164,24 @@ var statusCtrl = function($scope, libreService, $translate) {
     }
 
     function fillOracles() {
-        getContractData("oracleCount")
+        getLatestBlockData().then((blockData) => {
+            latestBlockTime = parseInt(blockData.data.timestamp, 16);
+            return;
+        })
+        .then(() => {
+            return getContractData("oracleCount");
+        })
         .then((res) => {
             let 
                 count = res.data[0],
                 oraclePromise = [];
-            for (let i=0; i<count; i++) oraclePromise.push(getOracle(i));
+            for (let i = 0; i < count; i++) oraclePromise.push(getOracle(i));
             return Promise.all(oraclePromise);
         })
         .then((result) => {
             $scope.oracles = result;
             $scope.loading = false;
             applyScope();
-            
         })
     }
 
