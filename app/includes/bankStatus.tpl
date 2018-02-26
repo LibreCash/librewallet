@@ -33,14 +33,6 @@
                 <div class="contract-status__table">
                     <div ng-hide="(data.data.indexOf('0x') == 0) && (data.data.length == 42)" ng-repeat="data in contractData" class="contract-status__table-item">
                         <div ng-hide="(data.data.indexOf('0x') == 0) && (data.data.length == 42)" class="contract-status__table-item-data">{{ data.data }}</div>
-
-                        <!-- Raw block -->
-                        <!-- <div ng-hide="(info.data.data.indexOf('0x') == 0) && (info.data.data.length == 42)">{{ info.data.error ? info.data.message : info.data.data }}</div> 
-
-                        <div ng-show="(data.data.indexOf('0x') == 0) && (data.data.length == 42)">
-                            <a ng-href="{{ data.error ? '#' : ajaxReq.blockExplorerAddr.replace('[[address]]', data.data) }}" target="_blank"
-                                rel="noopener noreferrer">{{ data.data.error ? data.data.message : data.data }}&hellip;</a>
-                        </div>-->
                         <div ng-hide="(data.data.indexOf('0x') == 0) && (data.data.length == 42)" translate="{{ data.translate }}" class="contract-status__table-item-name">{{ data.default }}</div>
                     </div>
                 </div>
