@@ -5,14 +5,25 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         toUnixtime = libreService.methods.toUnixtime,
         normalizeRate = libreService.methods.normalizeRate,
         hexToString = libreService.methods.hexToString,
-        stateName = libreService.methods.stateName,
-        balanceBank = 0;
+        stateName = libreService.methods.getStateName,
+        balanceBank = 0,
+        translateStatus = [
+          'LIBRE_LOCKED',
+          'LIBRE_PROCESSING_ORDERS',
+          'LIBRE_WAIT_ORACLES',
+          'LIBRE_CALC_RATES',
+          'LIBRE_REQUEST_RATES'
+        ];
 
     if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
         $translate("LIBREBUY_networkFail").then((msg) => {
             $scope.notifier.danger(msg);
         });
         return;
+    }
+
+    for(let i=0; i < translateStatus.length; i++) {
+      $translate(translateStatus[i]).then(txt => translateStatus[i] = txt);
     }
 
     ajaxReq.getBalance(bankAddress, function(balanceData) {
@@ -25,7 +36,11 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
     varsObject = {
         tokenAddress: {
             default: "LibreCash",
-            translate: "VAR_tokenAddress"
+            translate: "VAR_tokenAddress",
+            process: data => {
+              $scope.tokenAddress = data[0];
+              return data[0];
+            }
         },
         buyRate: {
             default: "Buy Rate",
@@ -59,7 +74,7 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         getState: {
             default: "State",
             translate: "VAR_contractState",
-            process: stateName
+            process: data => translateStatus[data[0]]
         },
         requestTime:{
             default: "Request time",
@@ -74,11 +89,12 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         tokenBalance: {
             default: "Exchanger token balance",
             translate: "VAR_tokenBalance",
-            process: (tokens) => `${tokens / Math.pow(10, libreService.coeff.tokenDecimals)} LIBRE`
+            process: (tokens) => `${Math.round((tokens / Math.pow(10, libreService.coeff.tokenDecimals)) * 100)/100} LIBRE`
         }
     };
     
     $scope.address = bankAddress;
+    $scope.tokenAddress = libreService.token.address;
     $scope.contractData = varsObject;
 
     const oraclesStruct = {
@@ -91,8 +107,6 @@ var bankStatusCtrl = function($scope, libreService, $translate) {
         rate:6,
     };
 
-
-    
     function getData(varsObject){
         let promises = Object.keys(varsObject).map((key)=>getContractData(key));
         return Promise.all(promises);
