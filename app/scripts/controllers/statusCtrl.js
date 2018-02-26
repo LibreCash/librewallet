@@ -44,7 +44,11 @@ var statusCtrl = function($scope, libreService, $translate) {
     varsObject = {
         tokenAddress: {
             default: "LibreCash",
-            translate: "VAR_tokenAddress"
+            translate: "VAR_tokenAddress",
+            process: data => {
+              $scope.tokenAddress = data[0];
+              return data[0];
+            }
         },
         buyRate: {
             default: "Buy Rate",
@@ -98,6 +102,7 @@ var statusCtrl = function($scope, libreService, $translate) {
     };
     
     $scope.address = bankAddress;
+    $scope.tokenAddress = libreService.token.address;
     $scope.contractData = varsObject;
 
     for (var state in libreService.coeff.statesENUM) {
