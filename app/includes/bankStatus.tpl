@@ -32,8 +32,8 @@
 
                 <div class="contract-status__table">
                     <div ng-hide="(data.data.indexOf('0x') == 0) && (data.data.length == 42)" ng-repeat="data in contractData" class="contract-status__table-item">
-                        <div ng-hide="(data.data.indexOf('0x') == 0) && (data.data.length == 42)" class="contract-status__table-item-data">{{ data.data }}</div>
-                        <div ng-hide="(data.data.indexOf('0x') == 0) && (data.data.length == 42)" translate="{{ data.translate }}" class="contract-status__table-item-name">{{ data.default }}</div>
+                        <div class="contract-status__table-item-data">{{ data.data }}</div>
+                        <div translate="{{ data.translate }}" class="contract-status__table-item-name">{{ data.default }}</div>
                     </div>
                 </div>
             </div>
