@@ -24,24 +24,16 @@
                 </div>
                 <div class="contract-status__LCC">
                     <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank" rel="noopener noreferrer" class="contract-status__BCA-link">
-                        {{ address }}
+                        {{ tokenAddress }}
                     </a>
-                    <p translate="BANKSTATUS_bankContractAddress" class="contract-status__BCA-bottom">LibreCash Contract</p>
+                    <p translate="VAR_tokenAddress" class="contract-status__BCA-bottom">LibreCash Contract</p>
                     <button class="contract-status__copy-btn">copy</button>
                 </div>
 
                 <div class="contract-status__table">
-                    <div ng-repeat="(name, info) in contractData" class="contract-status__table-item">
-                        <div ng-hide="(info.data.data.indexOf('0x') == 0) && (info.data.data.length == 42)" class="contract-status__table-item-data">938</div>
-
-                        <!-- Raw block -->
-                        <!-- <div ng-hide="(info.data.data.indexOf('0x') == 0) && (info.data.data.length == 42)">{{ info.data.error ? info.data.message : info.data.data }}</div> -->
-
-                        <div ng-show="(info.data.data.indexOf('0x') == 0) && (info.data.data.length == 42)">
-                            <a ng-href="{{ info.data.error ? '#' : ajaxReq.blockExplorerAddr.replace('[[address]]', info.data.data) }}" target="_blank"
-                                rel="noopener noreferrer">{{ info.data.error ? info.data.message : info.data.data }}&hellip;</a>
-                        </div>
-                        <div translate="{{ info.translate }}" class="contract-status__table-item-name">{{ info.default }}</div>
+                    <div ng-hide="(data.data.indexOf('0x') == 0) && (data.data.length == 42)" ng-repeat="data in contractData" class="contract-status__table-item">
+                        <div ng-hide="(data.data.indexOf('0x') == 0) && (data.data.length == 42)" class="contract-status__table-item-data">{{ data.data }}</div>
+                        <div ng-hide="(data.data.indexOf('0x') == 0) && (data.data.length == 42)" translate="{{ data.translate }}" class="contract-status__table-item-name">{{ data.default }}</div>
                     </div>
                 </div>
             </div>
