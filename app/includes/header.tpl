@@ -81,7 +81,7 @@
     <div class="tagline">
 
       <div class="header__left">
-        <span class="header__title">New Wallet</span>
+        <span class="header__title">{{ activeTabName }}</span>
       </div>
 
       <!-- <span class="hidden-xs">3.11.1.7</span> -->
