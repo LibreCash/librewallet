@@ -49,15 +49,6 @@
 
   <!-- If unlocked with PK -->
   <article class="block" ng-hide="wallet.type=='addressOnly'" ng-show="buy">
-    <nav class="container nav-container" ng-show="state == states.PROCESSING_ORDERS">
-      <div class="nav-scroll">
-      <ul class="nav-inner">
-        <li class="nav-item {{ buyOrSell ? 'active' : '' }}" ng-click="buyOrSell=!buyOrSell"><a translate="LIBRE_buyDirection">ETH -> Libre</a></li>
-        <li class="nav-item {{ buyOrSell ? '' : 'active' }}" ng-click="buyOrSell=!buyOrSell"><a translate="LIBRE_sellDirection">Libre -> ETH</a></li>
-      </ul>
-      </div>
-    </nav>
-
     <section  class="row form-group" ng-show="state != states.PROCESSING_ORDERS &&
                                               state != states.WAIT_ORACLES &&
                                               state != states.REQUEST_RATES &&
@@ -98,6 +89,11 @@
         <span translate="LIBRE_contractBalances">Contract balances</span>:<br/>
         {{ tokenBalance | number: 3 }} Libre<br/>
         {{ ethBalance | number: 3 }} ETH
+      </div>
+
+      <div class="col-sm-11">
+        <button class="btn {{ buyOrSell ? 'btn-success' : '' }}" ng-click="buyOrSell=!buyOrSell"><span translate="LIBRE_buyDirection">ETH -> Libre</span></button>
+        <button class="btn {{ buyOrSell ? '' : 'btn-success' }}" ng-click="buyOrSell=!buyOrSell"><span translate="LIBRE_sellDirection">Libre -> ETH</span></button>
       </div>
       
       <!-- buy section -->

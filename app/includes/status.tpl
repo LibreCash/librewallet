@@ -9,8 +9,8 @@
 
             </div>
             <div class="col-lg-10 col-lg-offset-1">
-                    <button class="btn {{ showOracles ? '' : 'btn-success' }}" ng-click="showOracles=!showOracles"><a translate="LIBRESTATUS_contractStatus">Contract status</a></li>
-                    <button class="btn {{ showOracles ? 'btn-success' : '' }}" ng-click="showOracles=!showOracles"><a translate="LIBRESTATUS_oraclesStatus">Oracles</a></li>
+                <button class="btn {{ showOracles ? '' : 'btn-success' }}" ng-click="showOracles=!showOracles"><span translate="LIBRESTATUS_contractStatus">Contract status</span></button>
+                <button class="btn {{ showOracles ? 'btn-success' : '' }}" ng-click="showOracles=!showOracles"><span translate="LIBRESTATUS_oraclesStatus">Oracles</span></button>
             </div>
             <div class="col-lg-10 col-lg-offset-1" ng-hide="showOracles">
                 <h1 translate="LIBRESTATUS_contractStatus">Contract Status</h1>
