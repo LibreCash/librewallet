@@ -3,8 +3,6 @@
       ng-controller='emissionCtrl'
       ng-cloak >
 
-  @@include('./libreStatus.tpl')
-
   <!-- Header : todo turn into warning notification-->
   <div class="alert alert-info" ng-show="hasQueryString">
     <p translate="WARN_Send_Link">
