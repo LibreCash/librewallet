@@ -5,16 +5,12 @@
             Loading...
         </section>
         <section ng-hide="loading">
-            <nav class="container nav-container">
-                <div class="nav-scroll">
-                <ul class="nav-inner">
-                    <li class="nav-item {{ showOracles ? '' : 'active' }}" ng-click="showOracles=!showOracles"><a translate="LIBRESTATUS_contractStatus">Contract status</a></li>
-                    <li class="nav-item {{ showOracles ? 'active' : '' }}" ng-click="showOracles=!showOracles"><a translate="LIBRESTATUS_oraclesStatus">Oracles</a></li>
-                </ul>
-                </div>
-            </nav>
             <div class="col-lg-10 col-lg-offset-1">
 
+            </div>
+            <div class="col-lg-10 col-lg-offset-1">
+                    <button class="btn {{ showOracles ? '' : 'btn-success' }}" ng-click="showOracles=!showOracles"><a translate="LIBRESTATUS_contractStatus">Contract status</a></li>
+                    <button class="btn {{ showOracles ? 'btn-success' : '' }}" ng-click="showOracles=!showOracles"><a translate="LIBRESTATUS_oraclesStatus">Oracles</a></li>
             </div>
             <div class="col-lg-10 col-lg-offset-1" ng-hide="showOracles">
                 <h1 translate="LIBRESTATUS_contractStatus">Contract Status</h1>
