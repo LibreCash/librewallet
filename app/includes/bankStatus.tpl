@@ -12,7 +12,6 @@
         </div>
 
         <div class="col-lg-12 bank-status__wrapper" ng-hide="showOracles">
-            <!-- <h1 translate="BANKSTATUS_contractStatus">Contract Status</h1> -->
             <div class="contract-status">
 
                 <div class="contract-status__BCA">
@@ -23,7 +22,7 @@
                     <button class="contract-status__copy-btn">copy</button>
                 </div>
                 <div class="contract-status__LCC">
-                    <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank" rel="noopener noreferrer" class="contract-status__BCA-link">
+                    <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', tokenAddress) }}" target="_blank" rel="noopener noreferrer" class="contract-status__BCA-link">
                         {{ tokenAddress }}
                     </a>
                     <p translate="VAR_tokenAddress" class="contract-status__BCA-bottom">LibreCash Contract</p>
