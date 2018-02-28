@@ -55,7 +55,16 @@
                                               state != states.CALC_RATES"
                                               translate="LIBRE_loadingContractData">
                                                 Loading contract data...
-                                            </section>
+    </section>
+        
+    <div class="tab-content__inner" ng-show="buyOrSell">
+      <nav class="bank-status-nav">
+        <ul class="bank-status-nav__list">
+          <li class="bank-status-nav__item  {{ buyOrSell ? 'active' : '' }}" ng-click="buyOrSell=!buyOrSell"><a translate="LIBRE_buyDirection">ETH -> Libre</a></button>
+          <li class="bank-status-nav__item {{ buyOrSell ? '' : 'active' }}" ng-click="buyOrSell=!buyOrSell"><a translate="LIBRE_sellDirection">Libre -> ETH</a></button>
+        </ul>
+      </nav>
+    </div>                      
     <!-- buy/sell section -->
     <section class="row form-group" ng-show="state == states.PROCESSING_ORDERS">
       <div class="col-sm-11">
@@ -91,18 +100,9 @@
         {{ ethBalance | number: 3 }} ETH
       </div>
 
-      <div class="col-sm-11">
-        <button class="btn {{ buyOrSell ? 'btn-success' : '' }}" ng-click="buyOrSell=!buyOrSell"><span translate="LIBRE_buyDirection">ETH -> Libre</span></button>
-        <button class="btn {{ buyOrSell ? '' : 'btn-success' }}" ng-click="buyOrSell=!buyOrSell"><span translate="LIBRE_sellDirection">Libre -> ETH</span></button>
-      </div>
-      
       <!-- buy section -->
       <section ng-show="buyOrSell">
-        <div class="col-sm-11">
-          <label translate="LIBRE_buyDirection">
-            ETH  -> Libre
-          </label>
-        </div>
+
         <div class="col-sm-11">
           <div class="input-group">
             <input type="text"
