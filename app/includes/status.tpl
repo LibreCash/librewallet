@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <div class="col-lg-12" ng-show="showOracles">
+            <div class="col-lg-12 less-padding" ng-show="showOracles">
                 <h1 translate="LIBRESTATUS_oraclesStatus">Oracles status</h1>
                 <table class="table oracles-table">
                     <thead>
@@ -57,7 +57,7 @@
                     </thead>
                     
                     <tr ng-repeat="oracle in oracles">
-                        <td><a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank"
+                        <td class="table__wallet"><a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank"
                         rel="noopener noreferrer">{{ oracle.address | limitTo: 15 }}&hellip;</a></td>
                         <td>{{ oracle.name }}</td>
                         <!--td>{{ oracle.type }}</td-->

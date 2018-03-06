@@ -1,5 +1,5 @@
 <!-- Content -->
-<div class="col-sm-8">
+<div class="col-sm-8 less-paddings-mobile">
 <!-- todo state is "" for several seconds when we come from status tab. do "loading"? -->
   <!-- If unlocked with address only -->
   <article class="block" ng-show="wallet.type=='addressOnly'">
@@ -127,7 +127,7 @@
         <!-- Amount to Send - Transfer Entire Balance -->
         <p class="col-xs-12" ng-hide="tx.readOnly">
           <a ng-click="transferAllBalance()">
-            <span class="strong" translate="SEND_TransferTotal">
+            <span class="strong underline" translate="SEND_TransferTotal">
               Send Entire Balance
             </span>
           </a>
@@ -178,7 +178,7 @@
                       ng-class="Validator.isPositiveNumber(tokensToAllow) ? 'is-valid' : 'is-invalid'"/>
               <div class="input-group-btn">
                 <button style="min-width: 170px"
-                  class="btn btn-default"
+                  class="btn btn-default btn-wide"
                   ng-disabled="approvePending || !Validator.isPositiveNumber(tokensToAllow)"
                   ng-click="approveModal()">
                   <strong>
@@ -243,7 +243,7 @@
           
             <div class="col-sm-8 offset-col-sm-2">
               <button style="min-width: 170px"
-                class="btn btn-default"
+                class="btn btn-default btn-wide"
                 ng-click="sellModal()"
                 ng-disabled="sellPending || !orderAllowed || !Validator.isPositiveNumber(tokenValue) || changedEth > ethBalance">
                 <strong>
@@ -329,7 +329,7 @@
 
 
 <!-- Sidebar -->
-<section class="col-sm-4">
+<section class="col-sm-4 no-padding">
 
   <div class="block block--danger"
        ng-show="wallet!=null && globalService.currentTab==globalService.tabs.swap.id && !hasEnoughBalance()">
