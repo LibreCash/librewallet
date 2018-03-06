@@ -192,7 +192,7 @@
 </section>
 
 <nav role="navigation" aria-label="main navigation" class="nav-container header-branding overflowing" >
-  <a class="nav-toggler">
+  <a class="nav-toggler" id="nav-toggler">
     <span></span>
     <span></span>
     <span></span>
