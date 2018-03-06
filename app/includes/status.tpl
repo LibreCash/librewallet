@@ -57,10 +57,7 @@
                     </thead>
                     
                     <tr ng-repeat="oracle in oracles">
-                        <td class="table__wallet"><a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank"
-                        rel="noopener noreferrer">{{ oracle.address | limitTo: 15 }}&hellip;</a></td>
-                        <td>{{ oracle.name }}</td>
-                        <!--td>{{ oracle.type }}</td-->
+                        <td><a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', oracle.address) }}" target="_blank">{{ oracle.name }}</a></td>
                         <td>{{ oracle.updateTime }}</td>
                         <td>{{ oracle.outdated ? 'outdated' : (oracle.waiting ? ('LIBRE_waiting' | translate) : oracle.rate + ' Libre/ETH' ) }}</td>
                     </tr>
