@@ -48,7 +48,6 @@
                 <table class="table oracles-table">
                     <thead>
                     <tr>
-                        <th translate="LIBRESTATUS_address">Address</th>
                         <th translate="LIBRESTATUS_name">Name</th>
                         <!--th translate="LIBRESTATUS_type">Type</th-->
                         <th translate="LIBRESTATUS_updateTime">Update Time</th>
