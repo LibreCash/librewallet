@@ -109,7 +109,7 @@
             </tr>
             <tr>
               <td class="small text-right">Data:</td>
-              <td class="small text-left mono">{{parsedSignedTx.data}}</td>
+              <td class="small text-left mono"><input class="form-control" value="{{parsedSignedTx.data}}"></input></td>
             </tr>
 
           </tbody>
