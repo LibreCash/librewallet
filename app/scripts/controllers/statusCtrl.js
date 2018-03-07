@@ -105,8 +105,13 @@ var statusCtrl = function($scope, libreService, $translate) {
     $scope.tokenAddress = libreService.token.address;
     $scope.contractData = varsObject;
 
-    for (var state in libreService.coeff.statesENUM) {
-        $translate(`LIBRE_state${state}`).then(msg => {stateMsg[state] = msg});
+    function translateMSGs() {
+      var promises = [];
+      for (var state in libreService.coeff.statesENUM) {
+        promises.push($translate(`LIBRE_state${state}`).then(msg => {stateMsg[state] = msg}));
+      }
+
+      return Promise.all(promises);
     }
 
     const oraclesStruct = {
@@ -190,7 +195,7 @@ var statusCtrl = function($scope, libreService, $translate) {
         })
     }
 
-    fillData(varsObject);
+    translateMSGs().then(() => fillData(varsObject));
     fillOracles();
 
 };
