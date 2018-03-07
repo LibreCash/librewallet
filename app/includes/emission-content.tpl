@@ -58,7 +58,7 @@
                                                 Loading contract data...
                                             </section>
       
-                                                <div class="tab-content__inner" ng-show="buyOrSell">
+    <div class="tab-content__inner" ng-show="state == states.PROCESSING_ORDERS">
       <nav class="bank-status-nav">
         <ul class="bank-status-nav__list">
           <li class="bank-status-nav__item  {{ buyOrSell ? 'active' : '' }}" ng-click="buyOrSell=!buyOrSell"><a translate="LIBRE_buyDirection">ETH -> Libre</a></button>
@@ -177,25 +177,25 @@
                       ng-model="tokensToAllow"
                       ng-disabled="tx.readOnly || checkTxReadOnly"
                       ng-class="Validator.isPositiveNumber(tokensToAllow) ? 'is-valid' : 'is-invalid'"/>
-              <div class="input-group-btn">
-                <button style="min-width: 170px"
-                  class="btn btn-default btn-wide"
-                  ng-disabled="approvePending || !Validator.isPositiveNumber(tokensToAllow)"
-                  ng-click="approveModal()">
-                  <strong>
-                    {{ approvePending ? 'LIBRE_txPending' : 'LIBRE_approve' | translate }}
-                  </strong>
-                </button>
-              </div>
             </div>
           </div>
           <p class="col-xs-12" ng-hide="tx.readOnly">
             <a ng-click="tokensToAllow = allTokens">
-              <span class="strong" translate="LIBRE_approveAll">
+              <span class="strong underline" translate="LIBRE_approveAll">
                 Approve whole balance
               </span>
             </a>
           </p>
+          <div class="col-sm-8 offset-col-sm-2">
+            <button style="min-width: 170px"
+              class="btn btn-default"
+              ng-disabled="approvePending || !Validator.isPositiveNumber(tokensToAllow)"
+              ng-click="approveModal()">
+              <strong>
+                {{ approvePending ? 'LIBRE_txPending' : 'LIBRE_approve' | translate }}
+              </strong>
+            </button>
+          </div>
         
           <section ng-hide="allowedTokens > 0">
             <div class="col-sm-11">
@@ -213,7 +213,7 @@
             </div>
           
             <div class="col-sm-11">
-              <div class="input-group">
+              <div class="input-group input-group--flex">
                 <input type="text"
                         class="form-control"
                         placeholder="{{ 'SEND_amount_short' | translate }}"
@@ -223,7 +223,7 @@
                         ng-change="changedEth = Validator.isPositiveNumber(tokenValue) ? tokenValue / sellRate : 0"/>
                 <div class="input-group-btn">
                   <span style="min-width: 170px"
-                        class="btn btn-default"
+                        class="btn btn-default btn-inside-input"
                         ng-class="'disabled'">
                           <strong>
                             {{ changedEth }} ETH
@@ -236,7 +236,7 @@
                 <!-- Amount to Send - Transfer Entire Balance -->
             <p class="col-xs-12" ng-hide="tx.readOnly">
               <a ng-click="tokenValue = (allowedTokens <= allTokens) ? allowedTokens : allTokens; changedEth = tokenValue / sellRate">
-                <span class="strong" translate="LIBRE_sellAllApproved">
+                <span class="strong underline" translate="LIBRE_sellAllApproved">
                   Sell All Available Tokens
                 </span>
               </a>
