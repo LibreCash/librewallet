@@ -207,7 +207,7 @@
         <!--<p class="small visible-xs">3.11.1.7</p>-->
       </a>
     }
-    <button class="nav-settings"></button>
+    <!-- <button class="nav-settings"></button> -->
     @@if (site === 'cx'  ) {
       <a class="brand" href="/cx-wallet.html" aria-label="Go to homepage">
         <img src="images/logo-libre.svg" height="64px" width="245px" alt="LibreWallet" />
