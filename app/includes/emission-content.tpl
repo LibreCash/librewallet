@@ -3,6 +3,7 @@
 <!-- todo state is "" for several seconds when we come from status tab. do "loading"? -->
   <!-- If unlocked with address only -->
   <article class="block" ng-show="wallet.type=='addressOnly'">
+    
     <div class="row form-group">
       <h4 translate="SEND_ViewOnly">
         You cannot send with only your address. You must use one of the other options to unlock your wallet in order to send.
@@ -49,22 +50,22 @@
 
   <!-- If unlocked with PK -->
   <article class="block" ng-hide="wallet.type=='addressOnly'" ng-show="buy">
-    <section  class="row form-group" ng-show="state != states.PROCESSING_ORDERS &&
+  <section  class="row form-group" ng-show="state != states.PROCESSING_ORDERS &&
                                               state != states.WAIT_ORACLES &&
                                               state != states.REQUEST_RATES &&
                                               state != states.CALC_RATES"
                                               translate="LIBRE_loadingContractData">
                                                 Loading contract data...
-    </section>
-        
-    <div class="tab-content__inner" ng-show="buyOrSell">
+                                            </section>
+      
+                                                <div class="tab-content__inner" ng-show="buyOrSell">
       <nav class="bank-status-nav">
         <ul class="bank-status-nav__list">
           <li class="bank-status-nav__item  {{ buyOrSell ? 'active' : '' }}" ng-click="buyOrSell=!buyOrSell"><a translate="LIBRE_buyDirection">ETH -> Libre</a></button>
           <li class="bank-status-nav__item {{ buyOrSell ? '' : 'active' }}" ng-click="buyOrSell=!buyOrSell"><a translate="LIBRE_sellDirection">Libre -> ETH</a></button>
         </ul>
       </nav>
-    </div>                      
+    </div>  
     <!-- buy/sell section -->
     <section class="row form-group" ng-show="state == states.PROCESSING_ORDERS">
       <div class="col-sm-11">
@@ -102,9 +103,9 @@
 
       <!-- buy section -->
       <section ng-show="buyOrSell">
-
+ 
         <div class="col-sm-11">
-          <div class="input-group">
+          <div class="input-group input-group--flex">
             <input type="text"
                     class="form-control"
                     placeholder="{{ 'SEND_amount_short' | translate }}"
@@ -112,9 +113,9 @@
                     ng-disabled="tx.readOnly || checkTxReadOnly"
                     ng-class="Validator.isPositiveNumber(buyTXValue) ? 'is-valid' : 'is-invalid'"
                     ng-change="changedTokens = Validator.isPositiveNumber(buyTXValue) ? buyTXValue * buyRate : 0"/>
-            <div class="input-group-btn">
+                    <div class="input-group-btn">
               <span style="min-width: 170px"
-                    class="btn btn-default"
+                    class="btn btn-default btn-inside-input"
                     ng-class="'disabled'">
                     <strong>
                       {{ changedTokens }} Libre
@@ -243,7 +244,7 @@
           
             <div class="col-sm-8 offset-col-sm-2">
               <button style="min-width: 170px"
-                class="btn btn-default btn-wide"
+                class="btn btn-default"
                 ng-click="sellModal()"
                 ng-disabled="sellPending || !orderAllowed || !Validator.isPositiveNumber(tokenValue) || changedEth > ethBalance">
                 <strong>
@@ -280,7 +281,7 @@
         <span translate="LIBRE_RURCost">Update rates cost</span>: {{ updateRatesCost }} ETH
       </div>
 
-      <div class="col-sm-5">
+      <div class="col-sm-8">
         <button class="btn btn-block"
               ng-click="updateRatesModal()"
               ng-class="updateRatesAllowed ? 'btn-success' : 'btn-default'"
