@@ -192,11 +192,7 @@
 </section>
 
 <nav role="navigation" aria-label="main navigation" class="nav-container header-branding overflowing" >
-  <button class="nav-toggler" id="nav-toggler">
-    <span></span>
-    <span></span>
-    <span></span>
-  </button>
+  <a class="nav-toggler"  id="nav-toggler"></a>
   @@if (site === 'mew' ) {
       <a class="brand" href="/" aria-label="Go to homepage">
         <picture>
