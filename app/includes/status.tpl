@@ -2,8 +2,13 @@
 <main class="tab-pane active" ng-if="globalService.currentTab==globalService.tabs.status.id" ng-controller='statusCtrl' ng-cloak>
     <div class="row justify-content-md-center">
 
-            <section ng-show="loading">Loading...</section>
-            <section ng-hide="loading">
+        <section class="loading-wrap" ng-show="loading">
+            <div class="loading">
+            <h1> Loading... </h1>
+            </div>
+        </section>
+
+        <section ng-hide="loading">
 
             <div class="tab-content__inner">
                 <nav class="bank-status-nav">
