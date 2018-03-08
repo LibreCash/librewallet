@@ -79,7 +79,10 @@
              type="radio"
              ng-model="walletType"
              value="fileupload" />
-      Keystore / JSON File
+      <span translate="x_Keystore">
+        Keystore / JSON File
+      </span>       
+      
       <a href="https://myetherwallet.github.io/knowledge-base/private-keys-passwords/difference-beween-private-key-and-keystore-file.html"
          target="_blank"
          rel="noopener noreferrer">
@@ -118,30 +121,6 @@
          target="_blank"
          rel="noopener noreferrer">
         <img src="images/icon-help-3.svg" width="16px" height="16px" style="margin: 0 5px 5px">
-      </a>
-    </label>
-
-    <!-- Parity -->
-    <label class="radio" style="display: none;" id="showMeTheMoney">
-      <input aria-flowto="aria8"
-             aria-label="parity phrase"
-             type="radio"
-             ng-model="walletType"
-             value="parityBWallet" />
-      <span translate="x_ParityPhrase">
-        Parity Phrase
-      </span>
-    </label>
-
-    <label aria-flowto="aria9" class="radio">
-      &nbsp;
-      <span translate="x_ParityPhrase">
-        Parity Phrase
-      </span>
-      <a href="https://myetherwallet.github.io/knowledge-base/private-keys-passwords/parity-phrases-are-no-longer-supported.html"
-         target="_blank"
-         rel="noopener noreferrer">
-           <img src="images/icon-help-3.svg" width="16px" height="16px" style="margin: 0 5px 5px">
       </a>
     </label>
 
@@ -300,7 +279,8 @@
            class="btn btn-default btn-xs"
            href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en"
            target="_blank"
-           rel="noopener noreferrer">
+           rel="noopener noreferrer"
+           translate="DOWNLOAD_MetaMask">
               Download MetaMask
         </a>
       </div>
