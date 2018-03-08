@@ -47,14 +47,14 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     id:5,
     name: "NAV_ENS",
     url: "ens",
-    mew: true,
-    cx: true
+    mew: false,
+    cx: false
   },
   domainsale: {
     id: 6,
     name: "NAV_DomainSale",
     url: "domainsale",
-    mew: true,
+    mew: false,
     cx: true
   },
   signMsg: {
