@@ -167,9 +167,12 @@ gulp.task('staticJS', function() {
 // Copy
 let imgSrcFolder = app + 'images/**/*';
 let fontSrcFolder = app + 'fonts/*.*';
+let additionalFonts =  app + 'fonts/*/*.*';
 let cxSrcFiles = app + 'includes/browser_action/*.*';
 let jsonFile = app + '*.json';
 let jQueryFile = app + 'scripts/staticJS/jquery-1.12.3.min.js';
+let menuToggler = app + 'scripts/staticJS/menuToggler.js';
+
 let bin = app + '/bin/*';
 let staticJSSrcFile = js_destFolderStatic + js_destFileStatic;
 let readMe = './README.md';
@@ -183,12 +186,20 @@ gulp.task('copy', ['staticJS'], function() {
     gulp.src(fontSrcFolder)
         .pipe(gulp.dest(dist + 'fonts'))
         .pipe(gulp.dest(dist_CX + 'fonts'));
+    
+    gulp.src(additionalFonts)
+        .pipe(gulp.dest(dist + 'fonts'))
+        .pipe(gulp.dest(dist_CX + 'fonts'));
 
     gulp.src(staticJSSrcFile)
         .pipe(gulp.dest(dist + 'js'))
         .pipe(gulp.dest(dist_CX + 'js'));
 
     gulp.src(jQueryFile)
+        .pipe(gulp.dest(dist + 'js'))
+        .pipe(gulp.dest(dist_CX + 'js'));
+    
+    gulp.src(menuToggler)
         .pipe(gulp.dest(dist + 'js'))
         .pipe(gulp.dest(dist_CX + 'js'));
 
