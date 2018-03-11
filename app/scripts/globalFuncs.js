@@ -207,10 +207,11 @@ globalFuncs.getDefaultTokensAndNetworkType =  function getDefaultTokensAndNetwor
 
     var tokenMappings = {
         'eth': require('./tokens/ethTokens.json'),
-        'etc': require('./tokens/etcTokens.json'),
-        'rop': require('./tokens/ropstenTokens.json'),
-        'kov': require('./tokens/kovanTokens.json'),
         'rin': require('./tokens/rinkebyTokens.json')
+        /* 'etc': require('./tokens/etcTokens.json'),
+        'rop': require('./tokens/ropstenTokens.json'),
+        'kov': require('./tokens/kovanTokens.json')
+        */
     };
 
     var nodeErrMsg = 'Node does not exist, contact support@myetherwallet.com CODE:localstorageNodeMissing'
