@@ -14,7 +14,7 @@
   <!-- Unlock Wallet -->
   <article class="collapse-container">
     <div class="row">
-      <div class="col-sm-12">
+      <div class="col-sm-12 less-padding">
         <div ng-click="wd = !wd">
           <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
           <h1 translate="NAV_SendEther">

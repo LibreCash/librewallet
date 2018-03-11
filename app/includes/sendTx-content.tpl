@@ -1,5 +1,5 @@
 <!-- Content -->
-<div class="col-sm-8">
+<div class="col-sm-8 less-paddings-mobile">
 
 
   <!-- If unlocked with address only -->
@@ -63,18 +63,18 @@
     <!-- Amount to Send -->
     <section class="row form-group">
 
-      <div class="col-sm-11">
+      <div class="col-sm-11 less-paddings-mobile">
         <label translate="SEND_amount">
           Amount to Send:
         </label>
       </div>
 
-      <div class="col-sm-11">
+      <div class="col-sm-11 less-paddings-mobile">
 
-        <div class="input-group">
+        <div class="input-group input-group--flex input-group--flex-start">
 
           <input type="text"
-                 class="form-control"
+                 class="form-control form-control--narrow"
                  placeholder="{{ 'SEND_amount_short' | translate }}"
                  ng-model="tx.value"
                  ng-disabled="tx.readOnly || checkTxReadOnly"
@@ -83,7 +83,7 @@
           <div class="input-group-btn">
 
             <a style="min-width: 170px"
-               class="btn btn-default dropdown-toggle"
+               class="btn btn-default dropdown-toggle btn-inside-input"
                class="dropdown-toggle"
                ng-click="wallet.setTokens(); globalService.tokensLoaded=true;dropdownAmount = !dropdownAmount"
                ng-class="dropdownEnabled ? '' : 'disabled'">
@@ -94,7 +94,7 @@
             </a>
 
             <!-- Amount to Send - Dropdown -->
-            <ul class="dropdown-menu dropdown-menu-right"
+            <ul class="dropdown-menu"
                 ng-show="dropdownAmount && !tx.readOnly">
               <li>
                 <a ng-class="{true:'active'}[tx.sendMode=='ether']"
@@ -135,7 +135,7 @@
 
       <!-- Amount to Send - Transfer Entire Balance -->
       <p class="col-xs-12" ng-hide="tx.readOnly">
-        <a ng-click="transferAllBalance()">
+        <a ng-click="transferAllBalance()" class="underline basecolor">
           <span class="strong" translate="SEND_TransferTotal">
             Send Entire Balance
           </span>
@@ -154,12 +154,13 @@
            href="https://myetherwallet.github.io/knowledge-base/gas/what-is-gas-ethereum.html"
            target="_blank"
            rel="noopener noreferrer">
-          <img src="images/icon-help.svg" class="help-icon" />
+          
           <p class="account-help-text" translate="GAS_LIMIT_Desc"></p>
         </a>
         <label translate="TRANS_gas">
           Gas Limit:
         </label>
+        <img src="images/icon-help.svg" class="help-icon" />
         <input type="text"
                class="form-control"
                placeholder="21000"
@@ -171,12 +172,16 @@
     </section>
 
     <!-- Advanced Option Panel -->
-    <a ng-click="showAdvance=true"
-       ng-show='globalService.currentTab==globalService.tabs.sendTransaction.id'>
-      <p class="strong" translate="TRANS_advanced">
-        + Advanced: Add Data
-      </p>
-    </a>
+    <section class="row">
+      <div class="col-sm-11">
+        <a ng-click="showAdvance=true"
+           ng-show='globalService.currentTab==globalService.tabs.sendTransaction.id'>
+          <p class="strong" translate="TRANS_advanced">
+            + Advanced: Add Data
+          </p>
+        </a>
+      </div>
+    </section>
 
 
 
@@ -186,13 +191,13 @@
       <section class="row form-group">
         <div class="col-sm-11 clearfix" ng-show="tx.sendMode=='ether'">
           <span class="account-help-icon">
-            <img src="images/icon-help.svg" class="help-icon" />
             <p class="account-help-text" translate="OFFLINE_Step2_Label_6b">
               This is optional.
             </p>
           </span>
 
           <label translate="TRANS_data"> Data: </label>
+          <img src="images/icon-help.svg" class="help-icon" />
 
           <input type="text"
                  class="form-control"
@@ -213,13 +218,13 @@
              href="https://myetherwallet.github.io/knowledge-base/transactions/what-is-nonce.html"
              target="_blank"
              rel="noopener noreferrer">
-            <img src="images/icon-help.svg" class="help-icon" />
             <p class="account-help-text" translate="NONCE_Desc"></p>
           </a>
 
           <label translate="OFFLINE_Step2_Label_5">
             Nonce
           </label>
+          <img src="images/icon-help.svg" class="help-icon" />
           <input type="text"
                  class="form-control"
                  placeholder="2"
@@ -238,13 +243,13 @@
              href="https://myetherwallet.github.io/knowledge-base/gas/what-is-gas-ethereum.html"
              target="_blank"
              rel="noopener noreferrer">
-                <img src="images/icon-help.svg" class="help-icon" />
                 <p class="account-help-text" translate="GAS_PRICE_Desc"></p>
           </a>
 
           <label translate="OFFLINE_Step2_Label_3">
             Gas Price:
           </label>
+          <img src="images/icon-help.svg" class="help-icon" />
           <input type="text"
                  class="form-control"
                  placeholder="50"
@@ -328,7 +333,7 @@
 
 
 <!-- Sidebar -->
-<section class="col-sm-4">
+<section class="col-sm-4 no-padding">
 
   <div class="block block--danger"
        ng-show="wallet!=null && globalService.currentTab==globalService.tabs.swap.id && !hasEnoughBalance()">

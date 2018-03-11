@@ -28,7 +28,7 @@ var libreService = function(walletService, $translate) {
             gasRemission: 90000,
             gasApprove: 50000,
             gasUpdateRates: 1000000,
-            gasCalcRates: 170000,
+            gasCalcRates: 200000,
             statesENUM: statesENUM,
             isDebug: IS_DEBUG,
             minReadyOracles: 2,

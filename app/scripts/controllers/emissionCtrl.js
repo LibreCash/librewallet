@@ -118,8 +118,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.waitOraclesRemains--;
         }
 
-        let deadlineDays = $scope.deadlineRemains / (60 * 60 * 24),
-            antiMinute = 1 / (24 * 60); // 
+        let deadlineDays = $scope.deadlineRemains / (60 * 60 * 24);
 
         if ($scope.deadlineRemains > 0) {
             $scope.deadlineRemains--;

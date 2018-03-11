@@ -227,3 +227,11 @@ input[type="button"] {
   cursor: inherit;
   display: block;
 }
+.input-group-btn > .btn-inside-input {
+  right: 0;
+  position: absolute;
+  @media screen and (max-width: @screen-sm) {
+    position: relative;
+    right: auto;
+  }
+}

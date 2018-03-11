@@ -3,8 +3,6 @@
       ng-controller='emissionCtrl'
       ng-cloak >
 
-  @@include('./libreStatus.tpl')
-
   <!-- Header : todo turn into warning notification-->
   <div class="alert alert-info" ng-show="hasQueryString">
     <p translate="WARN_Send_Link">
@@ -15,11 +13,15 @@
 
   <!-- Unlock Wallet -->
   <article class="collapse-container">
+    <div class="row">
+    <div class="col-xs-12 less-padding">
     <div ng-click="wd = !wd">
       <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
       <h1 translate="LIBRE_exchangeLibreCash">
         Exchange LibreCash
       </h1>
+    </div>
+    </div>
     </div>
     <div ng-show="!wd">
         @@if (site === 'cx' )  {  <cx-wallet-decrypt-drtv></cx-wallet-decrypt-drtv>   }

@@ -39,8 +39,8 @@ th {
         vertical-align: top;
         border-top: 1px solid @table-border-color;
         @media screen and (max-width: @screen-lg) {
-          padding: @table-condensed-cell-padding 20px;
-          font-size: @font-size-small;
+          padding: @space-xs 5px;
+          font-size: @font-size-xs;
         }
       }
     }
@@ -52,6 +52,9 @@ th {
     font-size: @font-size-small;
     font-weight: 400;
     color: @ether-gray;
+    @media screen and (max-width: @screen-sm) {
+      font-size: @font-size-xs;
+    }
   }
   // Remove top border from thead by default
   > caption + thead,
@@ -78,6 +81,9 @@ th {
     max-width: 170px;
     overflow: hidden;
     text-overflow: ellipsis;
+    @media screen and (max-width: @screen-sm) {
+      max-width: 40px;
+    }
   }
 }
 

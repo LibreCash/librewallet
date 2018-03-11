@@ -48,6 +48,11 @@
     float: left;
     width: percentage((@columns / @grid-columns));
   }
+
+  @media (max-width: @screen-sm) {
+    padding-left:  (@gutter / 4);
+    padding-right: (@gutter / 4);
+  }
 }
 .make-sm-column-offset(@columns) {
   @media (min-width: @screen-sm-min) {
