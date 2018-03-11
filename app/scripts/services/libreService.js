@@ -1,6 +1,8 @@
 /*jshint esversion: 6 */ 
 "use strict";
 var libreService = function(walletService, $translate) {
+    const 
+        networks = {rinkeby: 'rin_ethscan', eth: 'eth_mew'};
     var 
         exchanger = getContract("LibreExchanger"),
         cash = getContract("LibreCash");
@@ -27,8 +29,8 @@ var libreService = function(walletService, $translate) {
             gasEmission: 90000,
             gasRemission: 90000,
             gasApprove: 50000,
-            gasUpdateRates: 1000000,
-            gasCalcRates: 200000,
+            gasUpdateRates: 1800000,
+            gasCalcRates: 260000,
             statesENUM: statesENUM,
             isDebug: IS_DEBUG,
             minReadyOracles: 2,
@@ -82,7 +84,8 @@ var libreService = function(walletService, $translate) {
 
     function getContract(name){
         let
-            abiList = nodes.nodeList.rin_ethscan.abiList,
+            _network = getNetwork(),
+            abiList = nodes.nodeList[_network].abiList,
             contract = abiList.find((contract) => contract.name == name),
             abi = JSON.parse(contract.abi),
             refactored = {};
@@ -94,6 +97,12 @@ var libreService = function(walletService, $translate) {
             abi: abi,
             abiRefactored: refactored
         };
+    }
+
+    function getNetwork() {
+        let networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
+        console.log(~Object.keys(networks).indexOf(networkType) ? networks[networkType] : '');
+        return ~Object.keys(networks).indexOf(networkType) ? networks[networkType] : '';
     }
 
     function getBankDataProcess(_var, process, params = []) {
@@ -489,9 +498,10 @@ var libreService = function(walletService, $translate) {
             canOrder: canOrder,
             getGasPrice: getGasPrice,
             getLatestBlockData: getLatestBlockData,
-            getEstimatedGas: getEstimatedGas
+            getEstimatedGas: getEstimatedGas,
+            getNetwork: getNetwork
         },
-        networkType: "rinkeby",
+        networks: networks,
         IS_DEBUG: IS_DEBUG
     };
 };

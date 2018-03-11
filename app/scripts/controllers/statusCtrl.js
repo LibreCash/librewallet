@@ -7,6 +7,7 @@ var statusCtrl = function($scope, libreService, $translate) {
         hexToString = libreService.methods.hexToString,
         stateName = libreService.methods.getStateName,
         getLatestBlockData = libreService.methods.getLatestBlockData,
+        getNetwork = libreService.methods.getNetwork,
         balanceBank = 0,
         IS_DEBUG = libreService.IS_DEBUG,
         stateMsg = {},
@@ -16,7 +17,7 @@ var statusCtrl = function($scope, libreService, $translate) {
 
     const ORACLE_ACTUAL = libreService.coeff.oracleActual;
 
-    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
+    if (getNetwork() == '') {
         $translate("LIBREBUY_networkFail").then((msg) => {
             $scope.notifier.danger(msg);
         });

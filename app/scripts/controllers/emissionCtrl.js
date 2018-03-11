@@ -21,13 +21,15 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         canOrder = libreService.methods.canOrder,
         canRequest = libreService.methods.canRequest,
         canCalc = libreService.methods.canCalc,
+        getNetwork = libreService.methods.getNetwork,
+        
         getEstimatedGas = libreService.methods.getEstimatedGas,
         IS_DEBUG = libreService.IS_DEBUG;
 
     const gasPriceKey = "gasPrice",
           loadingText = "...";
 
-    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
+    if (getNetwork() == '') {
         $translate("LIBREBUY_networkFail").then((msg) => {
             $scope.notifier.danger(msg);
         });
