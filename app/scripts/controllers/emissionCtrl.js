@@ -179,7 +179,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     });
 
                     let stateDec = +state.data[0];
-                    console.log(`I"M STATEE ${stateDec}`)
                     if ($scope.state != stateDec) {
                         stateWatcher(stateDec);
                     }
@@ -441,6 +440,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     
             $scope.tx.to = bankAddress;
             $scope.tx.value = 0;
+            $scope.tx.unit = 'ether';
             $scope.tx.from = walletService.wallet.getAddressString();
 
             if (!estimate) {

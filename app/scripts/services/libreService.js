@@ -230,7 +230,9 @@ var libreService = function(walletService, $translate) {
     }
 
     function getEstimatedGas(txData) {
-        txData.value = +txData.value; // make integer for full compatibility
+        if (txData.value == "0x00") {
+            txData.value = 0;
+        }
         return new Promise((resolve, reject) => {
             ajaxReq.getEstimatedGas(txData, (data) => {
                 if (data.error) reject(data);
