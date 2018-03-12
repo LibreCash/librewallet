@@ -248,7 +248,6 @@ var libreService = function(walletService, $translate) {
                 var txData = uiFuncs.getTxData(_scope);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     if (rawTx.isError) {
-                        if (pendingName != null) _scope[pendingName] = false;
                         _scope.notifier.danger("generateTx: " + rawTx.error);
                         reject(rawTx);
                     }

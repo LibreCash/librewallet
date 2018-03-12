@@ -179,6 +179,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     });
 
                     let stateDec = +state.data[0];
+                    console.log(`I"M STATEE ${stateDec}`)
                     if ($scope.state != stateDec) {
                         stateWatcher(stateDec);
                     }
@@ -288,7 +289,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         }).then(function(gas) {
             $scope.txModal.estimatedGas = +gas.data;
         }, function(error) {
-            $scope.notifier.danger(error.msg);
+            $scope.notifier.danger(error);
         });
     }
 
