@@ -107,13 +107,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         getCashDataProcess("allowance", setAllowance, [walletService.wallet.getAddressString(), bankAddress]);
     }
 
-    function stateWatcher(newState) {
-        if (newState == libreService.coeff.statesENUM.PROCESSING_ORDERS) {
-            if (IS_DEBUG) console.log("new rates");
-            updateContractData();
-        }
-    }
-
     // on-page timers decreasing
     setInterval(() => {
         if ($scope.waitOraclesRemains > 0) {
@@ -138,9 +131,13 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         }
     }, 1000);
 
+    if (libreService.mainTimer !== null) {
+        clearInterval(libreService.mainTimer)
+    }
+    
     var lastCalcTime, lastRequestTime, lastLastBlockTime, deadline = 0;
     $scope.pendingOrderAllowCheck = false;
-    setInterval(() => {
+    libreService.mainTimer = setInterval(() => {
         if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
             if ($scope.pendingOrderAllowCheck) {
                 return;
@@ -161,70 +158,76 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     walletService.wallet == null ? { data: 0 } :
                         getTokenData("balanceOf", [walletService.wallet.getAddressString()]),
                     walletService.wallet == null ? { data: 0 } :
-                        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress])            
+                        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]),
+                    $scope.deadlineRemains == 0 ? getContractData("deadline") : { data : 0 }
                 ]).then((values) => {
-                    let 
-                        state = values[0],
-                        exchangerTokenBalance = values[1],
-                        updateRatesCost = values[2],
-                        calcTime = values[3],
-                        readyOracles = values[4],
-                        oracleCount = values[5],
-                        requestTime = values[6],
-                        userTokenBalance = values[7],
-                        allowedTokens = values[8];
-
-                    ajaxReq.getBalance(bankAddress, function(balanceData) {
-                        $scope.ethBalance = etherUnits.toEther(balanceData.data.balance, 'wei');
-                    });
-
-                    let stateDec = +state.data[0];
-                    if ($scope.state != stateDec) {
-                        stateWatcher(stateDec);
-                    }
-                    $scope.state = stateDec;
-                    $scope.allowedTokens = +allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-                    $scope.allTokens = +userTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-
-                    $scope.tokenBalance = +exchangerTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-
-                    $scope.readyOracles = +readyOracles.data[0];
-                    $scope.oracleCount = +oracleCount.data[0];
-
-                    $scope.orderAllowed = (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS);
-                    $scope.updateRatesAllowed = (stateDec == libreService.coeff.statesENUM.REQUEST_RATES);
-                    $scope.calcRatesAllowed = (stateDec == libreService.coeff.statesENUM.CALC_RATES);
-                    if ($scope.updateRatesAllowed) {
-                        $scope.updateRatesCost = updateRatesCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-                    }
-
-                    if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
-                        $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
-                        lastCalcTime = +calcTime.data[0];
-                    }
-
-                    if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
-                        $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
-                        lastRequestTime = +requestTime.data[0]
-                    }
-
-                    if (deadline == 0) {
-                        // we need to get deadline only once
-                        getContractData("deadline").then((_deadline) => {
-                            deadline = _deadline;    
-                        })
-                    } else {
-                        if (lastLastBlockTime != lastBlockTime) {
-                            $scope.deadlineRemains = +deadline.data[0] - lastBlockTime;
-                            $scope.deadlineDays = Math.floor($scope.deadlineRemains / (60 * 60 * 24));
+                    try {
+                        let 
+                            state = values[0],
+                            exchangerTokenBalance = values[1],
+                            updateRatesCost = values[2],
+                            calcTime = values[3],
+                            readyOracles = values[4],
+                            oracleCount = values[5],
+                            requestTime = values[6],
+                            userTokenBalance = values[7],
+                            allowedTokens = values[8];
+                        if (values[9].data !== 0) {
+                            deadline = values[9]
                         }
-                    }
 
-                    if (lastLastBlockTime != lastBlockTime) {
-                        lastLastBlockTime = lastBlockTime;
+                        ajaxReq.getBalance(bankAddress, function(balanceData) {
+                            $scope.ethBalance = etherUnits.toEther(balanceData.data.balance, 'wei');
+                        });
+
+                        let stateDec = +state.data[0];
+                        if ($scope.state != stateDec) {
+                            if (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS) {
+                                updateContractData();
+                            }
+                        }
+                        $scope.state = stateDec;
+                        $scope.allowedTokens = +allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                        $scope.allTokens = +userTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+
+                        $scope.tokenBalance = +exchangerTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+
+                        $scope.readyOracles = +readyOracles.data[0];
+                        $scope.oracleCount = +oracleCount.data[0];
+
+                        $scope.orderAllowed = (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS);
+                        $scope.updateRatesAllowed = (stateDec == libreService.coeff.statesENUM.REQUEST_RATES);
+                        $scope.calcRatesAllowed = (stateDec == libreService.coeff.statesENUM.CALC_RATES);
+                        if ($scope.updateRatesAllowed) {
+                            $scope.updateRatesCost = updateRatesCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                        }
+
+                        if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
+                            $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
+                            lastCalcTime = +calcTime.data[0];
+                        }
+
+                        if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
+                            $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
+                            lastRequestTime = +requestTime.data[0]
+                        }
+
+                        if (+deadline.data != 0) {
+                            if (lastLastBlockTime != lastBlockTime) {
+                                $scope.deadlineRemains = +deadline.data[0] - lastBlockTime;
+                                $scope.deadlineDays = Math.floor($scope.deadlineRemains / (60 * 60 * 24));
+                            }
+                        }
+
+                        if (lastLastBlockTime != lastBlockTime) {
+                            lastLastBlockTime = lastBlockTime;
+                        }
+                    } catch (error) {
+                          $scope.notifier.danger(error)
                     }
 
                     $scope.pendingOrderAllowCheck = false;
+                    applyScope()
                 });
             });
     
