@@ -137,7 +137,9 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     
     var lastCalcTime, lastRequestTime, lastLastBlockTime, deadline = 0;
     $scope.pendingOrderAllowCheck = false;
+    var timerTicker = 0;
     libreService.mainTimer = setInterval(() => {
+        if (IS_DEBUG) console.info("TIMER", ++timerTicker)
         if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
             if ($scope.pendingOrderAllowCheck) {
                 return;
@@ -146,7 +148,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
             ajaxReq.getLatestBlockData(function(blockData) {
                 var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-
+                if (IS_DEBUG) console.info("BEFORE PROMISES")
                 Promise.all([
                     getContractData("getState"),
                     getContractData("tokenBalance"),
@@ -161,6 +163,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]),
                     $scope.deadlineRemains == 0 ? getContractData("deadline") : { data : 0 }
                 ]).then((values) => {
+                    if (IS_DEBUG) console.info("PROMISES DONE")
                     try {
                         let 
                             state = values[0],
@@ -228,6 +231,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
                     $scope.pendingOrderAllowCheck = false;
                     applyScope()
+                    if (IS_DEBUG) console.info("SYNC CYCLE END")
                 });
             });
     
