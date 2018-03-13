@@ -85,7 +85,7 @@
             <a style="min-width: 170px"
                class="btn btn-default dropdown-toggle btn-inside-input"
                class="dropdown-toggle"
-               ng-click="wallet.setTokens(); globalService.tokensLoaded=true;dropdownAmount = !dropdownAmount"
+               ng-click="globalService.tokensLoaded=true;dropdownAmount = !dropdownAmount"
                ng-class="dropdownEnabled ? '' : 'disabled'">
                 <strong>
                   {{unitReadable}}

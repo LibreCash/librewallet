@@ -2,7 +2,7 @@
 <main class="tab-pane active" ng-if="globalService.currentTab==globalService.tabs.status.id" ng-controller='statusCtrl' ng-cloak>
     <div class="row justify-content-md-center">
 
-        <section class="loading-wrap" ng-show="loading">
+        <section class="loading-wrap" ng-show="loading" ng-click="loading = false">
             <div class="loading">
             <h1> Loading... </h1>
             </div>

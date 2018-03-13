@@ -40,6 +40,10 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
 
     var setAllTokens = function(data) {
         $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+        $scope.wallet.tokenObjs.forEach(token => {
+            if (token.symbol === 'Libre')
+                token.balance = $scope.allTokens;
+        })
     };
 
     $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
