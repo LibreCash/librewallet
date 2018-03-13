@@ -5,7 +5,8 @@ var libreService = function(walletService, $translate) {
         networks = {rinkeby: 'rin_ethscan', eth: 'eth_mew'};
     var 
         exchanger = getContract("LibreExchanger"),
-        cash = getContract("LibreCash");
+        cash = getContract("LibreCash"),
+        mainTimer = null;
 
     const 
         IS_DEBUG = true,
@@ -503,7 +504,8 @@ var libreService = function(walletService, $translate) {
             getNetwork: getNetwork
         },
         networks: networks,
-        IS_DEBUG: IS_DEBUG
+        IS_DEBUG: IS_DEBUG,
+        mainTimer: mainTimer
     };
 };
 module.exports = libreService;
