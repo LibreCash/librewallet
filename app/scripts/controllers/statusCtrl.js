@@ -109,7 +109,8 @@ var statusCtrl = function($scope, libreService, $translate) {
     function translateMSGs() {
       var promises = [];
       for (var state in libreService.coeff.statesENUM) {
-        promises.push($translate(`LIBRE_state${state}`).then(msg => {stateMsg[state] = msg}));
+        let local_state = state;
+        promises.push($translate(`LIBRE_state${state}`).then(msg => {stateMsg[local_state] = msg}));
       }
 
       return Promise.all(promises);
