@@ -45,7 +45,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     $scope.states = coeff.statesENUM;
 
-    var ORACLE_ACTUAL = coeff.oracleActual;
+    var RATE_ACTUAL = coeff.rateActual;
     var ORACLE_TIMEOUT = coeff.oracleTimeout;
     $scope.MIN_READY_ORACLES = coeff.minReadyOracles;
 
@@ -206,7 +206,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         }
 
                         if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
-                            $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
+                            $scope.rateActualTime = RATE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
                             lastCalcTime = +calcTime.data[0];
                         }
 

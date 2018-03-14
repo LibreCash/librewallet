@@ -35,7 +35,8 @@ var libreService = function(walletService, $translate) {
             statesENUM: statesENUM,
             isDebug: IS_DEBUG,
             minReadyOracles: 2,
-            oracleActual: 10 * 60,
+            oracleActual: 15 * 60,
+            rateActual: 10 * 15,
             oracleTimeout: 10 * 60
         };
         
