@@ -264,13 +264,19 @@ var libreService = function(walletService, $translate) {
                     _scope.rawTx = rawTx.rawTx;
                     _scope.signedTx = rawTx.signedTx;
 
-                    let tx = {name: pendingName, status: 'sent...'}
+                    let time = new Date();
+                    let tx = {
+                        name: pendingName.replace('Pending',''),
+                        status: 'sent...',
+                        date: `${time.getHours()}:${time.getMinutes()}`
+                    }
                     _scope.notifier.txs.push(tx)
 
                     uiFuncs.sendTx(_scope.signedTx, function(resp) {
                         if (resp.isError) {
                             _scope[pendingName] = false;
                             _scope.notifier.danger("sendTx: " + resp.error);
+                            tx.status = 'error';
                             return;
                         }
                         var checkTxLink = `https://www.myetherwallet.com?txHash=${resp.data}#check-tx-status`;
@@ -311,7 +317,6 @@ var libreService = function(walletService, $translate) {
                                         _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
-                                    //_scope.notifier.txs.filter(tx => tx.hash === resp.data).status = 'error';
                                     tx.status = 'error';
                                 } else {
                                     if (receipt.data == null) {
@@ -339,6 +344,9 @@ var libreService = function(walletService, $translate) {
                             });
                         }, receiptInterval);
                     });
+
+                    for(;_scope.notifier.txs.length > 10;)
+                        _scope.notifier.txs.shift()
                 });
             } catch (e) {
                 _scope[pendingName] = false;

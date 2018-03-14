@@ -38,8 +38,14 @@
     <h5>Transactions</h5>
     <table class="account-info">
       <tr ng-repeat="tx in notifier.txs">
-        <td class="mono wrap point">{{ tx.name }}</td>
-        <td class="mono wrap point" ng-style="{color: tx.status === 'success' ? 'green': 'red'}">{{ tx.status }}</td>
+        <td class="mono wrap point">{{ tx.date }}</td>
+        <td class="mono wrap point">
+          <a href="{{ajaxReq.blockExplorerTX.replace('[[txHash]]', tx.hash)}}" target="_blank" rel="noopener noreferrer">{{ tx.name }}</a>
+          
+        </td>
+        <td class="mono wrap point" ng-style="{color: tx.status === 'success' ? 'green': (tx.status === 'error' ? 'red' : '#cc0')}">
+          {{ tx.status }}
+        </td>
       </tr>
     </table>
     <h5 translate="sidebar_TransHistory"> Transaction History</h5>
