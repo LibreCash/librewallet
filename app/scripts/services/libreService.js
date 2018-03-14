@@ -276,7 +276,7 @@ var libreService = function(walletService, $translate) {
                         if (resp.isError) {
                             _scope[pendingName] = false;
                             _scope.notifier.danger("sendTx: " + resp.error);
-                            tx.status = 'error';
+                            tx.status = 'fail';
                             return;
                         }
                         var checkTxLink = `https://www.myetherwallet.com?txHash=${resp.data}#check-tx-status`;
@@ -317,7 +317,7 @@ var libreService = function(walletService, $translate) {
                                         _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
-                                    tx.status = 'error';
+                                    tx.status = 'fail';
                                 } else {
                                     if (receipt.data == null) {
                                         isCheckingTx = false;
@@ -336,7 +336,7 @@ var libreService = function(walletService, $translate) {
                                         translator(`LIBRE${opPrefix}_txFail`).then((msg) => {
                                             _scope.notifier.danger(msg, 0);
                                         });
-                                        tx.status = 'error'
+                                        tx.status = 'fail'
                                     }
                                     _scope[pendingName] = false;
                                 }

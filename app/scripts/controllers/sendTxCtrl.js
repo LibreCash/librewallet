@@ -1,5 +1,5 @@
 'use strict';
-var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope) {
+var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     const TOKEN_DECIMALS = 18;
     $scope.tx = {};
     $scope.signedTx;
@@ -295,18 +295,22 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
                             } else {
                                 $scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                             }
-                            tx.status = 'error';
+                            tx.status = 'fail';
                         } else {
                             if (receipt.data == null) {
                                 isCheckingTx = false;
                                 return; // next interval
                             }
-                            if (receipt.data.status == "0x1") { 
-                                $scope.notifier.success('Success sending', 0);
+                            if (receipt.data.status == "0x1") {
+                                $translate('LIBRESEND_txOk').then(msg => {
+                                    $scope.notifier.success(msg, 0);
+                                });
                                 tx.status = 'success'
                             } else {
-                                $scope.notifier.danger('Failed sending', 0);
-                                tx.status = 'error'
+                                $translate('LIBRESEND_txFail').then(msg => {
+                                    $scope.notifier.danger(msg, 0);
+                                });
+                                tx.status = 'fail'
                             }
                         }
                         isCheckingTx = false;
@@ -316,7 +320,7 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
                 if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
             } else {
                 $scope.notifier.danger(resp.error);
-                tx.status = 'error';
+                tx.status = 'fail';
             }
         });
     }
