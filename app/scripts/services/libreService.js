@@ -279,6 +279,10 @@ var libreService = function(walletService, $translate) {
                     }
                     _scope.rawTx = rawTx.rawTx;
                     _scope.signedTx = rawTx.signedTx;
+
+                    let tx = {name: pendingName, status: 'sent...'}
+                    _scope.notifier.txs.push(tx)
+
                     uiFuncs.sendTx(_scope.signedTx, function(resp) {
                         if (resp.isError) {
                             _scope[pendingName] = false;
@@ -291,7 +295,10 @@ var libreService = function(walletService, $translate) {
                         var checkTxBtn = `<a class="btn btn-xs btn-info" href="${checkTxLink}" target="_blank" rel="noopener noreferrer"> Check TX Status </a>`;
                         var completeMsg = `<p>${globalFuncs.successMsgs[2]}<strong>${resp.data}</strong></p><p>${verifyTxBtn} ${checkTxBtn}</p>`;
                         _scope.notifier.success(completeMsg, 0);
-                        
+
+                        tx.hash = resp.data;
+                        tx.status = 'pending...';
+
                         _scope.wallet.setBalance(function() {
                             if (!_scope.$$phase) _scope.$apply();
                         });
@@ -320,6 +327,8 @@ var libreService = function(walletService, $translate) {
                                         _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
+                                    //_scope.notifier.txs.filter(tx => tx.hash === resp.data).status = 'error';
+                                    tx.status = 'error';
                                 } else {
                                     if (receipt.data == null) {
                                         isCheckingTx = false;
@@ -329,6 +338,7 @@ var libreService = function(walletService, $translate) {
                                     if (receipt.data.status == "0x1") { 
                                         translator(`LIBRE${opPrefix}_txOk`).then((msg) => {
                                             _scope.notifier.success(msg, 0);
+                                            tx.status = 'success'
                                         });
                                         if (updater != null) {
                                             updater();
@@ -337,6 +347,7 @@ var libreService = function(walletService, $translate) {
                                         translator(`LIBRE${opPrefix}_txFail`).then((msg) => {
                                             _scope.notifier.danger(msg, 0);
                                         });
+                                        tx.status = 'error'
                                     }
                                     _scope[pendingName] = false;
                                 }
