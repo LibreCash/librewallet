@@ -979,7 +979,18 @@ LIBREFE_RelevancePeriod     : 'Период актуальности курса'
 LIBREFE_QueuePeriod         : 'Период обработки очереди',
 LIBREFE_Paused              : 'Остановлен',
 LIBREFE_ReadyOracles        : 'Готовые оракулы',
-LIBREFE_RURCost             : 'Стоимость запроса курса'
+LIBREFE_RURCost             : 'Стоимость запроса курса',
+
+LIBRE_txState_Send          :  'отправка...',
+LIBRE_txState_Pending       :  'в ожидании...',
+LIBRE_txState_Success       :  'успех',
+LIBRE_txState_Fail          :  'провал',
+LIBRE_txName_updateRates    :  'Запрос курсав',
+LIBRE_txName_calcRates      :  'Расчет курса',
+LIBRE_txName_buy            :  'Покупка',
+LIBRE_txName_sell           :  'Продажа',
+LIBRE_txName_approve        :  'Выдача прав',
+LIBRE_txName_send           :  'Перевод',
 };
 
 module.exports = ru;

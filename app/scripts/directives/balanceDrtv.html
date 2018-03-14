@@ -43,7 +43,7 @@
           <a href="{{ajaxReq.blockExplorerTX.replace('[[txHash]]', tx.hash)}}" target="_blank" rel="noopener noreferrer">{{ tx.name }}</a>
           
         </td>
-        <td class="mono wrap point" ng-style="{color: tx.status === 'success' ? 'green': (tx.status === 'fail' ? 'red' : '#cc0')}">
+        <td class="mono wrap point" ng-style="{color: tx.color}">
           {{ tx.status }}
         </td>
       </tr>
