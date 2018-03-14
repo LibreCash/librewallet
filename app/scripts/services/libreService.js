@@ -268,7 +268,7 @@ var libreService = function(walletService, $translate) {
                     let tx = {
                         name: pendingName.replace('Pending',''),
                         status: 'sent...',
-                        date: `${time.getHours()}:${time.getMinutes()}`
+                        date: `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`
                     }
                     _scope.notifier.txs.push(tx)
 
