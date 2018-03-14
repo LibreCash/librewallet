@@ -2,7 +2,7 @@
 "use strict";
 var libreService = function(walletService, $translate) {
     const 
-        networks = {rinkeby: 'rin_ethscan', eth: 'eth_mew'};
+        networks = {rinkeby: 'rin_ethscan', eth: 'eth_infura'};
     var 
         exchanger = getContract("LibreExchanger"),
         cash = getContract("LibreCash"),
@@ -133,22 +133,6 @@ var libreService = function(walletService, $translate) {
         .catch((e)=>{
             console.log(e);
             console.log(`Error on getDataAsync: ${to} ${JSON.stringify(abi)} ${_var} ${params}`);
-        });
-    }
-
-    function getEthCall(options){
-        return new Promise((resolve,reject)=>{
-            ajaxReq.getEthCall({
-                from: options.from,
-                data: options.data,
-                to:options.to
-            },(res)=>{
-                if(!res.error && res.data != '0x'){
-                    resolve(res);
-                } else {
-                    reject(res);
-                }
-            });
         });
     }
 
@@ -443,14 +427,14 @@ var libreService = function(walletService, $translate) {
         return globalFuncs.localStorage.getItem("gasPrice", null);
     }
 
-    function getEthCall(options){
-        return new Promise((resolve,reject)=>{
+    function getEthCall(options) {
+        return new Promise((resolve,reject) => {
             ajaxReq.getEthCall({
                 from: options.from,
                 data: options.data,
-                to:options.to
+                to: options.to
             }, (res) => {
-                if(!res.error && res.data != '0x'){
+                if(!res.error && res.data != '0x') {
                     resolve(res);
                 } else {
                     reject(res);

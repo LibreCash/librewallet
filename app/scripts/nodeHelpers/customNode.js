@@ -109,7 +109,7 @@ var ethCallArr = {
     callbacks: [],
     timer: null
 };
-customNode.prototype.getEthCall = function(txobj, callback) {
+/*customNode.prototype.getEthCall = function(txobj, callback) {
     var parentObj = this;
     if (!ethCallArr.calls.length) {
         ethCallArr.timer = setTimeout(function() {
@@ -127,7 +127,20 @@ customNode.prototype.getEthCall = function(txobj, callback) {
     ethCallArr.calls.push({ "id": parentObj.getRandomID(), "jsonrpc": "2.0", "method": "eth_call",
         "params": [{ to: txobj.to, data: txobj.data }, 'latest'] });
     ethCallArr.callbacks.push(callback);
+}*/
+
+customNode.prototype.getEthCall = function(txobj, callback) {
+    var parentObj = this;
+
+    var ethCall = { "id": parentObj.getRandomID(), "jsonrpc": "2.0", "method": "eth_call",
+        "params": [{ to: txobj.to, data: txobj.data }, 'latest'] }
+
+    parentObj.rawPost(ethCall, function(data) {
+        if (data.error) callback({ error: true, msg: data.error.message, data: '' });
+        else callback({ error: false, msg: '', data: data.result });
+    })
 }
+
 customNode.prototype.getTraceCall = function(txobj, callback) {
     this.post({
         method: 'trace_call',
