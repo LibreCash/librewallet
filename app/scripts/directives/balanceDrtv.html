@@ -83,12 +83,12 @@
       <a href="https://myetherwallet.github.io/knowledge-base/send/adding-new-token-and-sending-custom-tokens.html"
          rel="noopener noreferrer"
          target="_blank">
-         How to See Your Tokens
+         <span translate="How_to_see_tokens">How to See Your Tokens</span>
       </a>
     </h5>
 
     <p>
-      You can also view your Balances on
+      <span translate-"You_can_view_tokens">You can also view your Balances on</span>
       <a ng-show="ajaxReq.type != 'CUS'"
          href="{{ajaxReq.blockExplorerAddr.replace('[[address]]', wallet.getAddressString())}}"
          target="_blank"
@@ -106,7 +106,7 @@
 
     <!-- Buttons -->
     <a class="btn btn-warning btn-xs" ng-click="showAllTokens=true" ng-show="showAllTokens==false">
-      Show All Tokens
+      <span translate="Show_all_tokens">Show All Tokens</span>
     </a>
     <a class="btn btn-warning btn-xs" ng-click="showAllTokens=false" ng-show="showAllTokens==true">
       Only Show Balances
