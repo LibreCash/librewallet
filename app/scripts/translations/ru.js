@@ -7,8 +7,8 @@ ru.data = {
 GEN_Help_0                      :  'У вас уже есть кошелек?',
 GEN_Help_MetaMask               :  'Это просто! Ключи остаются в Metamask, а не на фишинговом сайте.',
 
-GEN_Warning_1                   :  '**Не теряйте его!** Он не может быть восстановлен если вы потеряете его.',
-GEN_Warning_2                   :  '**Не передавайте его!** Вы потеряете свои средства если используете ключ на вредоносном сайте.',
+GEN_Warning_1                   :  '**Не теряйте его!** Он не может быть восстановлен, если вы потеряете его.',
+GEN_Warning_2                   :  '**Не передавайте его!** Вы потеряете свои средства, если используете ключ на вредоносном сайте.',
 GEN_Warning_3                   :  '**Делайте бэкапы!** Если вы потереяете доступ к ключу - вы потеряете доступ к средствам.',
 
 GAS_Price_1                     : 'Медленно',
@@ -35,7 +35,7 @@ X_HelpfulLinks_2                :  'Я потерял свой приватны�
 X_HelpfulLinks_3                :  'Мой приватный ключ отпирает несколько адресов',
 X_HelpfulLinks_4                :  'Мигрирую с/на LibreBank',
 X_Network                       :  'Сеть', // aka "node" or "chain" - used in the dropdown in header
-X_Network_Custom                :  'Добавть свою сеть',
+X_Network_Custom                :  'Добавить свою сеть',
 
 DOMAIN_Buy                      :  'Купить домен',
 DOMAIN_BuyItNow                 :  'Цена (если вы хотите купить домен прямо сейчас):',
@@ -137,7 +137,7 @@ ONBOARD_blockchain_title        :  'Wait, WTF is a Blockchain?',
 ONBOARD_blockchain_content__1   :  'The blockchain is like a huge, global, decentralized spreadsheet.',
 ONBOARD_blockchain_content__2   :  'It keeps track of who sent how many coins to whom, and what the balance of every account is.',
 ONBOARD_blockchain_content__3   :  'It is stored and maintained by thousands of people (miners) across the globe who have special computers.',
-ONBOARD_blockchain_content__4   :  'The blocks in the blockchain are made up of all the individual transactions sent from LibreBank, MetaMask, Exodus, Mist, Geth, Parity, and everywhere else.',
+ONBOARD_blockchain_content__4   :  'The blocks in the blockchain are made up of all the individual transactions sent from LibreBank, MEW, MetaMask, Exodus, Mist, Geth, Parity, and everywhere else.',
 ONBOARD_blockchain_content__5   :  'When you see your balance on LibreBank.com or view your transactions on [etherscan.io](https://etherscan.io), you are seeing data on the blockchain, not in our personal systems.',
 ONBOARD_blockchain_content__6   :  'Again: **we are not a bank**.',
 ONBOARD_interface_title__alt    :  'MEW is an Interface',
@@ -952,7 +952,7 @@ LIBRE_statePROCESSING_ORDERS: 'Обработка ордеров',
 LIBRE_stateWAIT_ORACLES     : 'Ожидаем данные оракулов',
 LIBRE_stateCALC_RATES       : 'Расчет курсов',
 LIBRE_stateREQUEST_RATES    : 'Запрос курсов',
-LIBRE_whenActual            : 'Курсы акутальны еще',
+LIBRE_whenActual            : 'Время актуальности курсов',
 LIBRE_contractBalances      : 'Балансы контракта',
 LIBREALLOWANCE_equal        : 'Вы пытаетесь установить текущие права на трату',
 LIBREALLOWANCE_txOk         : 'Права на трату успешно выданы',
@@ -1045,6 +1045,7 @@ Connect_via_ext                  :  'Авторизуйтесь при помо�
 Hardware_wallet                  :  'аппаратный кошелек',
 Only_show_balances               :  'Показывать балансы',
 Hist_tokens                      :  'Токены'
+
 };
 
 module.exports = ru;
