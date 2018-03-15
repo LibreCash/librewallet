@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>MyEtherWallet.com</title>
-<meta property="og:title" content="MyEtherWallet.com: Your Key to Ethereum">
-<meta property="og:site_name" content="MyEtherWallet.com: Your Key to Ethereum">
-<meta name="twitter:title" content="MyEtherWallet.com: Your Key to Ethereum">
-<meta name="apple-mobile-web-app-title" content="MyEtherWallet.com: Your Key to Ethereum">
-<link href="https://www.myetherwallet.com" rel="canonical">
-<meta content="https://www.myetherwallet.com" property="og:url">
-<meta content="https://www.myetherwallet.com" name="twitter:url">
+<title>LibreWallet</title>
+<meta property="og:title" content="LibreWallet: Your Key to LibreCash">
+<meta property="og:site_name" content="LibreWallet: Your Key to LibreCash">
+<meta name="twitter:title" content="LibreWallet: Your Key to LibreCash">
+<meta name="apple-mobile-web-app-title" content="LibreWallet: Your Key to LibreCash">
+<link href="https://www.wallet.librecash.com" rel="canonical">
+<meta content="https://www.wallet.librecash.com" property="og:url">
+<meta content="https://www.wallet.librecash.com" name="twitter:url">
 <link rel="stylesheet" href="css/etherwallet-master.min.css">
 <script type="text/javascript" src="js/etherwallet-static.min.js"></script>
 <script type="text/javascript" src="js/etherwallet-master.js"></script>
-<meta name="description" content="MyEtherWallet (MEW) is a free, open-source, client-side interface for generating Ethereum wallets & more. Interact with the Ethereum blockchain easily & securely.">
+<meta name="description" content="LibreWallet (based on MEW) is a free, open-source, client-side interface for generating Ethereum wallets & more. Interact with the Ethereum blockchain easily & securely.">
 <meta property="og:description"  content="Free, open-source, client-side Ethereum wallet. Enabling you to interact with the blockchain easily & securely.">
 <meta name="twitter:description" content="Free, open-source, client-side Ethereum wallet. Enabling you to interact with the blockchain easily & securely.">
 <meta name="robots" content="index,follow">
@@ -31,8 +31,8 @@
 <meta name="msapplication-config" content="images/fav/browserconfig.xml">
 <meta name="theme-color" content="#1d6986">
 <meta name="apple-mobile-web-app-status-bar-style" content="#1d6986">
-<meta property="og:url" content="https://www.myetherwallet.com" />
-<meta property="og:title" content="MyEtherWallet.com  &middot; Your Key to Ethereum" />
+<meta property="og:url" content="https://www.wallet.librecash.com" />
+<meta property="og:title" content="LibreWallet  &middot; Your Key to Ethereum" />
 <meta property="og:type" content="website">
 <meta property="og:image" content="/images/myetherwallet-logo-banner.png" />
 <meta property="og:image" content="/images/myetherwallet-logo.png" />
@@ -46,13 +46,13 @@
 {
 "@context": "http://schema.org",
 "@type" : "Organization",
-"name" : "MyEtherWallet",
-"legalName" : "MyEtherWallet LLC",
-"url" : "https://www.myetherwallet.com/",
+"name" : "LibreBank",
+"legalName" : "Librebank LLC",
+"url" : "https://www.librebank.com/",
 "contactPoint" : [{
   "@type" : "ContactPoint",
-  "email" : "support@myetherwallet.com",
-  "url"   : "https://myetherwallet.com",
+  "email" : "support@librebank.com",
+  "url"   : "https://liberbank.com",
   "contactType" : "customer service"
 }],
 "logo" : "https://www.myetherwallet.com/images/myetherwallet-logo.png",
