@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            <div class="col-lg-12 less-padding" ng-show="showOracles">
+            <div class="col-lg-12" ng-show="showOracles">
                 <h1 translate="LIBRESTATUS_oraclesStatus">Oracles status</h1>
                 <table class="table oracles-table">
                     <thead>

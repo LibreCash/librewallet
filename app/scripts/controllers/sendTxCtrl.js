@@ -343,6 +343,9 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope,
                 pending = false;
             }
         });
+
+        for(;$scope.notifier.txs.length > 10;)
+            $scope.notifier.txs.shift()
     }
 
     $scope.transferAllBalance = function() {
