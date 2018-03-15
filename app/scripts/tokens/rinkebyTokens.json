@@ -5,13 +5,7 @@
 "type":"default"
 },
 {
-"address":"0x889a16010c2c95d6447803098a6486d829c7e989",
-"symbol":"Libre",
-"decimal":18,
-"type":"default"
-},
-{
-"address":"0x880675d103fec9bc9686aea27fecfcf03a92d6b7",
+"address":"0x8b319c647dc6d8b1d4fbf17da31449a7c3ba473e",
 "symbol":"Libre",
 "decimal":18,
 "type":"default"
