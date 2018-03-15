@@ -971,6 +971,9 @@ HELP_SecCX_Desc_5               :  'Why aren\'t the nickname and wallet address 
 HELP_SecCX_Desc_6               :  'If we were to encrypt these items, you would need to enter a password each time you wanted to view your account balance or view the nicknames. If this concerns you, we recommend you use LibreBank.com instead of this Chrome Extension.',
 HELP_SecCX_Title                :  'Security - LibreBank CX',
 HELP_Warning                    :  'If you created a wallet -or- downloaded the repo before **Dec. 31st, 2015**, please check your wallets &amp; download a new version of the repo. Click for details.',
+Show_all_tokens                 :  'Show all tokens',
+How_to_see_tokens               :  'How to See Your Tokens',
+You_can_view_tokens             :  'You can also view your Balances on'
 };
 
 module.exports = en;
