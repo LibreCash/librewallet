@@ -57,7 +57,7 @@
       </li>
       <li ng-show="ajaxReq.type == 'ETH'">
         <a href="https://ethplorer.io/address/{{wallet.getAddressString()}}" target="_blank" rel="noopener noreferrer">
-          Tokens (Ethplorer.io)
+          <span translate="Hist_tokens">Tokens</span> (Ethplorer.io)
         </a>
       </li>
     </ul>
@@ -109,7 +109,7 @@
       <span translate="Show_all_tokens">Show All Tokens</span>
     </a>
     <a class="btn btn-warning btn-xs" ng-click="showAllTokens=false" ng-show="showAllTokens==true">
-      Only Show Balances
+      <span translate="Only_show_balances">Only Show Balances</span>
     </a>
     <a class="btn btn-default btn-xs" ng-click="customTokenField=!customTokenField">
       <span translate="SEND_custom">Add Custom Token</span>
