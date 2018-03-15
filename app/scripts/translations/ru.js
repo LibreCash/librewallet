@@ -11,18 +11,18 @@ GEN_Warning_1                   :  '**Не теряйте его!** Он не м
 GEN_Warning_2                   :  '**Не передавайте его!** Вы потеряете свои средства если используете ключ на вредоносном сайте.',
 GEN_Warning_3                   :  '**Делайте бэкапы!** Если вы потереяете доступ к ключу - вы потеряете доступ к средствам.',
 
-GAS_Price_1                     : 'Not So Fast',
-GAS_Price_2                     : 'Fast',
-GAS_Price_3                     : 'Fast AF',
+GAS_Price_1                     : 'Медленно',
+GAS_Price_2                     : 'Быстро',
+GAS_Price_3                     : 'Очень быстро',
 
 CONTRACT_Helper_1               :  'Please change the address to your own Multisig Contract Address.',
 CONTRACT_Warning_1              :  'You are about to **deploy a contract**.',
 CONTRACT_Warning_2              :  'It will be deployed on the following network:',
 CONTRACT_Warning_3              :  'You are about to **execute a function on contract**.',
 
-SEND_Helper_Contract            :  'In most cases you should leave this as 0.',
+SEND_Helper_Contract            :  'В большинстве случаев это значение должно быть 0.',
 SEND_ViewOnly                   :  'You cannot send with only your address. You must use one of the other options to unlock your wallet in order to send.',
-SEND_LoadTokens                 :  'Load Tokens',
+SEND_LoadTokens                 :  'Загрузить токены',
 SEND_CustomAddrMsg              :  'A message regarding',
 
 SWAP_Warning_1                  :  'Warning! You do not have enough funds to complete this swap.',
@@ -30,16 +30,16 @@ SWAP_Warning_2                  :  'Please add more funds to your wallet or acce
 
 X_Advanced                      :  'Для продвинутых пользователей',
 X_HelpfulLinks                  :  'Справка & FAQs',
-X_HelpfulLinks_1                :  'How to Access your Wallet',
+X_HelpfulLinks_1                :  'Как получить доступ к кошельку',
 X_HelpfulLinks_2                :  'Я потерял свой приватный ключ',
 X_HelpfulLinks_3                :  'Мой приватный ключ отпирает несколько адресов',
 X_HelpfulLinks_4                :  'Мигрирую с/на LibreBank',
 X_Network                       :  'Сеть', // aka "node" or "chain" - used in the dropdown in header
 X_Network_Custom                :  'Добавть свою сеть',
 
-DOMAIN_Buy                      :  'Buy the domain',
-DOMAIN_BuyItNow                 :  'Price to buy the domain immediately:',
-DOMAIN_bid                      :  'Bid for the domain',
+DOMAIN_Buy                      :  'Купить домен',
+DOMAIN_BuyItNow                 :  'Цена (если вы хотите купить домен прямо сейчас):',
+DOMAIN_bid                      :  'Сделать ставку',
 DOMAIN_bid_0                    :  'You are currently winning this auction with the highest bid. You can bid higher if you want, but it will delay the close of the auction for 24 hours.',
 DOMAIN_bid_1                    :  'Bid at least',
 DOMAIN_bid_2                    :  'on the domain.',
@@ -106,7 +106,7 @@ EOS_09                          :  'Claim EOS Tokens',
 EOS_10                          :  'Select `claimAll`.',
 
 /* Onboarding */
-ONBOARD_welcome_title           :  'Welcome to LibreBank.com',
+ONBOARD_welcome_title           :  'Добро пожаловать на LibreBank.com',
 ONBOARD_welcome_content__1      :  'Please take some time to understand this for your own safety. 🙏',
 ONBOARD_welcome_content__2      :  'Your funds will be stolen if you do not heed these warnings.',
 ONBOARD_welcome_content__3      :  'We know this click-through stuff is annoying. We are sorry.',
@@ -201,8 +201,7 @@ ONBOARD_final_content__7        :  'How to Send via MetaMask',
 ONBOARD_final_content__8        :  'Learn More or Contact Us',
 ONBOARD_final_content__9        :  'OMG, please just let me send FFS.',
 ONBOARD_resume                  :  'It looks like you didn\'t finish reading through these slides last time. ProTip: Finish reading through the slides 😉',
-
-HELP_2a_Title               : 'How do I save/backup my wallet? ',
+HELP_2a_Title                   :  'Как сделать резервную копию моего кошелька?',
 
 /* New Generics */
 x_CancelReplaceTx           : 'Отменить или заменить транзакцию',
@@ -211,20 +210,20 @@ x_PasswordDesc              : 'Этот пароль * шифрует * ваш �
 x_ReadMore                  : 'Узнать еще',
 x_ReplaceTx                 : 'Заменить транзакцию',
 x_TransHash                 : 'Хэш транзакции',
-x_TXFee                     : 'TX Fee',
-x_TxHash                    : 'TX Hash',
+x_TXFee                     : 'Комиссия транзакции',
+x_TxHash                    : 'Хэш транзакции',
 
 /* Check TX Status */
 NAV_CheckTxStatus           : 'Проверить статус',
 NAV_TxStatus                : 'Статус транзакции',
 tx_Details                  : 'Параметры транзакции',
 tx_Summary                  : 'During times of high volume (like during ICOs) transactions can be pending for hours, if not days. This tool aims to give you the ability to find and "cancel" / replace these TXs. ** This is not typically something you can do. It should not be relied upon & will only work when the TX Pools are full. [Please, read about this tool here.](https://LibreBank.github.io/knowledge-base/transactions/check-status-of-ethereum-transaction.html)**',
-tx_notFound                 : 'Transaction Not Found',
+tx_notFound                 : 'Транзакция не найдена',
 tx_notFound_1               : 'This TX cannot be found in the TX Pool of the node you are connected to.',
 tx_notFound_2               : 'If you just sent the transaction, please wait 15 seconds and press the "Check TX Status" button again. ',
 tx_notFound_3               : 'It could still be in the TX Pool of a different node, waiting to be mined.',
 tx_notFound_4               : 'Please use the dropdown in the top-right & select a different ETH node (e.g. `ETH (Etherscan.io)` or `ETH (Infura.io)` or `ETH (LibreBank)`) and check again.',
-tx_foundInPending           : 'Pending Transaction Found',
+tx_foundInPending           : 'Найдена транзакция в обработке',
 tx_foundInPending_1         : 'Your transaction was located in the TX Pool of the node you are connected to. ',
 tx_foundInPending_2         : 'It is currently pending (waiting to be mined). ',
 tx_foundInPending_3         : 'There is a chance you can "cancel" or replace this transaction. Unlock your wallet below.',
@@ -244,23 +243,23 @@ GEN_Help_7                  : 'Храните его в безопасном м�
 GEN_Help_8                  : 'Файл не скачивается?',
 GEN_Help_9                  : 'Попробуйте Google Chrome ',
 GEN_Help_10                 : 'Нажите правой кнопкой мыши и выберите "Сохранить файл как". Имя файла: ',
-GEN_Help_11                 : 'Не открывайте этот файл на на ваше компьютере ',
+GEN_Help_11                 : 'Не открывайте этот файл на на вашем компьютере ',
 GEN_Help_12                 : 'Используйте его для разблокировки кошелька через LibreWallet (или MEW, Mist, Geth, Parity и т.п.) ',
 GEN_Help_13                 : 'Как делать резервные копии кошелька',
-GEN_Help_14                 : 'What are these Different Formats? ',
+GEN_Help_14                 : 'Чем отличаются форматы ключа? ',
 GEN_Help_15                 : 'Как предотвратить утерю средств? ',
 GEN_Help_16                 : 'Чем отличаются разные форматы ключей?',
-GEN_Help_17                 : 'Why Should I?',
-GEN_Help_18                 : 'To have a secondary backup.',
-GEN_Help_19                 : 'In case you ever forget your password.',
+GEN_Help_17                 : 'Почему мне следует это сделать?',
+GEN_Help_18                 : 'Чтобы иметь дополнительную резервную копию',
+GEN_Help_19                 : 'Например, если вы забудете свой пароль.',
 GEN_Help_20                 : 'Холодное хранилище',
 GET_ConfButton              : 'Я понял. Продолжить',
 GEN_Label_5                 : 'Сохранить приватный ключ. ',
 GEN_Unlock                  : 'Разблокируйте кошелек для просмотра приватного ключа',
-GAS_PRICE_Desc              : 'Gas Price is the amount you pay per unit of gas. `TX fee = gas price * gas limit` & is paid to miners for including your TX in a block. Higher the gas price = faster transaction, but more expensive. Default is `20 GWEI`.',
-GAS_LIMIT_Desc              : 'Gas limit is the amount of gas to send with your TX. `TX fee` = gas price * gas limit & is paid to miners for including your TX in a block. Increasing this number will not get your TX mined faster. Sending ETH = `21000`. Sending Tokens = ~`200000`.',
-NONCE_Desc                  : 'The nonce is the number of transactions sent from a given address. It ensures transactions are sent in order & not more than once.',
-TXFEE_Desc                  : 'The TX Fee is paid to miners for including your TX in a block. Is is the `gas limit` * `gas price`. [You can convert GWEI -> ETH here](https://www.LibreBank.com/helpers.html)',
+GAS_PRICE_Desc              : 'Цена газа это сумма, уплачиваемая за единицу газа. `комиссия TX  = цена газа * лимит газа` и она платиться майнеру за включение TX в блок. Выше цена газа = выше скорость транзакции также как и её цена. По-умолчанию `20 GWEI`.',
+GAS_LIMIT_Desc              : 'Лимит газа количество газа выделяемое на транзакцию. `комиссия TX` = цена газа * лимит газа` и она платиться майнеру за включение TX в блок. Увеличение этого числа не влияет на скорость обработки транзакции. Отправка ETH = `21000`. Отправка токенов = ~`200000`.',
+NONCE_Desc                  : 'nonce - номер транзакции, отправляемой с данного адреса. Он гарантирует порядок выполнения транзакциии и то, что каждая будет обработана лишь однажды.',
+TXFEE_Desc                  : 'Комиссия TX платиться майнерам за влюкчени её в блок. Она равна `лимит газа` * `цену газа`. [Вы можете сконвертировать GWEI -> ETH здесь](https://www.wallet.librecash.com/helpers.html)',
 
 
 
@@ -277,11 +276,11 @@ NAV_ENS                     : 'ENS',
 NAV_GenerateWallet_alt      : 'Создать кошелек ',
 NAV_GenerateWallet          : 'Создать кошелёк ',
 NAV_Help                    : 'Справка ',
-NAV_InteractContract        : 'Interact with Contract ',
+NAV_InteractContract        : 'Взаимодействие с контрактом ',
 NAV_Multisig                : 'Multisig ',
 NAV_MyWallets               : 'Мои кошельки ',
 NAV_Offline                 : 'Оффлайн-перевод ',
-NAV_SendEther               : 'Перевод Eth и токенов',
+NAV_SendEther               : 'Перевод ETH и токенов',
 NAV_SendTokens              : 'Перевести токены ',
 NAV_SignMsg                 : 'Подписать сообщение ',
 NAV_Swap                    : 'Обмен ',
@@ -301,7 +300,7 @@ x_Keystore                  : 'Файл (UTC / JSON) ',
 x_Keystore2                 : 'Файл (UTC / JSON) ',
 x_Balance_only              : 'Просмотр баланса',
 x_KeystoreDesc              : 'Этот файл Keystore использует формат совместимый с Mist. Вы сможете в будущем импортировать его. Рекомендуется скачать этот файл и сделать резервную копию. ',
-x_MetaMask                  : 'Metamask / Mist ',
+x_MetaMask                  : 'Metamask ',
 x_Mnemonic                  : 'Кодовая фраза ',
 x_ParityPhrase              : 'Parity фраза ',
 x_Password                  : 'Пароль ',
@@ -375,10 +374,10 @@ ADD_Label_8                 : 'Пароль (опционально): ',
 /* Generate Wallets */
 GEN_desc                    : 'Если Вы хотите создать несколько кошельков, Вы можете сделать это здесь ',
 GEN_Label_1                 : 'Введите сложный пароль (не менее 9 символов) ',
-GEN_Placeholder_1           : 'Не забудьте сохранить это! ',
+GEN_Placeholder_1           : 'Не забудьте сохранить его! ',
 GEN_SuccessMsg              : 'Поздравляем! Ваш кошелёк успешно создан. ',
-GEN_Label_2                 : 'Сохраните Ваш файл Keystore/JSON или закрытый ключ. Не забывайте Ваш пароль! ',
-GEN_Label_3                 : 'Сохраните Ваш адрес. ',
+GEN_Label_2                 : 'Сохраните файл Keystore/JSON или закрытый ключ. Не забывайте Ваш пароль! ',
+GEN_Label_3                 : 'Сохраните ваш адрес. ',
 GEN_Label_4                 : 'Напечатайте бумажный кошелёк или сохраните QR код. (по желанию) ',
 
 /* Bulk Generate Wallets */
@@ -491,8 +490,8 @@ VAR_tokenBalance            :  'Баланс контракта',
 VIEWWALLET_Subtitle         : 'Позволяет скачать закрытые ключи в различных форматах, а также повторно напечатать Ваши бумажные кошельки. Вам это понадобится, когда Вы захотите [импортировать Ваши счета в geth или Mist](http://ethereum.stackexchange.com/questions/465/how-to-import-a-plain-private-key-into-geth/). Для проверки баланса Ваших счетов мы рекомендуем использовать браузер блокчейна, например [etherscan.io](https://etherscan.io/). ',
 VIEWWALLET_Subtitle_Short   : 'Позволяет Вам скачать Ваши закрытые ключи в различных форматах, а также повторно напечатать Ваши бумажные кошельки. ',
 VIEWWALLET_SuccessMsg       : 'Поздравляем! Вот информация о Вашем кошельке. ',
-VIEWWALLET_ShowPrivKey      : '(show)',
-VIEWWALLET_HidePrivKey      : '(hide)',
+VIEWWALLET_ShowPrivKey      : '(показать)',
+VIEWWALLET_HidePrivKey      : '(скрыть)',
 
 /* Chrome Extension */
 CX_error_1                  : 'У Вас нет сохранённых кошельков. Чтобы создать кошелёк, нажмите ["Создать кошелёк"](/cx-wallet.html#add-wallet)! ',
@@ -559,7 +558,7 @@ TRANS_gas                   : 'Лимит газа ', // changd in ENG to Gas Li
 WARN_Send_Link              : 'Вы попали сюда по ссылке, которая уже содержит в себе адрес, сумму, лимит газа и дополнительные параметры транзакции. ВЫ можете изменить эти данные перед отправкой транзакции. Для начала отоприте ваш кошелёк. ',
 
 /* Hardware wallets */
-x_Ledger                    : 'Ledger Wallet ',
+x_Ledger                    : 'Ledger ',
 ADD_Ledger_1                : 'Присоедините ваш Ledger Wallet ',
 ADD_Ledger_2                : 'Запустите приложение Ethereum (или приложение контракта) ',
 ADD_Ledger_2_Exp            : 'Запустите приложение Expanse (или приложение контракта) ',
@@ -601,14 +600,14 @@ ERROR_16                    : 'Кошелёк с таким адресом уж�
 ERROR_17                    : 'Недостаточно средств. На счёте, с которого вы пытаетесь отправить транзакцию, не хватает средств. Вам необходимо иметь не менее 0.01 эфира (ether) на Вашем счету, чтобы покрыть расходы на газ. Пожалуйста, пложите немного эфира (ether) на счёт и попробуйте снова. ',
 ERROR_18                    : 'Транзакция могла бы истратить весь газ. Это значит, что Вы уже голосовали по данному предложению, или период обсуждения данного предложения закончился. ',
 ERROR_19                    : 'Неправильный символ ',
-ERROR_20                    : 'Not a valid ERC-20 token', // 20
+ERROR_20                    : 'Некорректный ERC-20 токен', // 20
 ERROR_21                    : 'Could not estimate gas. There are not enough funds in the account, or the receiving contract address would throw an error. Feel free to manually set the gas and proceed. The error message upon sending may be more informative.', // 21
-ERROR_22                    : 'Please enter a valid node name', // 22
+ERROR_22                    : 'Введите корректное имя ноды', // 22
 ERROR_23                    : 'Please enter a valid URL. If you are on https, your URL must be https', // 23
 ERROR_24                    : 'Please enter a valid port. ', // 24
-ERROR_25                    : 'Please enter a valid chain ID. ', // 25
-ERROR_26                    : 'Please enter a valid ABI. ', // 26
-ERROR_27                    : 'Minimum amount: 0.01. Maximum Amount: ',
+ERROR_25                    : 'Укажите корректный ID цепочки. ', // 25
+ERROR_26                    : 'Укажите корректный ABI. ', // 26
+ERROR_27                    : 'Минимальное значение: 0.01. Максимальное значение: ',
 ERROR_28                    : 'В будущем, для доступа к этому кошельку **Вам понадобится либо файл Keystore/JSON вместе с паролем,  либо закрытый ключ**. Пожалуйста, сохраните их и сделайте резервную копию! Если Вы потеряете их, то не сможете восстановить доступ к Вашему кошельку. Обратитесь к [справке](https://www.LibreBank.com/#help) за инструкциями. ',
 ERROR_29                    : 'Please enter a valid user and password. ', // 29
 ERROR_30                    : 'Please enter a valid name (7+ characters, limited punctuation) ', // 30
@@ -616,19 +615,19 @@ ERROR_31                    : 'Please enter a valid secret phrase. ', // 31
 ERROR_32                    : 'Could not connect to the node. Refresh your page, try a different node (upper right corner), check your firewall settings. If custom node, check your configs.', // 32
 ERROR_33                    : 'The wallet you have unlocked does not match the owner\'s address. ', // 33
 ERROR_34                    : 'The name you are attempting to reveal does not match the name you have entered. ', // 34
-ERROR_35                    : 'Input address is not checksummed. <a href="https://LibreBank.github.io/knowledge-base/addresses/not-checksummed-shows-when-i-enter-an-address.html" target="_blank" rel="noopener noreferrer"> More info</a>', // 35
-ERROR_36                    : 'Enter valid TX hash', // 36
-ERROR_37                    : 'Enter valid hex string (0-9, a-f)', // 37
+ERROR_35                    : 'Введенный адрес не может быть верифицирован. <a href="https://LibreBank.github.io/knowledge-base/addresses/not-checksummed-shows-when-i-enter-an-address.html" target="_blank" rel="noopener noreferrer"> More info</a>', // 35
+ERROR_36                    : 'Введите корректный хэш TX', // 36
+ERROR_37                    : 'Введите корректную хэш-строку (0-9, a-f)', // 37
 ERROR_38                    : '(error_39) Offer must have either price or reserve set to more than 0',
 ERROR_39                    : '(error_40) Bid must be more than the specified minimum',
 
 SUCCESS_1                   : 'Адрес указан верно ',
 SUCCESS_2                   : 'Кошелёк успешно расшифрован ',
-SUCCESS_3                   : 'Your TX has been broadcast to the network. This does not mean it has been mined & sent. During times of extreme volume, it may take 3+ hours to send. 1) Check your TX below. 2) If it is pending for hours or disappears, use the Check TX Status Page to replace. 3) Use [ETH Gas Station](https://ethgasstation.info/) to see what gas price is optimal. 4) Save your TX Hash in case you need it later:    ',
+SUCCESS_3                   : 'Транзакция отправлена в сеть. Это не означает, что она была обработана и отправлена. Во время перегрузки сети обработка может занимать 3+ часов. 1) Проверьте транзакцию ниже. 2) Если она обрабатывается несколько часов используйте страницу проверки статуса для замены транзакции. 3) Используйте [ETH Gas Station](https://ethgasstation.info/) для определения оптимальной цены газа. 4) Сохраните хэш транзакции для последующей проверки:    ',
 SUCCESS_4                   : 'Ваш кошелёк успешно добавлен ',
 SUCCESS_5                   : 'Выбранный файл ',
-SUCCESS_6                   : 'You are successfully connected ',
-SUCCESS_7                   : 'Message Signature Verified',
+SUCCESS_6                   : 'Вы успешно подключены',
+SUCCESS_7                   : 'Подпись сообщения подтверждена',
 
 /* Geth Error Messages */
 GETH_InvalidSender          : 'Неверный адрес отправителя ',
@@ -1043,7 +1042,9 @@ Show_all_tokens                  :  'Показать все токены',
 How_to_see_tokens                :  'Как добавить токены',
 You_can_view_tokens              :  'Вы также можете проверить баланc токенов на ',
 Connect_via_ext                  :  'Авторизуйтесь при помощи ',
-Hardware_wallet                  :  'аппаратный кошелек'
+Hardware_wallet                  :  'аппаратный кошелек',
+Only_show_balances               :  'Показывать балансы',
+Hist_tokens                      :  'Токены'
 };
 
 module.exports = ru;

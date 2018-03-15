@@ -974,7 +974,10 @@ HELP_Warning                    :  'If you created a wallet -or- downloaded the 
 Show_all_tokens                 :  'Show all tokens',
 How_to_see_tokens               :  'How to See Your Tokens',
 You_can_view_tokens             :  'You can also view your Balances on',
-Hardware_wallet                 :  'hardware wallet'
+Hardware_wallet                 :  'hardware wallet',
+Connect_via_ext                 :  'Connect via',
+Only_show_balances              :  'Only Show Balances',
+Hist_tokens                     :  'Tokens'
 };
 
 module.exports = en;
