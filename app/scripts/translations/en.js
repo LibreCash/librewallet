@@ -533,6 +533,7 @@ LIBREFE_QueuePeriod             :  'Queue processing period:',
 LIBREFE_Paused                  :  'Paused:',
 LIBREFE_ReadyOracles            :  'Ready oracles:',
 LIBREFE_RURCost                 :  'Rates request cost:',
+LIBRE_calcRateRemains           :  'Time remaining for rates calculating:',
 
 LIBRE_modalETHToSend            :  'ETH to send:',
 LIBRE_modalAccountBalance       :  'Account Balance:',

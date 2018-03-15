@@ -975,7 +975,8 @@ LIBREFE_RelevancePeriod     : 'Период актуальности курса'
 LIBREFE_QueuePeriod         : 'Период обработки очереди',
 LIBREFE_Paused              : 'Остановлен',
 LIBREFE_ReadyOracles        : 'Готовые оракулы',
-LIBREFE_RURCost             : 'Стоимость запроса курса'
+LIBREFE_RURCost             : 'Стоимость запроса курса',
+LIBRE_calcRateRemains       : 'Расчёт курсов доступен:',
 };
 
 module.exports = ru;
