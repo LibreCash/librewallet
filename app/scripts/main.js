@@ -139,7 +139,7 @@ app.controller('decryptWalletCtrl', ['$scope', '$sce', 'walletService', decryptW
 app.controller('viewWalletCtrl', ['$scope', 'walletService', viewWalletCtrl]);
 app.controller('statusCtrl', ['$scope', 'libreService', '$translate', statusCtrl]);
 app.controller('txStatusCtrl', ['$scope', txStatusCtrl]);
-app.controller('sendTxCtrl', ['$scope', '$sce', 'walletService', 'libreService', '$rootScope', sendTxCtrl]);
+app.controller('sendTxCtrl', ['$scope', '$sce', 'walletService', 'libreService', '$rootScope', '$translate', sendTxCtrl]);
 app.controller('emissionCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', '$translate', emissionCtrl]);
 app.controller('swapCtrl', ['$scope', '$sce', 'walletService', swapCtrl]);
 app.controller('signMsgCtrl', ['$scope', '$sce', 'walletService', signMsgCtrl]);

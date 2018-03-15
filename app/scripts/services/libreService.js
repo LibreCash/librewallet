@@ -269,15 +269,23 @@ var libreService = function(walletService, $translate) {
                     let tx = {
                         name: pendingName.replace('Pending',''),
                         status: 'sent...',
+                        color: '#cc0',
                         date: `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`
                     }
+                    translator('LIBRE_txState_Send').then(msg => {
+                        if (tx.status === 'sent...')
+                            tx.status = msg;
+                    })
+                    translator(`LIBRE_txName_${tx.name}`).then(msg => tx.name = msg);
                     _scope.notifier.txs.push(tx)
 
                     uiFuncs.sendTx(_scope.signedTx, function(resp) {
                         if (resp.isError) {
                             _scope[pendingName] = false;
                             _scope.notifier.danger("sendTx: " + resp.error);
-                            tx.status = 'error';
+                            tx.status = 'fail';
+                            tx.color = 'red';
+                            translator('LIBRE_txState_Fail').then(msg => tx.status = msg);
                             return;
                         }
                         var checkTxLink = `https://www.myetherwallet.com?txHash=${resp.data}#check-tx-status`;
@@ -289,6 +297,7 @@ var libreService = function(walletService, $translate) {
 
                         tx.hash = resp.data;
                         tx.status = 'pending...';
+                        translator('LIBRE_txState_Pending').then(msg => tx.status = msg);
 
                         _scope.wallet.setBalance(function() {
                             if (!_scope.$$phase) _scope.$apply();
@@ -318,7 +327,9 @@ var libreService = function(walletService, $translate) {
                                         _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                                     }
-                                    tx.status = 'error';
+                                    tx.status = 'fail';
+                                    tx.color = 'red';
+                                    translator('LIBRE_txState_Fail').then(msg => tx.status = msg);
                                 } else {
                                     if (receipt.data == null) {
                                         isCheckingTx = false;
@@ -328,8 +339,10 @@ var libreService = function(walletService, $translate) {
                                     if (receipt.data.status == "0x1") { 
                                         translator(`LIBRE${opPrefix}_txOk`).then((msg) => {
                                             _scope.notifier.success(msg, 0);
-                                            tx.status = 'success'
                                         });
+                                        tx.status = 'success'
+                                        tx.color = 'green';
+                                        translator('LIBRE_txState_Success').then(msg => tx.status = msg);
                                         if (updater != null) {
                                             updater();
                                         }
@@ -337,7 +350,9 @@ var libreService = function(walletService, $translate) {
                                         translator(`LIBRE${opPrefix}_txFail`).then((msg) => {
                                             _scope.notifier.danger(msg, 0);
                                         });
-                                        tx.status = 'error'
+                                        tx.status = 'fail'
+                                        tx.color = 'red';
+                                        translator('LIBRE_txState_Fail').then(msg => tx.status = msg);
                                     }
                                     _scope.wallet.setBalance(function() {
                                         if (!_scope.$$phase) _scope.$apply();

@@ -35,7 +35,7 @@
         <span class="mono wrap">{{allTokens}}</span> Libre
       </li>
     </ul>
-    <h5>Transactions</h5>
+    <h5 translate="sidebar_Transactions">Transactions</h5>
     <table class="account-info">
       <tr ng-repeat="tx in notifier.txs">
         <td class="mono wrap point">{{ tx.date }}</td>
@@ -43,7 +43,7 @@
           <a href="{{ajaxReq.blockExplorerTX.replace('[[txHash]]', tx.hash)}}" target="_blank" rel="noopener noreferrer">{{ tx.name }}</a>
           
         </td>
-        <td class="mono wrap point" ng-style="{color: tx.status === 'success' ? 'green': (tx.status === 'error' ? 'red' : '#cc0')}">
+        <td class="mono wrap point" ng-style="{color: tx.color}">
           {{ tx.status }}
         </td>
       </tr>

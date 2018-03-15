@@ -1,5 +1,5 @@
 'use strict';
-var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope) {
+var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     const TOKEN_DECIMALS = 18;
     $scope.tx = {};
     $scope.signedTx;
@@ -251,12 +251,19 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
 
     $scope.sendTx = function() {
         $scope.sendTxModal.close();
-        let time = new Date();
+        let time = new Date(),
+            pending = true;
         let tx = {
-            name: 'Send',
+            name: 'send',
             status: 'sent...',
+            color: '#cc0',
             date: `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`
         }
+        $translate('LIBRE_txState_Send').then(msg => {
+            if (tx.status === 'sent...')
+                tx.status = msg;
+        })
+        $translate(`LIBRE_txName_${tx.name}`).then(msg => tx.name = msg);
         $scope.notifier.txs.push(tx)
 
         uiFuncs.sendTx($scope.signedTx, function(resp) {
@@ -272,6 +279,7 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
 
                 tx.hash = resp.data;
                 tx.status = 'pending...';
+                $translate('LIBRE_txState_Pending').then(msg => tx.status = msg);
                 $scope.wallet.setBalance(applyScope);
 
                 var isCheckingTx = false,
@@ -279,7 +287,7 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
                 receiptInterval = 5000,
                 txCheckingTimeout = 60 * 1000,
                 checkingTx = setInterval(() => {
-                    if (tx.status !== 'pending...') {
+                    if (!pending) {
                         clearInterval(checkingTx);
                         return;
                     }
@@ -295,18 +303,31 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
                             } else {
                                 $scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
                             }
-                            tx.status = 'error';
+                            tx.status = 'fail';
+                            tx.color = 'red';
+                            $translate('LIBRE_txState_Fail').then(msg => tx.status = msg);
+                            pending = false;
                         } else {
                             if (receipt.data == null) {
                                 isCheckingTx = false;
                                 return; // next interval
                             }
-                            if (receipt.data.status == "0x1") { 
-                                $scope.notifier.success('Success sending', 0);
+                            if (receipt.data.status == "0x1") {
+                                $translate('LIBRESEND_txOk').then(msg => {
+                                    $scope.notifier.success(msg, 0);
+                                });
                                 tx.status = 'success'
+                                tx.color = 'green';
+                                $translate('LIBRE_txState_Success').then(msg => tx.status = msg);
+                                pending = false;
                             } else {
-                                $scope.notifier.danger('Failed sending', 0);
-                                tx.status = 'error'
+                                $translate('LIBRESEND_txFail').then(msg => {
+                                    $scope.notifier.danger(msg, 0);
+                                });
+                                tx.status = 'fail'
+                                tx.color = 'red';
+                                $translate('LIBRE_txState_Fail').then(msg => tx.status = msg);
+                                pending = false;
                             }
                         }
                         isCheckingTx = false;
@@ -316,7 +337,10 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
                 if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
             } else {
                 $scope.notifier.danger(resp.error);
-                tx.status = 'error';
+                tx.status = 'fail';
+                tx.color = 'red';
+                $translate('LIBRE_txState_Fail').then(msg => tx.status = msg);
+                pending = false;
             }
         });
     }
