@@ -510,7 +510,7 @@ CONTRACT_Write              : 'ЗАПИСАТЬ ',
 SWAP_rates                  : "Текущие котировки ",
 SWAP_init_1                 : "Я хочу обменять мои ",
 SWAP_init_2                 : " на ", // "I want to swap my X ETH for X BTC"
-SWAP_init_CTA               : "! ", // or "Continue"
+SWAP_init_CTA               : "Продолжить ", // or "Continue"
 SWAP_information            : "Информация об операции",
 SWAP_send_amt               : "Сумма для отправки ",
 SWAP_rec_amt                : "Сумма к получению ",
@@ -519,7 +519,7 @@ SWAP_rec_add                : "Адрес получателя ",
 SWAP_start_CTA              : "Начать обмен ",
 SWAP_ref_num                : "Идентификатор операции ",
 SWAP_time                   : "Время до отправки ",
-SWAP_elapsed				: "Время, прошедшее с момента отправки ",
+SWAP_elapsed                : "Время, прошедшее с момента отправки ",
 SWAP_progress_1             : "Заявка выставлена ",
 SWAP_progress_2             : "Ждём получения ваших ", // Waiting for your BTC...
 SWAP_progress_3             : "Получено! ", // ETH Received!
