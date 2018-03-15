@@ -40,8 +40,8 @@
       <tr ng-repeat="tx in notifier.txs">
         <td class="mono wrap point">{{ tx.date }}</td>
         <td class="mono wrap point">
-          <a href="{{ajaxReq.blockExplorerTX.replace('[[txHash]]', tx.hash)}}" target="_blank" rel="noopener noreferrer">{{ tx.name }}</a>
-          
+          <a ng-if="tx.hash" href="{{ajaxReq.blockExplorerTX.replace('[[txHash]]', tx.hash)}}" target="_blank" rel="noopener noreferrer">{{ tx.name }}</a>
+          <span ng-if="!tx.hash">{{ tx.name }}</span>
         </td>
         <td class="mono wrap point" ng-style="{color: tx.color}">
           {{ tx.status }}
