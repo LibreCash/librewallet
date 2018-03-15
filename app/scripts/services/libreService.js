@@ -36,7 +36,7 @@ var libreService = function(walletService, $translate) {
             isDebug: IS_DEBUG,
             minReadyOracles: 2,
             oracleActual: 15 * 60,
-            rateActual: 10 * 15,
+            rateActual: 10 * 60,
             oracleTimeout: 10 * 60
         };
         
@@ -354,6 +354,9 @@ var libreService = function(walletService, $translate) {
                                         tx.color = 'red';
                                         translator('LIBRE_txState_Fail').then(msg => tx.status = msg);
                                     }
+                                    _scope.wallet.setBalance(function() {
+                                        if (!_scope.$$phase) _scope.$apply();
+                                    });
                                     _scope[pendingName] = false;
                                 }
                                 isCheckingTx = false;

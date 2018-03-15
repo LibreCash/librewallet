@@ -47,9 +47,11 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     var RATE_ACTUAL = coeff.rateActual;
     var ORACLE_TIMEOUT = coeff.oracleTimeout;
+    var ORACLE_ACTUAL = coeff.oracleActual;
     $scope.MIN_READY_ORACLES = coeff.minReadyOracles;
 
     $scope.deadlineRemains = 0;
+    $scope.calcRatesRemains = 0;
     $scope.gasPrice = {};
     $scope.txFees = {};
     $scope.txModal = {};
@@ -111,6 +113,10 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     setInterval(() => {
         if ($scope.waitOraclesRemains > 0) {
             $scope.waitOraclesRemains--;
+        }
+
+        if ($scope.calcRatesRemains > 0) {
+            $scope.calcRatesRemains--;
         }
 
         let deadlineDays = $scope.deadlineRemains / (60 * 60 * 24);
@@ -212,6 +218,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
                         if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
                             $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
+                            $scope.calcRatesRemains = ORACLE_ACTUAL - (lastBlockTime - +requestTime.data[0]);
                             lastRequestTime = +requestTime.data[0]
                         }
 

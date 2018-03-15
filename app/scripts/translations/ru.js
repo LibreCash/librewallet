@@ -981,6 +981,7 @@ LIBREFE_QueuePeriod         : 'Период обработки очереди',
 LIBREFE_Paused              : 'Остановлен',
 LIBREFE_ReadyOracles        : 'Готовые оракулы',
 LIBREFE_RURCost             : 'Стоимость запроса курса',
+LIBRE_calcRateRemains       : 'Расчёт курсов доступен:',
 
 LIBRE_txState_Send          :  'отправка...',
 LIBRE_txState_Pending       :  'в ожидании...',
