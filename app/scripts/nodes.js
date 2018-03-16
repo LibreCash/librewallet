@@ -5,7 +5,7 @@ nodes.infuraNode = require('./nodeHelpers/infura');
 nodes.metamaskNode = require('./nodeHelpers/metamask');
 nodes.nodeTypes = {
     ETH: "ETH",
-    ETC: "ETC",
+    //ETC: "ETC",
     Rinkeby: "RINKEBY ETH",
     /*Ropsten: "ROPSTEN ETH",
     Kovan: "KOVAN ETH",

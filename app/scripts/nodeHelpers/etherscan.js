@@ -104,6 +104,7 @@ etherscan.sendRawTx = function(rawTx, callback) {
     });
 }
 etherscan.getEstimatedGas = function(txobj, callback) {
+    txobj.value = ethFuncs.trimHexZero(txobj.value);
     this.post({
         module: 'proxy',
         action: 'eth_estimateGas',
