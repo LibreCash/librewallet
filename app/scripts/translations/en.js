@@ -559,7 +559,7 @@ LIBRE_captionCalcRates          :  'Calc Rates',
 LIBRE_captionBuyTransaction     :  'Buy Transaction',
 LIBRE_captionSellTransaction    :  'Sell Transaction',
 
-LIBRE_txState_Send              :  'send...',
+LIBRE_txState_Send              :  'sending...',
 LIBRE_txState_Pending           :  'pending...',
 LIBRE_txState_Success           :  'success',
 LIBRE_txState_Fail              :  'fail',
