@@ -245,7 +245,8 @@ var libreService = function(walletService, $translate) {
         });    
     }
 
-    function libreTransaction(_scope, pendingName, opPrefix, translator, updater) {
+    function libreTransaction(_scope, methodName, opPrefix, translator, updater) {
+        var pendingName = methodName + 'Pending';
         _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
@@ -267,7 +268,7 @@ var libreService = function(walletService, $translate) {
 
                     let time = new Date();
                     let tx = {
-                        name: pendingName.replace('Pending',''),
+                        name: methodName,
                         status: 'sent...',
                         color: '#cc0',
                         date: `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`
@@ -281,6 +282,7 @@ var libreService = function(walletService, $translate) {
 
                     uiFuncs.sendTx(_scope.signedTx, function(resp) {
                         if (resp.isError) {
+                            console.log(resp)
                             _scope[pendingName] = false;
                             _scope.notifier.danger("sendTx: " + resp.error);
                             tx.status = 'fail';
@@ -322,14 +324,17 @@ var libreService = function(walletService, $translate) {
                                         if (noTxCounter > txCheckingTimeout / receiptInterval) {
                                             _scope[pendingName] = false;
                                             _scope.notifier.danger(receipt.msg, 0);
+                                            tx.status = 'fail';
+                                            tx.color = 'red';
+                                            translator('LIBRE_txState_Fail').then(msg => tx.status = msg);
                                         }
                                     } else {
                                         _scope[pendingName] = false;
                                         _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
+                                        tx.status = 'fail';
+                                        tx.color = 'red';
+                                        translator('LIBRE_txState_Fail').then(msg => tx.status = msg);
                                     }
-                                    tx.status = 'fail';
-                                    tx.color = 'red';
-                                    translator('LIBRE_txState_Fail').then(msg => tx.status = msg);
                                 } else {
                                     if (receipt.data == null) {
                                         isCheckingTx = false;

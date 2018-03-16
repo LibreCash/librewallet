@@ -387,7 +387,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         if (!estimate) $scope.txModal.close();
         prepareApproveTx().then(function() {
             if (!estimate) {
-                libreTransaction($scope, "approvePending", "ALLOWANCE", $translate, updateBalanceAndAllowance);
+                libreTransaction($scope, "approve", "ALLOWANCE", $translate, updateBalanceAndAllowance);
             } else {
                 $scope.updateGas();
             }
@@ -418,7 +418,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.notifier.danger(err);
         }).then(function() {
             if (!estimate) {
-                libreTransaction($scope, "updateRatesPending", "RUR", $translate, null);
+                libreTransaction($scope, "updateRates", "RUR", $translate, null);
             } else {
                 $scope.updateGas();
             }
@@ -436,7 +436,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.tx.unit = 'ether';
     
             if (!estimate) {
-                libreTransaction($scope, "calcRatesPending", "CR", $translate, null);
+                libreTransaction($scope, "calcRates", "CR", $translate, null);
             } else {
                 $scope.updateGas();
             }
@@ -458,7 +458,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.tx.from = walletService.wallet.getAddressString();
 
             if (!estimate) {
-                libreTransaction($scope, "sellPending", "SELL", $translate, updateBalanceAndAllowance);
+                libreTransaction($scope, "sell", "SELL", $translate, updateBalanceAndAllowance);
             } else {
                 $scope.updateGas();
             }
@@ -477,7 +477,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.tx.value = $scope.buyTXValue;
 
             if (!estimate) {
-                libreTransaction($scope, "buyPending", "BUY", $translate, updateBalanceAndAllowance);
+                libreTransaction($scope, "buy", "BUY", $translate, updateBalanceAndAllowance);
             } else {
                 $scope.updateGas();
             }

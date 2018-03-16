@@ -126,7 +126,9 @@ globalFuncs.getParityMsg = function(str) {
     for (var reg in this.parityErrors) {
         if (this.parityErrors.hasOwnProperty(reg)) {
             // console.log("STR", str)
-            str = str.message ? str.message : str;
+            if (typeof(str) !== "string") {
+                str = str.msg || str.message
+            }
             let args = str.match("^" + reg + "$");
         if (args) {
                 let key = this.parityErrors[reg];
