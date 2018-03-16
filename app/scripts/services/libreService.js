@@ -1,15 +1,15 @@
 /*jshint esversion: 6 */ 
 "use strict";
 var libreService = function(walletService, $translate) {
-    const 
+    var 
         networks = {rinkeby: 'rin_ethscan', eth: 'eth_infura'};
     var 
         exchanger = getContract("LibreExchanger"),
         cash = getContract("LibreCash"),
         mainTimer = null;
 
-    const 
-        IS_DEBUG = true,
+    var 
+        IS_DEBUG = false,
         states = [
             'LOCKED',
             'PROCESSING_ORDERS',
@@ -103,7 +103,7 @@ var libreService = function(walletService, $translate) {
 
     function getNetwork() {
         let networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
-        console.log(~Object.keys(networks).indexOf(networkType) ? networks[networkType] : '');
+        if (IS_DEBUG) console.log(~Object.keys(networks).indexOf(networkType) ? networks[networkType] : '');
         return ~Object.keys(networks).indexOf(networkType) ? networks[networkType] : '';
     }
 
@@ -131,7 +131,7 @@ var libreService = function(walletService, $translate) {
             res.params = params;
             return res;
         })
-        .catch((e)=>{
+        .catch((e) => {
             console.log(e);
             console.log(`Error on getDataAsync: ${to} ${JSON.stringify(abi)} ${_var} ${params}`);
         });
