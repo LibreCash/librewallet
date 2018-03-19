@@ -13,8 +13,8 @@
 
 // Creates a wrapper for a series of columns
 .make-row(@gutter: @grid-gutter-width) {
-  margin-left:  (@gutter / -2);
-  margin-right: (@gutter / -2);
+  // margin-left:  (@gutter / -2);
+  // margin-right: (@gutter / -2);
   &:extend(.clearfix all);
 }
 
@@ -47,6 +47,11 @@
   @media (min-width: @screen-sm-min) {
     float: left;
     width: percentage((@columns / @grid-columns));
+  }
+
+  @media (max-width: @screen-sm) {
+    padding-left:  (@gutter / 4);
+    padding-right: (@gutter / 4);
   }
 }
 .make-sm-column-offset(@columns) {

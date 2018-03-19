@@ -6,7 +6,7 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
     $scope.customNodeModal = document.getElementById('customNodeModal') ? new Modal(document.getElementById('customNodeModal')) : null;
     $scope.Validator = Validator;
     $scope.nodeList = nodes.nodeList;
-    $scope.defaultNodeKey = 'eth_mew';
+    $scope.defaultNodeKey = 'eth_infura';
     $scope.customNode = { options: 'eth', name: '', url: '', port: '', httpBasicAuth: null, eip155: false, chainId: '' };
     $scope.customNodeCount = 0;
     $scope.nodeIsConnected = true;
@@ -90,9 +90,11 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
         globalFuncs.localStorage.setItem('curNode', JSON.stringify({
             key: key
         }));
+        /*
         if (nodes.ensNodeTypes.indexOf($scope.curNode.type) == -1) $scope.tabNames.ens.cx = $scope.tabNames.ens.mew = false;
         if (nodes.domainsaleNodeTypes.indexOf($scope.curNode.type) == -1) $scope.tabNames.domainsale.cx = $scope.tabNames.domainsale.mew = false;
         else $scope.tabNames.ens.cx = $scope.tabNames.ens.mew = true;
+        */
         ajaxReq.getCurrentBlock(function(data) {
             if (data.error) {
                 $scope.nodeIsConnected = false;
@@ -123,15 +125,18 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
     $scope.addCustomNodeToList = function(nodeInfo) {
         var tempObj = null;
         if (nodeInfo.options == 'eth') tempObj = JSON.parse(JSON.stringify(nodes.nodeList.eth_ethscan));
+        else if (nodeInfo.options == 'rin') tempObj = JSON.parse(JSON.stringify(nodes.nodeList.rin_ethscan));
+        
+        /*
         else if (nodeInfo.options == 'etc') tempObj = JSON.parse(JSON.stringify(nodes.nodeList.etc_epool));
         else if (nodeInfo.options == 'rop') tempObj = JSON.parse(JSON.stringify(nodes.nodeList.rop_mew));
         else if (nodeInfo.options == 'kov') tempObj = JSON.parse(JSON.stringify(nodes.nodeList.kov_ethscan));
-        else if (nodeInfo.options == 'rin') tempObj = JSON.parse(JSON.stringify(nodes.nodeList.rin_ethscan));
         else if (nodeInfo.options == 'cus') {
             tempObj = JSON.parse(JSON.stringify(nodes.customNodeObj));
             tempObj.eip155 = nodeInfo.eip155;
             tempObj.chainId = parseInt(nodeInfo.chainId);
         }
+        */
         if (tempObj) {
             tempObj.name = nodeInfo.name + ':' + nodeInfo.options;
             tempObj.service = 'Custom';
@@ -192,6 +197,9 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
             for (var key in $scope.tabNames) {
                 if ($scope.tabNames[key].url == hval) {
                     $scope.activeTab = globalService.currentTab = $scope.tabNames[key].id;
+                    $translate($scope.tabNames[key].name).then(translate => {
+                      $scope.activeTabName = translate.replace(/&amp;/g, '&');
+                    });
                     break;
                 }
                 $scope.activeTab = globalService.currentTab;
@@ -206,7 +214,12 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
         globalService.tokensLoaded = false
         $scope.activeTab = globalService.currentTab = id;
         for (var key in $scope.tabNames) {
-            if ($scope.tabNames[key].id == id) location.hash = $scope.tabNames[key].url;
+            if ($scope.tabNames[key].id == id) {
+              location.hash = $scope.tabNames[key].url;
+              $translate($scope.tabNames[key].name).then(translate => {
+                $scope.activeTabName = translate.replace(/&amp;/g, '&');
+              });
+            }
         }
     }
 

@@ -1,91 +1,254 @@
 'use strict';
-var emissionCtrl = async function($scope, $sce, walletService, libreService, $rootScope, $translate) {
+var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     var bankAddress = libreService.bank.address,
+        cashAddress = libreService.token.address,
         bankAbiRefactor = libreService.bank.abi,
-        getBankDataAsync = libreService.methods.getBankDataAsync,
+        cashAbiRefactor = libreService.token.abi,
+        getTokenData = libreService.methods.getTokenData,
+        getContractData = libreService.methods.getContractData,
         getBankDataProcess = libreService.methods.getBankDataProcess,
         getCashDataProcess = libreService.methods.getCashDataProcess,
         getDataString = libreService.methods.getDataString,
-        normalizeUnixTime = libreService.methods.normalizeUnixTime,
-        normalizeUnixTimeObject = libreService.methods.normalizeUnixTimeObject,
+        toUnixtime = libreService.methods.toUnixtime,
+        toUnixtimeObject = libreService.methods.toUnixtimeObject,
         normalizeRate = libreService.methods.normalizeRate,
         hexToString = libreService.methods.hexToString,
-        getStateName = libreService.methods.getStateName,
-        rateMultiplier = libreService.coeff.rateMultiplier,
-        gasEmission = libreService.coeff.gasEmission,
-        universalLibreTransaction = libreService.methods.universalLibreTransaction,
-        statusAllowsOrders = libreService.methods.statusAllowsOrders;
+        stateName = libreService.methods.stateName,
+        coeff = libreService.coeff,
+        fillStateData = libreService.methods.fillStateData,
+        libreTransaction = libreService.methods.libreTransaction,
+        getLibreRawTx = libreService.methods.getLibreRawTx,
+        canOrder = libreService.methods.canOrder,
+        canRequest = libreService.methods.canRequest,
+        canCalc = libreService.methods.canCalc,
+        getNetwork = libreService.methods.getNetwork,
+        
+        getEstimatedGas = libreService.methods.getEstimatedGas,
+        IS_DEBUG = libreService.IS_DEBUG;
 
-    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType)
-        $scope.notifier.danger(await $translate("LIBREBUY_networkFail"));
+    const gasPriceKey = "gasPrice",
+          loadingText = "...";
 
-    $scope.buyPending = false;
-    $scope.tx = {};
-    $scope.signedTx;
+    if (getNetwork() == '') {
+        $translate("LIBREBUY_networkFail").then((msg) => {
+            $scope.notifier.danger(msg);
+        });
+        return;
+    }
+
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
-    $scope.emissionModal = new Modal(document.getElementById('emission'));
-    //walletService.wallet = null;
-    //walletService.password = '';
-    $scope.allTokens = 'Loading';
-    $scope.showAdvance = $rootScope.rootScopeShowRawTx = false;
+
+    $scope.cashAddress = cashAddress;
+    $scope.bankAddress = bankAddress;
+    $scope.buyOrSell = true;
+
+    $scope.states = coeff.statesENUM;
+
+    var RATE_ACTUAL = coeff.rateActual;
+    var ORACLE_TIMEOUT = coeff.oracleTimeout;
+    var ORACLE_ACTUAL = coeff.oracleActual;
+    $scope.MIN_READY_ORACLES = coeff.minReadyOracles;
+
+    $scope.deadlineRemains = 0;
+    $scope.calcRatesRemains = 0;
+    $scope.gasPrice = {};
+    $scope.txFees = {};
+    $scope.txModal = {};
+
+    //$scope.allTokens = 'Loading';
+    $scope.approvePending = false;
+    $scope.sellPending = false;
+    $scope.buyPending = false;
+    $scope.orderAllowed = false;
+    $scope.CRPending = false;
+    $scope.updateRatesPending = false;
+    $scope.updateRatesAllowed = false;
+    $scope.calcRatesAllowed = false;
+    $scope.changedTokens = 0;
+    $scope.changedEth = 0;
+
+    $scope.txModal = new Modal(document.getElementById('txModal'));
+
+    //$scope.allTokens = 'Loading';
     $scope.Validator = Validator;
-    $scope.gasLimitChanged = false;
-    $scope.tx.readOnly = globalFuncs.urlGet('readOnly') == null ? false : true;
     var currentTab = $scope.globalService.currentTab;
     var tabs = $scope.globalService.tabs;
-    $scope.tokenTx = {
-        to: '',
-        value: 0,
-        id: -1
-    };
-    $scope.customGasMsg = '';
-
-    $scope.customGas = CustomGasMessages;
 
     $scope.tx = {
-        gasLimit: gasEmission,
-        data: "",
-        to: bankAddress,
         unit: "ether",
-        value: "",
+        sendMode: "ether",
         nonce: null,
         gasPrice: null,
         donate: false,
-        tokensymbol: false,
-        rateLimit: 0
+        tokensymbol: false
+    }
+    $scope.tx.readOnly = false;
+
+    // remission
+    function processSellRate(data) {
+        $scope.sellRate = data.error ? data.message : normalizeRate(data.data[0]);
+    }
+    function processTokenCount(data) {
+        $scope.tokenCount = data.error ? data.message : normalizeRate(data.data[0]);
+    };
+
+    function setAllTokens(data) {
+        $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     }
 
-    $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
-        $scope.tx.sendMode = sendMode;
-        $scope.unitReadable = '';
-        if ( globalFuncs.urlGet('tokensymbol') != null ) {
-            $scope.unitReadable = $scope.tx.tokensymbol;
-            $scope.tx.sendMode = 'token';
-        } else if (sendMode == 'ether') {
-            $scope.unitReadable = ajaxReq.type;
-        } else {
-            $scope.unitReadable = tokensymbol;
-            $scope.tokenTx.id = tokenId;
+    function setAllowance(data) {
+        $scope.allowedTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+    }
+
+    function updateBalanceAndAllowance() {
+        if (walletService.wallet == null) {
+            return;
         }
-        $scope.dropdownAmount = false;
+        getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
+        getCashDataProcess("allowance", setAllowance, [walletService.wallet.getAddressString(), bankAddress]);
     }
 
-    var applyScope = function() {
+    // on-page timers decreasing
+    setInterval(() => {
+        if ($scope.waitOraclesRemains > 0) {
+            $scope.waitOraclesRemains--;
+        }
+
+        if ($scope.calcRatesRemains > 0) {
+            $scope.calcRatesRemains--;
+        }
+
+        let deadlineDays = $scope.deadlineRemains / (60 * 60 * 24);
+
+        if ($scope.deadlineRemains > 0) {
+            $scope.deadlineRemains--;
+        }
+
+        if (deadlineDays != $scope.deadlineDays) {
+            $scope.deadlineDays = Math.floor(deadlineDays);
+        }
+
+        if ($scope.rateActualTime > 0) {
+            $scope.rateActualTime--;
+        }
+        if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
+            applyScope();
+        }
+    }, 1000);
+
+    if (libreService.mainTimer !== null) {
+        clearInterval(libreService.mainTimer)
+    }
+    
+    var lastCalcTime, lastRequestTime, lastLastBlockTime, deadline = 0;
+    $scope.pendingOrderAllowCheck = false;
+    var timerTicker = 0;
+    libreService.mainTimer = setInterval(() => {
+        if (IS_DEBUG) console.info("TIMER", ++timerTicker)
+        if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
+            if ($scope.pendingOrderAllowCheck) {
+                return;
+            }
+            $scope.pendingOrderAllowCheck = true;
+
+            ajaxReq.getLatestBlockData(function(blockData) {
+                var lastBlockTime = parseInt(blockData.data.timestamp, 16);
+                if (IS_DEBUG) console.info("BEFORE PROMISES")
+                Promise.all([
+                    getContractData("getState"),
+                    getContractData("tokenBalance"),
+                    getContractData("requestPrice"),
+                    getContractData("calcTime"),
+                    getContractData("readyOracles"),
+                    getContractData("oracleCount"),
+                    getContractData("requestTime"),
+                    walletService.wallet == null ? { data: 0 } :
+                        getTokenData("balanceOf", [walletService.wallet.getAddressString()]),
+                    walletService.wallet == null ? { data: 0 } :
+                        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]),
+                    $scope.deadlineRemains == 0 ? getContractData("deadline") : { data : 0 }
+                ]).then((values) => {
+                    if (IS_DEBUG) console.info("PROMISES DONE")
+                    try {
+                        let 
+                            state = values[0],
+                            exchangerTokenBalance = values[1],
+                            updateRatesCost = values[2],
+                            calcTime = values[3],
+                            readyOracles = values[4],
+                            oracleCount = values[5],
+                            requestTime = values[6],
+                            userTokenBalance = values[7],
+                            allowedTokens = values[8];
+                        if (values[9].data !== 0) {
+                            deadline = values[9]
+                        }
+
+                        ajaxReq.getBalance(bankAddress, function(balanceData) {
+                            $scope.ethBalance = etherUnits.toEther(balanceData.data.balance, 'wei');
+                        });
+
+                        let stateDec = +state.data[0];
+                        if ($scope.state != stateDec) {
+                            if (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS) {
+                                updateContractData();
+                            }
+                        }
+                        $scope.state = stateDec;
+                        $scope.allowedTokens = +allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                        $scope.allTokens = +userTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+
+                        $scope.tokenBalance = +exchangerTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+
+                        $scope.readyOracles = +readyOracles.data[0];
+                        $scope.oracleCount = +oracleCount.data[0];
+
+                        $scope.orderAllowed = (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS);
+                        $scope.updateRatesAllowed = (stateDec == libreService.coeff.statesENUM.REQUEST_RATES);
+                        $scope.calcRatesAllowed = (stateDec == libreService.coeff.statesENUM.CALC_RATES);
+                        if ($scope.updateRatesAllowed) {
+                            $scope.updateRatesCost = updateRatesCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                        }
+
+                        if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
+                            $scope.rateActualTime = RATE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
+                            lastCalcTime = +calcTime.data[0];
+                        }
+
+                        if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
+                            $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
+                            $scope.calcRatesRemains = ORACLE_ACTUAL - (lastBlockTime - +requestTime.data[0]);
+                            lastRequestTime = +requestTime.data[0]
+                        }
+
+                        if (+deadline.data != 0) {
+                            if (lastLastBlockTime != lastBlockTime) {
+                                $scope.deadlineRemains = +deadline.data[0] - lastBlockTime;
+                                $scope.deadlineDays = Math.floor($scope.deadlineRemains / (60 * 60 * 24));
+                            }
+                        }
+
+                        if (lastLastBlockTime != lastBlockTime) {
+                            lastLastBlockTime = lastBlockTime;
+                        }
+                    } catch (error) {
+                          $scope.notifier.danger(error)
+                    }
+
+                    $scope.pendingOrderAllowCheck = false;
+                    applyScope()
+                    if (IS_DEBUG) console.info("SYNC CYCLE END")
+                });
+            });
+    
+
+        }
+    }, 5000);
+
+    function applyScope() {
         if (!$scope.$$phase) $scope.$apply();
     }
-
-    var defaultInit = function() {
-        globalFuncs.urlGet('sendMode') == null ? $scope.setSendMode('ether') : $scope.setSendMode(globalFuncs.urlGet('sendMode'));
-        $scope.gasLimitChanged = globalFuncs.urlGet('gaslimit') != null ? true : false;
-        $scope.showAdvance = globalFuncs.urlGet('gaslimit') != null || globalFuncs.urlGet('gas') != null || globalFuncs.urlGet('data') != null;
-        if (globalFuncs.urlGet('data') || globalFuncs.urlGet('value') || globalFuncs.urlGet('to') || globalFuncs.urlGet('gaslimit') || globalFuncs.urlGet('sendMode') || globalFuncs.urlGet('gas') || globalFuncs.urlGet('tokensymbol')) $scope.hasQueryString = true // if there is a query string, show an warning at top of page
-
-    }
-
-    var setAllTokens = function(data) {
-        $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-    };
 
     $scope.$watch(function() {
         if (walletService.wallet == null) return null;
@@ -93,44 +256,38 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
     }, function() {
         if (walletService.wallet == null) return;
         $scope.wallet = walletService.wallet;
-        getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
+        updateContractData();
+        updateBalanceAndAllowance();
+
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
-        $scope.tx.to = bankAddress; //walletService.wallet.getAddressString();//$scope.wallet.setTokens();
-        if ($scope.parentTxConfig) {
-            var setTxObj = function() {
-                $scope.addressDrtv.ensAddressField = $scope.parentTxConfig.to;
-                $scope.tx.value = $scope.parentTxConfig.value;
-                $scope.tx.sendMode = 'ether';
-                $scope.tx.gasPrice = $scope.parentTxConfig.gasPrice ? $scope.parentTxConfig.gasPrice : null;
-                $scope.tx.nonce = $scope.parentTxConfig.nonce ? $scope.parentTxConfig.nonce : null;
-                $scope.tx.data = $scope.parentTxConfig.data ? $scope.parentTxConfig.data : $scope.tx.data;
-                $scope.tx.readOnly = $scope.addressDrtv.readOnly = $scope.parentTxConfig.readOnly ? $scope.parentTxConfig.readOnly : false;
-                if ($scope.parentTxConfig.gasLimit) {
-                    $scope.tx.gasLimit = $scope.parentTxConfig.gasLimit;
-                    $scope.gasLimitChanged = true;
-                }
-            }
-            $scope.$watch('parentTxConfig', function() {
-                setTxObj();
-            }, true);
-        }
-        defaultInit();
     });
 
     $scope.$watch('ajaxReq.key', function() {
         if ($scope.wallet) {
-            $scope.setSendMode('ether');
             $scope.wallet.setBalance(applyScope);
             $scope.wallet.setTokens();
         }
     });
 
-    $scope.$watch('tx', function(newValue, oldValue) {
-        $rootScope.rootScopeShowRawTx = false;
-    }, true);
+    $scope.$watch(function() {
+        return +globalFuncs.localStorage.getItem(gasPriceKey, null) +
+                +$scope.tx.gasLimit +
+                +$scope.txModal.estimatedGas;
+    }, function() {
+        $scope.gasPrice.gwei = globalFuncs.localStorage.getItem(gasPriceKey, null) ? +(globalFuncs.localStorage.getItem(gasPriceKey)) : 20;
+        if ($scope.txModal.estimatedGas !== loadingText) {
+            $scope.txModal.estimatedFee = etherUnits.toEther(
+                etherUnits.toWei($scope.gasPrice.gwei, 'gwei') * $scope.txModal.estimatedGas,
+            'wei');
+        }
+        $scope.txModal.maximumFee = etherUnits.toEther(
+            etherUnits.toWei($scope.gasPrice.gwei, 'gwei') * $scope.tx.gasLimit,
+        'wei');
+        applyScope();
+    });
 
-    var isEnough = function(valA, valB) {
+    function isEnough(valA, valB) {
         return new BigNumber(valA).lte(new BigNumber(valB));
     }
 
@@ -139,38 +296,204 @@ var emissionCtrl = async function($scope, $sce, walletService, libreService, $ro
         return isEnough($scope.tx.value, $scope.wallet.balance);
     }
 
-    var processBuyRate = function(data) {
+    $scope.updateGas = function() {
+        getLibreRawTx($scope).then((rawTx) => {
+            return getEstimatedGas(rawTx);
+        }).then(function(gas) {
+            $scope.txModal.estimatedGas = +gas.data;
+        }, function(error) {
+            $scope.notifier.danger(error);
+        });
+    }
+
+    function processBuyRate(data) {
         $scope.buyRate = data.error ? data.message : normalizeRate(data.data[0]);
-        $scope.tx.rateLimit = data.error ? 0 : normalizeRate(data.data[0] * 1.1); // +10%
     };
 
     function updateContractData() {
-        // reserved for updating data code
+        getBankDataProcess("buyRate", processBuyRate);
+        getBankDataProcess("sellRate", processSellRate);
+        if (walletService.wallet != null) {
+            updateBalanceAndAllowance();
+        }
     }
     updateContractData();
 
-    $scope.generateBuyLibreTx = function() {
-        statusAllowsOrders($scope, buyLibreTx);
+    function setOpenModal(maxGas, action, title) {
+        $translate(title).then((caption) => {
+            $scope.txModal.maximumFee = loadingText;
+            $scope.tx.gasLimit = maxGas;
+            $scope.tx.value = loadingText;
+            $scope.txModal.estimatedFee = loadingText;
+            $scope.txModal.estimatedGas = loadingText;
+            $scope.txModal.modalClick = action;
+            $scope.txModal.title = caption;
+            $scope.txModal.open();
+            action(/* estimate = */ true);
+        });
     }
 
-    var buyLibreTx = function() {
-        let rateLimit = Math.round($scope.tx.rateLimit * rateMultiplier);
-        $scope.tx.data = getDataString(bankAbiRefactor["createBuyOrder"],
-            [$scope.wallet.getAddressString(), rateLimit]);
+    $scope.updateRatesModal = function() {
+        setOpenModal(coeff.gasUpdateRates, $scope.updateRatesTx, "LIBRE_captionUpdateRates");
+    }
 
-        $scope.tx.to = bankAddress;
-        $scope.tx.gasLimit = gasEmission;
+    $scope.approveModal = function() {
+        setOpenModal(coeff.gasApprove, $scope.approveTx, "LIBRE_captionApprove");
+    }
 
-        universalLibreTransaction($scope, "buyPending", "BUY", $translate, updateContractData);
+    $scope.calcRatesModal = function() {
+        setOpenModal(coeff.gasCalcRates, $scope.calcRatesTx, "LIBRE_captionCalcRates");
+    }
+
+    $scope.buyModal = function() {
+        setOpenModal(coeff.gasEmission, $scope.buyTx, "LIBRE_captionBuyTransaction");
+    }
+
+    $scope.sellModal = function() {
+        setOpenModal(coeff.gasRemission, $scope.sellTx, "LIBRE_captionSellTransaction");
+    }
+
+    function prepareApproveTx() {
+        return new Promise((resolve, reject) => {
+            if (walletService.wallet == null) {
+                $translate("LIBRE_nullWallet").then((msg) => reject(msg));
+            }
+            getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]).then((allowanceData) => {
+                if (allowanceData.error) {
+                    reject(allowanceData.msg);
+                }
+                var allowance = +allowanceData.data[0];
+                var tokensToAllowCount = $scope.tokensToAllow * Math.pow(10, libreService.coeff.tokenDecimals);
+                if (allowance == tokensToAllowCount) {
+                    $translate("LIBREALLOWANCE_equal").then((msg) => reject(msg));
+                } else if (tokensToAllowCount < allowance) {
+                    $scope.tx.data = getDataString(
+                        cashAbiRefactor["decreaseApproval"], [bankAddress, allowance - tokensToAllowCount]
+                    );
+                } else {
+                    // tokensToAllowCount > allowance
+                    $scope.tx.data = getDataString(
+                        cashAbiRefactor["increaseApproval"], [bankAddress, tokensToAllowCount - allowance]
+                    );
+                }
+                $scope.tx.to = cashAddress;
+                $scope.tx.value = 0;
+                resolve();
+            });
+        });
+    }
+
+    $scope.approveTx = function(estimate = false) {
+        if (!estimate) $scope.txModal.close();
+        prepareApproveTx().then(function() {
+            if (!estimate) {
+                libreTransaction($scope, "approve", "ALLOWANCE", $translate, updateBalanceAndAllowance);
+            } else {
+                $scope.updateGas();
+            }
+        },
+        function(err) {
+            $scope.notifier.danger(err);
+        });
+    }
+
+    function prepareUpdateRatesTx() {
+        return new Promise((resolve, reject) => {
+            getContractData("requestPrice", []).then((oracleDeficit) => {
+                $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
+    
+                $scope.tx.to = bankAddress;
+                $scope.tx.value = etherUnits.toEther(+oracleDeficit.data[0], 'wei');
+                $scope.tx.unit = 'ether';
+                resolve();
+            });
+        });
+    }
+
+    $scope.updateRatesTx = function(estimate = false) {
+        if (!estimate) $scope.txModal.close();
+        canRequest().then(function() {
+            return prepareUpdateRatesTx();
+        }).catch(function(err) {
+            $scope.notifier.danger(err);
+        }).then(function() {
+            if (!estimate) {
+                libreTransaction($scope, "updateRates", "RUR", $translate, null);
+            } else {
+                $scope.updateGas();
+            }
+        }).catch(function(err) {
+            $scope.notifier.danger(err);
+        });
+    }
+
+    $scope.calcRatesTx = function(estimate = false) {
+        if (!estimate) $scope.txModal.close();
+        canCalc().then(function() {
+            $scope.tx.data = getDataString(bankAbiRefactor["calcRates"], []);
+            $scope.tx.to = bankAddress;
+            $scope.tx.value = 0;
+            $scope.tx.unit = 'ether';
+    
+            if (!estimate) {
+                libreTransaction($scope, "calcRates", "CR", $translate, null);
+            } else {
+                $scope.updateGas();
+            }
+        }).catch(function(err) {
+            $scope.notifier.danger(err);
+        });
+    }
+
+    $scope.sellTx = function(estimate = false) {
+        if (!estimate) $scope.txModal.close();
+        canOrder([0, $scope.sellRate]).then(function() {
+            var tokenCount = $scope.tokenValue * Math.pow(10, libreService.coeff.tokenDecimals)
+            $scope.tx.data = getDataString(bankAbiRefactor["sellTokens"], 
+                [$scope.wallet.getAddressString(), tokenCount]);
+    
+            $scope.tx.to = bankAddress;
+            $scope.tx.value = 0;
+            $scope.tx.unit = 'ether';
+            $scope.tx.from = walletService.wallet.getAddressString();
+
+            if (!estimate) {
+                libreTransaction($scope, "sell", "SELL", $translate, updateBalanceAndAllowance);
+            } else {
+                $scope.updateGas();
+            }
+        }).catch(function(err) {
+            $scope.notifier.danger(err);
+        });
+    }
+
+    $scope.buyTx = function(estimate = false) {
+        if (!estimate) $scope.txModal.close();
+        canOrder([$scope.buyRate, 0]).then(function() {
+            let txData = getDataString(bankAbiRefactor["buyTokens"], [$scope.wallet.getAddressString()]);
+
+            $scope.tx.data = txData;
+            $scope.tx.to = bankAddress;
+            $scope.tx.value = $scope.buyTXValue;
+
+            if (!estimate) {
+                libreTransaction($scope, "buy", "BUY", $translate, updateBalanceAndAllowance);
+            } else {
+                $scope.updateGas();
+            }
+        }).catch(function(err) {
+            $scope.notifier.danger(err);
+        });
     }
 
     $scope.transferAllBalance = function() {
-        uiFuncs.transferAllBalance($scope.wallet.getAddressString(), $scope.tx.gasLimit, function(resp) {
+        uiFuncs.transferAllBalance($scope.wallet.getAddressString(), coeff.gasEmission, function(resp) {
             if (!resp.isError) {
                 $scope.tx.unit = resp.unit;
                 $scope.tx.value = resp.value;
+                $scope.buyTXValue = resp.value;
+                $scope.changedTokens = resp.value * $scope.buyRate;
             } else {
-                $rootScope.rootScopeShowRawTx = false;
                 $scope.notifier.danger(resp.error);
             }
         });

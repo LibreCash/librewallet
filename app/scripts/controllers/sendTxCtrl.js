@@ -1,5 +1,5 @@
 'use strict';
-var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope) {
+var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope, $translate) {
     const TOKEN_DECIMALS = 18;
     $scope.tx = {};
     $scope.signedTx;
@@ -40,6 +40,10 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
 
     var setAllTokens = function(data) {
         $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+        $scope.wallet.tokenObjs.forEach(token => {
+            if (token.symbol === 'Libre')
+                token.balance = $scope.allTokens;
+        })
     };
 
     $scope.setSendMode = function(sendMode, tokenId = '', tokensymbol = '') {
@@ -247,6 +251,21 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
 
     $scope.sendTx = function() {
         $scope.sendTxModal.close();
+        let time = new Date(),
+            pending = true;
+        let tx = {
+            name: 'send',
+            status: 'sent...',
+            color: '#cc0',
+            date: `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`
+        }
+        $translate('LIBRE_txState_Send').then(msg => {
+            if (tx.status === 'sent...')
+                tx.status = msg;
+        })
+        $translate(`LIBRE_txName_${tx.name}`).then(msg => tx.name = msg);
+        $scope.notifier.txs.push(tx)
+
         uiFuncs.sendTx($scope.signedTx, function(resp) {
             if (!resp.isError) {
                 var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
@@ -257,12 +276,76 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope)
                 var emailBtn = '<a class="btn btn-xs btn-info " href="mailto:support@myetherwallet.com?Subject=Issue%20regarding%20my%20TX%20&Body=' + emailBody + '" target="_blank" rel="noopener noreferrer">Confused? Email Us.</a>';
                 var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
                 $scope.notifier.success(completeMsg, 0);
+
+                tx.hash = resp.data;
+                tx.status = 'pending...';
+                $translate('LIBRE_txState_Pending').then(msg => tx.status = msg);
                 $scope.wallet.setBalance(applyScope);
+
+                var isCheckingTx = false,
+                noTxCounter = 0,
+                receiptInterval = 5000,
+                txCheckingTimeout = 60 * 1000,
+                checkingTx = setInterval(() => {
+                    if (!pending) {
+                        clearInterval(checkingTx);
+                        return;
+                    }
+                    if (isCheckingTx) return; // fixing doubling success messages
+                    isCheckingTx = true;
+                    ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
+                        if (receipt.error) {
+                            if (receipt.msg == "unknown transaction") {
+                                noTxCounter++;
+                                if (noTxCounter > txCheckingTimeout / receiptInterval) {
+                                    $scope.notifier.danger(receipt.msg, 0);
+                                }
+                            } else {
+                                $scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
+                            }
+                            tx.status = 'fail';
+                            tx.color = 'red';
+                            $translate('LIBRE_txState_Fail').then(msg => tx.status = msg);
+                            pending = false;
+                        } else {
+                            if (receipt.data == null) {
+                                isCheckingTx = false;
+                                return; // next interval
+                            }
+                            if (receipt.data.status == "0x1") {
+                                $translate('LIBRESEND_txOk').then(msg => {
+                                    $scope.notifier.success(msg, 0);
+                                });
+                                tx.status = 'success'
+                                tx.color = 'green';
+                                $translate('LIBRE_txState_Success').then(msg => tx.status = msg);
+                                pending = false;
+                            } else {
+                                $translate('LIBRESEND_txFail').then(msg => {
+                                    $scope.notifier.danger(msg, 0);
+                                });
+                                tx.status = 'fail'
+                                tx.color = 'red';
+                                $translate('LIBRE_txState_Fail').then(msg => tx.status = msg);
+                                pending = false;
+                            }
+                        }
+                        isCheckingTx = false;
+                    });
+                }, receiptInterval);
+
                 if ($scope.tx.sendMode == 'token') $scope.wallet.tokenObjs[$scope.tokenTx.id].setBalance();
             } else {
                 $scope.notifier.danger(resp.error);
+                tx.status = 'fail';
+                tx.color = 'red';
+                $translate('LIBRE_txState_Fail').then(msg => tx.status = msg);
+                pending = false;
             }
         });
+
+        for(;$scope.notifier.txs.length > 10;)
+            $scope.notifier.txs.shift()
     }
 
     $scope.transferAllBalance = function() {

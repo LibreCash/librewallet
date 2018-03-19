@@ -40,21 +40,21 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     id: 4,
     name: "NAV_Contracts",
     url: "contracts",
-    mew: true,
-    cx: true
+    mew: false,
+    cx: false
   },
   ens: {
     id:5,
     name: "NAV_ENS",
     url: "ens",
-    mew: true,
-    cx: true
+    mew: false,
+    cx: false
   },
   domainsale: {
     id: 6,
     name: "NAV_DomainSale",
     url: "domainsale",
-    mew: true,
+    mew: false,
     cx: true
   },
   signMsg: {
@@ -73,29 +73,15 @@ var globalService = function($http, $httpParamSerializerJQLike) {
   },
   emission: {
     id: 9,
-    name: "NAV_BuyLibre",
-    url: "emission-librecash",
+    name: "NAV_Exchange",
+    url: "exchange",
     mew: true,
     cx: true
   },
-  remission: {
+  status: {
     id: 10,
-    name: "NAV_SellLibre",
-    url: "sell-libre",
-    mew: true,
-    cx: true
-  },
-  bankStatus: {
-    id: 11,
-    name: "NAV_BankStatus",
-    url: "bank-status",
-    mew: true,
-    cx: true
-  },
-  myOrders: {
-    id: 12,
-    name: "NAV_MyOrders",
-    url: "my-orders",
+    name: "NAV_Status",
+    url: "status",
     mew: true,
     cx: true
   }

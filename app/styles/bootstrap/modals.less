@@ -42,6 +42,7 @@
   box-shadow: 1px 1px 60px rgba(0, 0, 0, 0.32);
   background-clip: padding-box;
   outline: 0;
+  overflow: hidden;
 }
 
 .modal-backdrop {
@@ -81,6 +82,9 @@
   font-size: @font-size-bump-more;
   .table > tbody > tr > td {
     vertical-align: middle;
+    @media screen and (max-width: @screen-sm) {
+      font-size: 10px;
+    }
   }
   .addressIdenticon {
     margin: auto;
@@ -90,15 +94,24 @@
 .modal-footer {
   padding: @space 1.5rem;
   text-align: right;
+  text-align: center;
   border-top: 1px solid @modal-footer-border-color;
   &:extend(.clearfix all);
   .btn {
     margin-top: 0;
+    @media screen and (max-width: @screen-sm) {
+      width: 100%;
+    }
   }
   .btn + .btn {
     margin-left: @space-sm;
     margin-bottom: 0;
     margin-top: 0;
+    @media screen and (max-width: @screen-sm) {
+      margin-top: @space;
+      margin-right: 0;
+      margin-left: 0;
+    }
   }
 }
 
