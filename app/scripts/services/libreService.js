@@ -278,14 +278,12 @@ var libreService = function(walletService, $translate) {
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
         
-        let userWallet = _scope.wallet.getAddressString();
-        var data = await getTransactionData(userWallet)
         try {
             let time = new Date();
             let tx = {
                 name: await translator(`LIBRE_txName_${methodName}`),
-                status: await translator('LIBRE_txState_Send'),
-                color: '#cc0',
+                status: '',
+                color: '',
                 date: `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`,
                 fail: async () => {
                     tx.status = await translator('LIBRE_txState_Fail')
@@ -297,11 +295,19 @@ var libreService = function(walletService, $translate) {
                     tx.status = await translator('LIBRE_txState_Success')
                     _scope[pendingName] = false;
                 },
+                sending: async () => {
+                    tx.color = '#cc0';
+                    tx.status = await await translator('LIBRE_txState_Send')
+                },
                 pending: async () => {
+                    tx.color = '#cc0';
                     tx.status = await translator('LIBRE_txState_Pending')
                 }
             }
+            tx.sending()
             _scope.notifier.txs.push(tx)
+            let userWallet = _scope.wallet.getAddressString();
+            var data = await getTransactionData(userWallet)
 
             var txData = uiFuncs.getTxData(_scope);
             if (IS_DEBUG) console.log(txData);
