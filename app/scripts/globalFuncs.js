@@ -129,6 +129,7 @@ globalFuncs.getParityMsg = function(str) {
             if (typeof(str) !== "string") {
                 str = str.msg || str.message
             }
+            if (str === undefined) str = "unknown error"
             let args = str.match("^" + reg + "$");
         if (args) {
                 let key = this.parityErrors[reg];
