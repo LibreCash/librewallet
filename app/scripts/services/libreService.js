@@ -272,6 +272,33 @@ var libreService = function(walletService, $translate) {
         })
     }
 
+    function TX(methodName, translator) {
+        this.fail = async () => {
+            this.status = await translator('LIBRE_txState_Fail')
+            this.color = "red"
+        }
+        this.success = async () => {
+            this.color = 'green';
+            this.status = await translator('LIBRE_txState_Success')
+        }
+        this.sending = async () => {
+            this.color = '#cc0';
+            this.status = await await translator('LIBRE_txState_Send')
+        }
+        this.pending = async () => {
+            this.color = '#cc0';
+            this.status = await translator('LIBRE_txState_Pending')
+        }
+        this.init = async () => {
+            let time = new Date();
+            this.name = await translator(`LIBRE_txName_${methodName}`)
+            this.status = ''
+            this.color = ''
+            this.date = `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`
+            this.sending()
+        }
+    }
+
     async function libreTransaction(_scope, methodName, opPrefix, translator, updater) {
         var pendingName = `${methodName}Pending`;
         _scope[pendingName] = true;
@@ -279,32 +306,9 @@ var libreService = function(walletService, $translate) {
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
         
         try {
-            let time = new Date();
-            let tx = {
-                name: await translator(`LIBRE_txName_${methodName}`),
-                status: '',
-                color: '',
-                date: `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`,
-                fail: async () => {
-                    tx.status = await translator('LIBRE_txState_Fail')
-                    tx.color = "red"
-                    _scope[pendingName] = false;
-                },
-                success: async () => {
-                    tx.color = 'green';
-                    tx.status = await translator('LIBRE_txState_Success')
-                    _scope[pendingName] = false;
-                },
-                sending: async () => {
-                    tx.color = '#cc0';
-                    tx.status = await await translator('LIBRE_txState_Send')
-                },
-                pending: async () => {
-                    tx.color = '#cc0';
-                    tx.status = await translator('LIBRE_txState_Pending')
-                }
-            }
-            tx.sending()
+            let tx = new TX(methodName, translator)
+            await tx.init()
+
             _scope.notifier.txs.push(tx)
             let userWallet = _scope.wallet.getAddressString();
             var data = await getTransactionData(userWallet)
@@ -315,6 +319,7 @@ var libreService = function(walletService, $translate) {
             if (rawTx.isError) {
                 await tx.fail()
                 _scope.notifier.danger("generateTx: " + rawTx.error);
+                _scope[pendingName] = false
                 return;
             }
             _scope.rawTx = rawTx.rawTx;
@@ -325,6 +330,7 @@ var libreService = function(walletService, $translate) {
             if (resp.isError) {
                 _scope.notifier.danger("sendTx: " + resp.error);
                 await tx.fail()
+                _scope[pendingName] = false
                 return;
             }
             var checkTxLink = `https://www.myetherwallet.com?txHash=${resp.data}#check-tx-status`;
@@ -362,29 +368,33 @@ var libreService = function(walletService, $translate) {
                     if (receipt.msg == "unknown transaction") {
                         noTxCounter++;
                         if (noTxCounter > txCheckingTimeout / receiptInterval) {
-                            
                             _scope.notifier.danger(receipt.msg, 0);
                             await tx.fail()
+                            _scope[pendingName] = false
                         }
                     } else {
                         _scope.notifier.danger(`tx receipt error: ${receipt.msg}`, 0);
                         await tx.fail()
+                        _scope[pendingName] = false
                     }
                 } else {
                     if (receipt.data == null) {
                         _scope.notifier.danger(await translator('LIBRE_possibleError'), 0);
                         await tx.fail()
+                        _scope[pendingName] = false
                         return
                     }
                     if (receipt.data.status == "0x1") {
                         _scope.notifier.success(await translator(`LIBRE${opPrefix}_txOk`), 0);
                         await tx.success()
+                        _scope[pendingName] = false
                         if (updater != null) {
                             updater();
                         }
                     } else {
                         _scope.notifier.danger(await translator(`LIBRE${opPrefix}_txFail`), 0);
                         await tx.fail()
+                        _scope[pendingName] = false
                     }
                     _scope.wallet.setBalance(function() {
                         if (!_scope.$$phase) _scope.$apply();
@@ -551,7 +561,10 @@ var libreService = function(walletService, $translate) {
             getGasPrice: getGasPrice,
             getLatestBlockData: getLatestBlockData,
             getEstimatedGas: getEstimatedGas,
-            getNetwork: getNetwork
+            getNetwork: getNetwork,
+            TXConstructor: TX,
+            getTransactionReceipt: getTransactionReceipt,
+            sendTx: sendTx
         },
         networks: networks,
         IS_DEBUG: IS_DEBUG,
