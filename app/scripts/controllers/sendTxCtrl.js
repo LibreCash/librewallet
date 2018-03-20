@@ -303,9 +303,7 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope,
                     }
                 } else {
                     if (receipt.data == null) {
-                        _scope.notifier.danger(await $translate('LIBRE_possibleError'), 0);
-                        await txBadge.fail()
-                        pending = false
+                        isCheckingTx = false
                         return
                     }
                     if (receipt.data.status == "0x1") {

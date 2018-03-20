@@ -379,9 +379,7 @@ var libreService = function(walletService, $translate) {
                     }
                 } else {
                     if (receipt.data == null) {
-                        _scope.notifier.danger(await translator('LIBRE_possibleError'), 0);
-                        await tx.fail()
-                        _scope[pendingName] = false
+                        isCheckingTx = false
                         return
                     }
                     if (receipt.data.status == "0x1") {
