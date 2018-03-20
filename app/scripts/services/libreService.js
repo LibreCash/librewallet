@@ -273,7 +273,7 @@ var libreService = function(walletService, $translate) {
     }
 
     async function libreTransaction(_scope, methodName, opPrefix, translator, updater) {
-        var pendingName = methodName + 'Pending';
+        var pendingName = `${methodName}Pending`;
         _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
@@ -313,7 +313,7 @@ var libreService = function(walletService, $translate) {
             if (IS_DEBUG) console.log(txData);
             var rawTx = await generateTx(txData)
             if (rawTx.isError) {
-                tx.fail()
+                await tx.fail()
                 _scope.notifier.danger("generateTx: " + rawTx.error);
                 return;
             }
@@ -345,7 +345,7 @@ var libreService = function(walletService, $translate) {
             var isCheckingTx = false,
                 noTxCounter = 0,
                 receiptInterval = 5000,
-                txCheckingTimeout = 60 * 1000;
+                txCheckingTimeout = 1.5 * 60 * 1000;
             var checkingTx = setInterval(async () => {
                 if (!_scope[pendingName]) {
                     clearInterval(checkingTx);
@@ -367,13 +367,14 @@ var libreService = function(walletService, $translate) {
                             await tx.fail()
                         }
                     } else {
-                        _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
+                        _scope.notifier.danger(`tx receipt error: ${receipt.msg}`, 0);
                         await tx.fail()
                     }
                 } else {
                     if (receipt.data == null) {
-                        isCheckingTx = false;
-                        return; // next interval
+                        _scope.notifier.danger(await translator('LIBRE_possibleError'), 0);
+                        await tx.fail()
+                        return
                     }
                     if (receipt.data.status == "0x1") {
                         _scope.notifier.success(await translator(`LIBRE${opPrefix}_txOk`), 0);
