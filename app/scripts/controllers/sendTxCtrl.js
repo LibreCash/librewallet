@@ -302,12 +302,7 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope,
                         pending = false;
                     }
                 } else {
-                    if (receipt.data == null) {
-                        isCheckingTx = false
-                        return
-                    }
-                    if (receipt.data.blockNumber == null) {
-                        // still pending tx
+                    if (receipt.data == null || receipt.data.blockNumber == null) {
                         isCheckingTx = false
                         return
                     }
