@@ -268,7 +268,7 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope,
             var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
             $scope.notifier.success(completeMsg, 0);
 
-            //tx.hash = resp.data;
+            txBadge.hash = resp.data;
             await txBadge.pending();
             $scope.wallet.setBalance(applyScope);
 
@@ -306,9 +306,20 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope,
                         isCheckingTx = false
                         return
                     }
+                    if (receipt.data.blockNumber == null) {
+                        // still pending tx
+                        isCheckingTx = false
+                        return
+                    }
                     if (receipt.data.status == "0x1") {
                         $scope.notifier.success(await $translate(`LIBRESEND_txOk`), 0);
                         await txBadge.success()
+                        // update balances
+                        libreService.methods.getCashDataProcess("balanceOf", (data) => {
+                            $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals)
+                            if (!$scope.$$phase) $scope.$apply();
+                        }, [walletService.wallet.getAddressString()]);
+                
                         pending = false;
                     } else {
                         $scope.notifier.danger(await $translate(`LIBRESEND_txFail`), 0);

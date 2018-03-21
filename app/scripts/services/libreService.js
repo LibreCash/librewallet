@@ -283,7 +283,7 @@ var libreService = function(walletService, $translate) {
         }
         this.sending = async () => {
             this.color = '#cc0';
-            this.status = await await translator('LIBRE_txState_Send')
+            this.status = await translator('LIBRE_txState_Send')
         }
         this.pending = async () => {
             this.color = '#cc0';
@@ -292,10 +292,8 @@ var libreService = function(walletService, $translate) {
         this.init = async () => {
             let time = new Date();
             this.name = await translator(`LIBRE_txName_${methodName}`)
-            this.status = ''
-            this.color = ''
             this.date = `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`
-            this.sending()
+            await this.sending()
         }
     }
 
