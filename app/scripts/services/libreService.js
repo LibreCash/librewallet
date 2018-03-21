@@ -382,6 +382,11 @@ var libreService = function(walletService, $translate) {
                         isCheckingTx = false
                         return
                     }
+                    if (receipt.data.blockNumber == null) {
+                        // still pending tx
+                        isCheckingTx = false
+                        return
+                    }
                     if (receipt.data.status == "0x1") {
                         _scope.notifier.success(await translator(`LIBRE${opPrefix}_txOk`), 0);
                         await tx.success()
@@ -406,6 +411,7 @@ var libreService = function(walletService, $translate) {
             }
         } catch (e) {
             _scope[pendingName] = false;
+            isCheckingTx = false
             _scope.notifier.danger("getTransactionData: " + e);
         }
     }
