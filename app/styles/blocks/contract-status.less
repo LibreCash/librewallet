@@ -21,6 +21,12 @@
 		&-link {
 			text-transform: uppercase;
 			font-size: @font-size-medium-large;
+		  @media screen and (max-width: @screen-lg) {
+		    font-size: @font-size-medium;
+		  }
+		  @media screen and (max-width: @screen-md) {
+		    font-size: @font-size-small;
+		  }
 			@media screen and (max-width: @screen-sm) {
 		    font-size: @font-size-xs;
 		  }
@@ -55,7 +61,15 @@
 			color: @text-color-strong;
 			overflow: hidden;
 			text-overflow: ellipsis;
-			// margin-bottom: 10px;
+			@media screen and (max-width: @screen-lg) {
+		    font-size: @font-size-medium;
+		  }
+		  @media screen and (max-width: @screen-md) {
+		    font-size: @font-size-base;
+		  }
+		  @media screen and (max-width: @screen-sm) {
+		    font-size: @font-size-xs;
+		  }
 		}
 	}
 }
