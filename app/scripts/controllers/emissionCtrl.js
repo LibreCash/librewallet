@@ -288,7 +288,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     });
 
     function isEnough(valA, valB) {
-        return new BigNumber(valA).lte(new BigNumber(valB));
+        return new BigNumber(valA.toString()).lte(new BigNumber(valB.toString()));
     }
 
     $scope.hasEnoughBalance = function() {

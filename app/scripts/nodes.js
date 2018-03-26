@@ -67,7 +67,19 @@ nodes.nodeList = {
         'tokenList': require('./tokens/ethTokens.json'),
         'abiList': require('./abiDefinitions/ethAbi.json'),
         'service': 'infura.io',
-        'lib': new nodes.infuraNode('https://mainnet.infura.io/mew')
+        'lib': new nodes.infuraNode('https://mainnet.infura.io/mew', '')
+    },
+    'eth_libre': {
+        'name': 'ETH',
+        'blockExplorerTX': 'https://etherscan.io/tx/[[txHash]]',
+        'blockExplorerAddr': 'https://etherscan.io/address/[[address]]',
+        'type': nodes.nodeTypes.ETH,
+        'eip155': true,
+        'chainId': 1,
+        'tokenList': require('./tokens/ethTokens.json'),
+        'abiList': require('./abiDefinitions/ethAbi.json'),
+        'service': 'libre.live',
+        'lib': new nodes.customNode('https://mainnet.libre.live', '')
     },
 /*    'eth_giveth': {
         'name': 'ETH',
