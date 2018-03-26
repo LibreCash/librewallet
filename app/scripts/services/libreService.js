@@ -2,11 +2,14 @@
 "use strict";
 var libreService = function(walletService, $translate) {
     var 
+        networks = {rinkeby: 'rin_ethscan', eth: 'eth_infura'};
+    var 
         exchanger = getContract("LibreExchanger"),
-        cash = getContract("LibreCash");
+        cash = getContract("LibreCash"),
+        mainTimer = null;
 
-    const 
-        IS_DEBUG = true,
+    var 
+        IS_DEBUG = false,
         states = [
             'LOCKED',
             'PROCESSING_ORDERS',
@@ -27,12 +30,13 @@ var libreService = function(walletService, $translate) {
             gasEmission: 90000,
             gasRemission: 90000,
             gasApprove: 50000,
-            gasUpdateRates: 1000000,
-            gasCalcRates: 200000,
+            gasUpdateRates: 1800000,
+            gasCalcRates: 260000,
             statesENUM: statesENUM,
             isDebug: IS_DEBUG,
             minReadyOracles: 2,
-            oracleActual: 10 * 60,
+            oracleActual: 15 * 60,
+            rateActual: 10 * 60,
             oracleTimeout: 10 * 60
         };
         
@@ -82,7 +86,8 @@ var libreService = function(walletService, $translate) {
 
     function getContract(name){
         let
-            abiList = nodes.nodeList.rin_ethscan.abiList,
+            _network = getNetwork(),
+            abiList = nodes.nodeList[_network].abiList,
             contract = abiList.find((contract) => contract.name == name),
             abi = JSON.parse(contract.abi),
             refactored = {};
@@ -94,6 +99,12 @@ var libreService = function(walletService, $translate) {
             abi: abi,
             abiRefactored: refactored
         };
+    }
+
+    function getNetwork() {
+        let networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
+        if (IS_DEBUG) console.log(~Object.keys(networks).indexOf(networkType) ? networks[networkType] : '');
+        return ~Object.keys(networks).indexOf(networkType) ? networks[networkType] : '';
     }
 
     function getBankDataProcess(_var, process, params = []) {
@@ -120,25 +131,9 @@ var libreService = function(walletService, $translate) {
             res.params = params;
             return res;
         })
-        .catch((e)=>{
+        .catch((e) => {
             console.log(e);
             console.log(`Error on getDataAsync: ${to} ${JSON.stringify(abi)} ${_var} ${params}`);
-        });
-    }
-
-    function getEthCall(options){
-        return new Promise((resolve,reject)=>{
-            ajaxReq.getEthCall({
-                from: options.from,
-                data: options.data,
-                to:options.to
-            },(res)=>{
-                if(!res.error && res.data != '0x'){
-                    resolve(res);
-                } else {
-                    reject(res);
-                }
-            });
         });
     }
 
@@ -221,7 +216,9 @@ var libreService = function(walletService, $translate) {
     }
 
     function getEstimatedGas(txData) {
-        txData.value = +txData.value; // make integer for full compatibility
+        if (txData.value == "0x00") {
+            txData.value = 0;
+        }
         return new Promise((resolve, reject) => {
             ajaxReq.getEstimatedGas(txData, (data) => {
                 if (data.error) reject(data);
@@ -239,7 +236,6 @@ var libreService = function(walletService, $translate) {
                 var txData = uiFuncs.getTxData(_scope);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     if (rawTx.isError) {
-                        if (pendingName != null) _scope[pendingName] = false;
                         _scope.notifier.danger("generateTx: " + rawTx.error);
                         reject(rawTx);
                     }
@@ -249,96 +245,168 @@ var libreService = function(walletService, $translate) {
         });    
     }
 
-    function libreTransaction(_scope, pendingName, opPrefix, translator, updater) {
+    function getTransactionReceipt(txData) {
+        return new Promise((resolve, reject) => {
+            ajaxReq.getTransactionReceipt(txData, (data) => {
+                if (data.error) reject(data);
+                resolve(data);
+            });
+        })
+    }
+
+    function sendTx(txData) {
+        return new Promise((resolve, reject) => {
+            uiFuncs.sendTx(txData, (data) => {
+                if (data.error) reject(data);
+                resolve(data);
+            });
+        })
+    }
+
+    function generateTx(txData) {
+        return new Promise((resolve, reject) => {
+            uiFuncs.generateTx(txData, (data) => {
+                if (data.error) reject(data);
+                resolve(data);
+            });
+        })
+    }
+
+    function TX(methodName, translator) {
+        this.fail = async () => {
+            this.status = await translator('LIBRE_txState_Fail')
+            this.color = "red"
+        }
+        this.success = async () => {
+            this.color = 'green';
+            this.status = await translator('LIBRE_txState_Success')
+        }
+        this.sending = async () => {
+            this.color = '#cc0';
+            this.status = await translator('LIBRE_txState_Send')
+        }
+        this.pending = async () => {
+            this.color = '#cc0';
+            this.status = await translator('LIBRE_txState_Pending')
+        }
+        this.init = async () => {
+            let time = new Date();
+            this.name = await translator(`LIBRE_txName_${methodName}`)
+            this.date = `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`
+            await this.sending()
+        }
+    }
+
+    async function libreTransaction(_scope, methodName, opPrefix, translator, updater) {
+        var pendingName = `${methodName}Pending`;
         _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
         
-        let userWallet = _scope.wallet.getAddressString();
-        getTransactionData(userWallet)
-        .then((data) => {
-            try {
-                var txData = uiFuncs.getTxData(_scope);
-                if (IS_DEBUG) console.log(txData);
-                uiFuncs.generateTx(txData, function(rawTx) {
-                    if (rawTx.isError) {
-                        _scope[pendingName] = false;
-                        _scope.notifier.danger("generateTx: " + rawTx.error);
-                        return;
-                    }
-                    _scope.rawTx = rawTx.rawTx;
-                    _scope.signedTx = rawTx.signedTx;
-                    uiFuncs.sendTx(_scope.signedTx, function(resp) {
-                        if (resp.isError) {
-                            _scope[pendingName] = false;
-                            _scope.notifier.danger("sendTx: " + resp.error);
-                            return;
-                        }
-                        var checkTxLink = `https://www.myetherwallet.com?txHash=${resp.data}#check-tx-status`;
-                        var txHashLink = _scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
-                        var verifyTxBtn = _scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
-                        var checkTxBtn = `<a class="btn btn-xs btn-info" href="${checkTxLink}" target="_blank" rel="noopener noreferrer"> Check TX Status </a>`;
-                        var completeMsg = `<p>${globalFuncs.successMsgs[2]}<strong>${resp.data}</strong></p><p>${verifyTxBtn} ${checkTxBtn}</p>`;
-                        _scope.notifier.success(completeMsg, 0);
-                        
-                        _scope.wallet.setBalance(function() {
-                            if (!_scope.$$phase) _scope.$apply();
-                        });
-                        if (IS_DEBUG) console.log("resp", resp);
-                        
-                        var isCheckingTx = false,
-                        noTxCounter = 0,
-                        receiptInterval = 5000,
-                        txCheckingTimeout = 60 * 1000,
-                        checkingTx = setInterval(() => {
-                            if (!_scope[pendingName]) {
-                                clearInterval(checkingTx);
-                                return;
-                            }
-                            if (isCheckingTx) return; // fixing doubling success messages
-                            isCheckingTx = true;
-                            ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
-                                if (receipt.error) {
-                                    if (receipt.msg == "unknown transaction") {
-                                        noTxCounter++;
-                                        if (noTxCounter > txCheckingTimeout / receiptInterval) {
-                                            _scope[pendingName] = false;
-                                            _scope.notifier.danger(receipt.msg, 0);
-                                        }
-                                    } else {
-                                        _scope[pendingName] = false;
-                                        _scope.notifier.danger("tx receipt error: ", receipt.msg, 0);
-                                    }
-                                } else {
-                                    if (receipt.data == null) {
-                                        isCheckingTx = false;
-                                        return; // next interval
-                                    }
-                                    _scope[pendingName] = false;
-                                    if (receipt.data.status == "0x1") { 
-                                        translator(`LIBRE${opPrefix}_txOk`).then((msg) => {
-                                            _scope.notifier.success(msg, 0);
-                                        });
-                                        if (updater != null) {
-                                            updater();
-                                        }
-                                    } else {
-                                        translator(`LIBRE${opPrefix}_txFail`).then((msg) => {
-                                            _scope.notifier.danger(msg, 0);
-                                        });
-                                    }
-                                    _scope[pendingName] = false;
-                                }
-                                isCheckingTx = false;
-                            });
-                        }, receiptInterval);
-                    });
-                });
-            } catch (e) {
-                _scope[pendingName] = false;
-                _scope.notifier.danger("getTransactionData: " + e);
+        try {
+            let tx = new TX(methodName, translator)
+            await tx.init()
+
+            _scope.notifier.txs.push(tx)
+            let userWallet = _scope.wallet.getAddressString();
+            var data = await getTransactionData(userWallet)
+
+            var txData = uiFuncs.getTxData(_scope);
+            if (IS_DEBUG) console.log(txData);
+            var rawTx = await generateTx(txData)
+            if (rawTx.isError) {
+                await tx.fail()
+                _scope.notifier.danger("generateTx: " + rawTx.error);
+                _scope[pendingName] = false
+                return;
             }
-        });
+            _scope.rawTx = rawTx.rawTx;
+            _scope.signedTx = rawTx.signedTx;
+
+            var resp = await sendTx(_scope.signedTx)
+
+            if (resp.isError) {
+                _scope.notifier.danger("sendTx: " + resp.error);
+                await tx.fail()
+                _scope[pendingName] = false
+                return;
+            }
+            var checkTxLink = `https://www.myetherwallet.com?txHash=${resp.data}#check-tx-status`;
+            var txHashLink = _scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
+            var verifyTxBtn = _scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
+            var checkTxBtn = `<a class="btn btn-xs btn-info" href="${checkTxLink}" target="_blank" rel="noopener noreferrer"> Check TX Status </a>`;
+            var completeMsg = `<p>${globalFuncs.successMsgs[2]}<strong>${resp.data}</strong></p><p>${verifyTxBtn} ${checkTxBtn}</p>`;
+            _scope.notifier.success(completeMsg, 0);
+
+            tx.hash = resp.data;
+            await tx.pending()
+
+            _scope.wallet.setBalance(function() {
+                if (!_scope.$$phase) _scope.$apply();
+            });
+            if (IS_DEBUG) console.log("resp", resp);
+            
+            var isCheckingTx = false,
+                noTxCounter = 0,
+                receiptInterval = 5000,
+                txCheckingTimeout = 1.5 * 60 * 1000;
+            var checkingTx = setInterval(async () => {
+                if (!_scope[pendingName]) {
+                    clearInterval(checkingTx);
+                    return;
+                }
+                if (isCheckingTx) return; // fixing doubling success messages
+                isCheckingTx = true;
+                try {
+                    var receipt = await getTransactionReceipt(resp.data)
+                } catch (e) {
+                    var receipt = e
+                }
+                if (receipt.error) {
+                    if (receipt.msg == "unknown transaction") {
+                        noTxCounter++;
+                        if (noTxCounter > txCheckingTimeout / receiptInterval) {
+                            _scope.notifier.danger(receipt.msg, 0);
+                            await tx.fail()
+                            _scope[pendingName] = false
+                        }
+                    } else {
+                        _scope.notifier.danger(`tx receipt error: ${receipt.msg}`, 0);
+                        await tx.fail()
+                        _scope[pendingName] = false
+                    }
+                } else {
+                    if (receipt.data == null || receipt.data.blockNumber == null) {
+                        isCheckingTx = false
+                        return
+                    }
+                    if (receipt.data.status == "0x1") {
+                        _scope.notifier.success(await translator(`LIBRE${opPrefix}_txOk`), 0);
+                        await tx.success()
+                        _scope[pendingName] = false
+                        if (updater != null) {
+                            updater();
+                        }
+                    } else {
+                        _scope.notifier.danger(await translator(`LIBRE${opPrefix}_txFail`), 0);
+                        await tx.fail()
+                        _scope[pendingName] = false
+                    }
+                    _scope.wallet.setBalance(function() {
+                        if (!_scope.$$phase) _scope.$apply();
+                    });
+                }
+                isCheckingTx = false;
+            }, receiptInterval);
+
+            for(;_scope.notifier.txs.length > 10;) {
+                _scope.notifier.txs.shift()
+            }
+        } catch (e) {
+            _scope[pendingName] = false;
+            isCheckingTx = false
+            _scope.notifier.danger("getTransactionData: " + e);
+        }
     }
 
     function canOrder(rates = [0, 0]) {
@@ -432,14 +500,14 @@ var libreService = function(walletService, $translate) {
         return globalFuncs.localStorage.getItem("gasPrice", null);
     }
 
-    function getEthCall(options){
-        return new Promise((resolve,reject)=>{
+    function getEthCall(options) {
+        return new Promise((resolve,reject) => {
             ajaxReq.getEthCall({
                 from: options.from,
                 data: options.data,
-                to:options.to
+                to: options.to
             }, (res) => {
-                if(!res.error && res.data != '0x'){
+                if(!res.error && res.data != '0x') {
                     resolve(res);
                 } else {
                     reject(res);
@@ -489,10 +557,15 @@ var libreService = function(walletService, $translate) {
             canOrder: canOrder,
             getGasPrice: getGasPrice,
             getLatestBlockData: getLatestBlockData,
-            getEstimatedGas: getEstimatedGas
+            getEstimatedGas: getEstimatedGas,
+            getNetwork: getNetwork,
+            TXConstructor: TX,
+            getTransactionReceipt: getTransactionReceipt,
+            sendTx: sendTx
         },
-        networkType: "rinkeby",
-        IS_DEBUG: IS_DEBUG
+        networks: networks,
+        IS_DEBUG: IS_DEBUG,
+        mainTimer: mainTimer
     };
 };
 module.exports = libreService;

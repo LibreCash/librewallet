@@ -21,13 +21,15 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         canOrder = libreService.methods.canOrder,
         canRequest = libreService.methods.canRequest,
         canCalc = libreService.methods.canCalc,
+        getNetwork = libreService.methods.getNetwork,
+        
         getEstimatedGas = libreService.methods.getEstimatedGas,
         IS_DEBUG = libreService.IS_DEBUG;
 
     const gasPriceKey = "gasPrice",
           loadingText = "...";
 
-    if (globalFuncs.getDefaultTokensAndNetworkType().networkType != libreService.networkType) {
+    if (getNetwork() == '') {
         $translate("LIBREBUY_networkFail").then((msg) => {
             $scope.notifier.danger(msg);
         });
@@ -43,11 +45,13 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     $scope.states = coeff.statesENUM;
 
-    var ORACLE_ACTUAL = coeff.oracleActual;
+    var RATE_ACTUAL = coeff.rateActual;
     var ORACLE_TIMEOUT = coeff.oracleTimeout;
+    var ORACLE_ACTUAL = coeff.oracleActual;
     $scope.MIN_READY_ORACLES = coeff.minReadyOracles;
 
     $scope.deadlineRemains = 0;
+    $scope.calcRatesRemains = 0;
     $scope.gasPrice = {};
     $scope.txFees = {};
     $scope.txModal = {};
@@ -105,17 +109,14 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         getCashDataProcess("allowance", setAllowance, [walletService.wallet.getAddressString(), bankAddress]);
     }
 
-    function stateWatcher(newState) {
-        if (newState == libreService.coeff.statesENUM.PROCESSING_ORDERS) {
-            if (IS_DEBUG) console.log("new rates");
-            updateContractData();
-        }
-    }
-
     // on-page timers decreasing
     setInterval(() => {
         if ($scope.waitOraclesRemains > 0) {
             $scope.waitOraclesRemains--;
+        }
+
+        if ($scope.calcRatesRemains > 0) {
+            $scope.calcRatesRemains--;
         }
 
         let deadlineDays = $scope.deadlineRemains / (60 * 60 * 24);
@@ -136,9 +137,15 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         }
     }, 1000);
 
+    if (libreService.mainTimer !== null) {
+        clearInterval(libreService.mainTimer)
+    }
+    
     var lastCalcTime, lastRequestTime, lastLastBlockTime, deadline = 0;
     $scope.pendingOrderAllowCheck = false;
-    setInterval(() => {
+    var timerTicker = 0;
+    libreService.mainTimer = setInterval(() => {
+        if (IS_DEBUG) console.info("TIMER", ++timerTicker)
         if ($scope.globalService.currentTab == $scope.globalService.tabs.emission.id) {
             if ($scope.pendingOrderAllowCheck) {
                 return;
@@ -147,7 +154,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
             ajaxReq.getLatestBlockData(function(blockData) {
                 var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-
+                if (IS_DEBUG) console.info("BEFORE PROMISES")
                 Promise.all([
                     getContractData("getState"),
                     getContractData("tokenBalance"),
@@ -159,70 +166,79 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     walletService.wallet == null ? { data: 0 } :
                         getTokenData("balanceOf", [walletService.wallet.getAddressString()]),
                     walletService.wallet == null ? { data: 0 } :
-                        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress])            
+                        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]),
+                    $scope.deadlineRemains == 0 ? getContractData("deadline") : { data : 0 }
                 ]).then((values) => {
-                    let 
-                        state = values[0],
-                        exchangerTokenBalance = values[1],
-                        updateRatesCost = values[2],
-                        calcTime = values[3],
-                        readyOracles = values[4],
-                        oracleCount = values[5],
-                        requestTime = values[6],
-                        userTokenBalance = values[7],
-                        allowedTokens = values[8];
-
-                    ajaxReq.getBalance(bankAddress, function(balanceData) {
-                        $scope.ethBalance = etherUnits.toEther(balanceData.data.balance, 'wei');
-                    });
-
-                    let stateDec = +state.data[0];
-                    if ($scope.state != stateDec) {
-                        stateWatcher(stateDec);
-                    }
-                    $scope.state = stateDec;
-                    $scope.allowedTokens = +allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-                    $scope.allTokens = +userTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-
-                    $scope.tokenBalance = +exchangerTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-
-                    $scope.readyOracles = +readyOracles.data[0];
-                    $scope.oracleCount = +oracleCount.data[0];
-
-                    $scope.orderAllowed = (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS);
-                    $scope.updateRatesAllowed = (stateDec == libreService.coeff.statesENUM.REQUEST_RATES);
-                    $scope.calcRatesAllowed = (stateDec == libreService.coeff.statesENUM.CALC_RATES);
-                    if ($scope.updateRatesAllowed) {
-                        $scope.updateRatesCost = updateRatesCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-                    }
-
-                    if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
-                        $scope.rateActualTime = ORACLE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
-                        lastCalcTime = +calcTime.data[0];
-                    }
-
-                    if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
-                        $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
-                        lastRequestTime = +requestTime.data[0]
-                    }
-
-                    if (deadline == 0) {
-                        // we need to get deadline only once
-                        getContractData("deadline").then((_deadline) => {
-                            deadline = _deadline;    
-                        })
-                    } else {
-                        if (lastLastBlockTime != lastBlockTime) {
-                            $scope.deadlineRemains = +deadline.data[0] - lastBlockTime;
-                            $scope.deadlineDays = Math.floor($scope.deadlineRemains / (60 * 60 * 24));
+                    if (IS_DEBUG) console.info("PROMISES DONE")
+                    try {
+                        let 
+                            state = values[0],
+                            exchangerTokenBalance = values[1],
+                            updateRatesCost = values[2],
+                            calcTime = values[3],
+                            readyOracles = values[4],
+                            oracleCount = values[5],
+                            requestTime = values[6],
+                            userTokenBalance = values[7],
+                            allowedTokens = values[8];
+                        if (values[9].data !== 0) {
+                            deadline = values[9]
                         }
-                    }
 
-                    if (lastLastBlockTime != lastBlockTime) {
-                        lastLastBlockTime = lastBlockTime;
+                        ajaxReq.getBalance(bankAddress, function(balanceData) {
+                            $scope.ethBalance = etherUnits.toEther(balanceData.data.balance, 'wei');
+                        });
+
+                        let stateDec = +state.data[0];
+                        if ($scope.state != stateDec) {
+                            if (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS) {
+                                updateContractData();
+                            }
+                        }
+                        $scope.state = stateDec;
+                        $scope.allowedTokens = +allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                        $scope.allTokens = +userTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+
+                        $scope.tokenBalance = +exchangerTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+
+                        $scope.readyOracles = +readyOracles.data[0];
+                        $scope.oracleCount = +oracleCount.data[0];
+
+                        $scope.orderAllowed = (stateDec == libreService.coeff.statesENUM.PROCESSING_ORDERS);
+                        $scope.updateRatesAllowed = (stateDec == libreService.coeff.statesENUM.REQUEST_RATES);
+                        $scope.calcRatesAllowed = (stateDec == libreService.coeff.statesENUM.CALC_RATES);
+                        if ($scope.updateRatesAllowed) {
+                            $scope.updateRatesCost = updateRatesCost.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+                        }
+
+                        if (lastLastBlockTime != lastBlockTime || lastCalcTime != +calcTime.data[0]) {
+                            $scope.rateActualTime = RATE_ACTUAL - (lastBlockTime - +calcTime.data[0]);
+                            lastCalcTime = +calcTime.data[0];
+                        }
+
+                        if (lastLastBlockTime != lastBlockTime || lastRequestTime != +requestTime.data[0]) {
+                            $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
+                            $scope.calcRatesRemains = ORACLE_ACTUAL - (lastBlockTime - +requestTime.data[0]);
+                            lastRequestTime = +requestTime.data[0]
+                        }
+
+                        if (+deadline.data != 0) {
+                            if (lastLastBlockTime != lastBlockTime) {
+                                $scope.deadlineRemains = +deadline.data[0] - lastBlockTime;
+                                $scope.deadlineDays = Math.floor($scope.deadlineRemains / (60 * 60 * 24));
+                            }
+                        }
+
+                        if (lastLastBlockTime != lastBlockTime) {
+                            lastLastBlockTime = lastBlockTime;
+                        }
+                    } catch (error) {
+                          $scope.notifier.danger(error)
                     }
 
                     $scope.pendingOrderAllowCheck = false;
+                    applyScope()
+                    if (IS_DEBUG) console.info("SYNC CYCLE END")
                 });
             });
     
@@ -272,7 +288,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     });
 
     function isEnough(valA, valB) {
-        return new BigNumber(valA).lte(new BigNumber(valB));
+        return new BigNumber(valA.toString()).lte(new BigNumber(valB.toString()));
     }
 
     $scope.hasEnoughBalance = function() {
@@ -286,7 +302,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         }).then(function(gas) {
             $scope.txModal.estimatedGas = +gas.data;
         }, function(error) {
-            $scope.notifier.danger(error.msg);
+            $scope.notifier.danger(error);
         });
     }
 
@@ -371,7 +387,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         if (!estimate) $scope.txModal.close();
         prepareApproveTx().then(function() {
             if (!estimate) {
-                libreTransaction($scope, "approvePending", "ALLOWANCE", $translate, updateBalanceAndAllowance);
+                libreTransaction($scope, "approve", "ALLOWANCE", $translate, updateBalanceAndAllowance);
             } else {
                 $scope.updateGas();
             }
@@ -402,7 +418,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.notifier.danger(err);
         }).then(function() {
             if (!estimate) {
-                libreTransaction($scope, "updateRatesPending", "RUR", $translate, null);
+                libreTransaction($scope, "updateRates", "RUR", $translate, null);
             } else {
                 $scope.updateGas();
             }
@@ -420,7 +436,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.tx.unit = 'ether';
     
             if (!estimate) {
-                libreTransaction($scope, "calcRatesPending", "CR", $translate, null);
+                libreTransaction($scope, "calcRates", "CR", $translate, null);
             } else {
                 $scope.updateGas();
             }
@@ -438,10 +454,11 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     
             $scope.tx.to = bankAddress;
             $scope.tx.value = 0;
+            $scope.tx.unit = 'ether';
             $scope.tx.from = walletService.wallet.getAddressString();
 
             if (!estimate) {
-                libreTransaction($scope, "sellPending", "SELL", $translate, updateBalanceAndAllowance);
+                libreTransaction($scope, "sell", "SELL", $translate, updateBalanceAndAllowance);
             } else {
                 $scope.updateGas();
             }
@@ -460,7 +477,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.tx.value = $scope.buyTXValue;
 
             if (!estimate) {
-                libreTransaction($scope, "buyPending", "BUY", $translate, updateBalanceAndAllowance);
+                libreTransaction($scope, "buy", "BUY", $translate, updateBalanceAndAllowance);
             } else {
                 $scope.updateGas();
             }

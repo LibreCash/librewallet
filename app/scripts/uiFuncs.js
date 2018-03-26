@@ -264,6 +264,7 @@ uiFuncs.transferAllBalance = function(fromAdd, gasLimit, callback) {
 }
 uiFuncs.notifier = {
     alerts: {},
+    txs: [],
     warning: function(msg, duration = 5000) {
         this.addAlert("warning", msg, duration);
     },

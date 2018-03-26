@@ -2,7 +2,7 @@
 <main class="tab-pane active" ng-if="globalService.currentTab==globalService.tabs.status.id" ng-controller='statusCtrl' ng-cloak>
     <div class="row justify-content-md-center">
 
-        <section class="loading-wrap" ng-show="loading">
+        <section class="loading-wrap" ng-show="loading" ng-click="loading = false">
             <div class="loading">
             <h1> Loading... </h1>
             </div>
@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            <div class="col-lg-12 less-padding" ng-show="showOracles">
+            <div class="col-lg-12" ng-show="showOracles">
                 <h1 translate="LIBRESTATUS_oraclesStatus">Oracles status</h1>
                 <table class="table oracles-table">
                     <thead>

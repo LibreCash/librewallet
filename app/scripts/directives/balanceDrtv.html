@@ -32,9 +32,22 @@
         <span class="mono wrap">{{wallet.balance}}</span> {{ajaxReq.type}}
       </li>
       <li>
-        <span class="mono wrap">{{allTokens}}</span> LCH
+        <span class="mono wrap">{{allTokens}}</span> Libre
       </li>
     </ul>
+    <h5 translate="sidebar_Transactions">Transactions</h5>
+    <table class="account-info">
+      <tr ng-repeat="tx in notifier.txs">
+        <td class="mono wrap point">{{ tx.date }}</td>
+        <td class="mono wrap point">
+          <a ng-if="tx.hash" href="{{ajaxReq.blockExplorerTX.replace('[[txHash]]', tx.hash)}}" target="_blank" rel="noopener noreferrer">{{ tx.name }}</a>
+          <span ng-if="!tx.hash">{{ tx.name }}</span>
+        </td>
+        <td class="mono wrap point" ng-style="{color: tx.color}">
+          {{ tx.status }}
+        </td>
+      </tr>
+    </table>
     <h5 translate="sidebar_TransHistory"> Transaction History</h5>
     <ul class="account-info">
       <li ng-show="ajaxReq.type != 'CUS'">
@@ -44,7 +57,7 @@
       </li>
       <li ng-show="ajaxReq.type == 'ETH'">
         <a href="https://ethplorer.io/address/{{wallet.getAddressString()}}" target="_blank" rel="noopener noreferrer">
-          Tokens (Ethplorer.io)
+          <span translate="Hist_tokens">Tokens</span> (Ethplorer.io)
         </a>
       </li>
     </ul>
@@ -70,12 +83,12 @@
       <a href="https://myetherwallet.github.io/knowledge-base/send/adding-new-token-and-sending-custom-tokens.html"
          rel="noopener noreferrer"
          target="_blank">
-         How to See Your Tokens
+         <span translate="How_to_see_tokens">How to See Your Tokens</span>
       </a>
     </h5>
 
     <p>
-      You can also view your Balances on
+      <span translate-"You_can_view_tokens">You can also view your Balances on</span>
       <a ng-show="ajaxReq.type != 'CUS'"
          href="{{ajaxReq.blockExplorerAddr.replace('[[address]]', wallet.getAddressString())}}"
          target="_blank"
@@ -93,10 +106,10 @@
 
     <!-- Buttons -->
     <a class="btn btn-warning btn-xs" ng-click="showAllTokens=true" ng-show="showAllTokens==false">
-      Show All Tokens
+      <span translate="Show_all_tokens">Show All Tokens</span>
     </a>
     <a class="btn btn-warning btn-xs" ng-click="showAllTokens=false" ng-show="showAllTokens==true">
-      Only Show Balances
+      <span translate="Only_show_balances">Only Show Balances</span>
     </a>
     <a class="btn btn-default btn-xs" ng-click="customTokenField=!customTokenField">
       <span translate="SEND_custom">Add Custom Token</span>

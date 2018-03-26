@@ -76,7 +76,7 @@
               Use your
             </span>
             <a ng-click="globalService.currentTab=globalService.tabs.sendTransaction.id">
-              hardware wallet
+              <span translate="Hardware_wallet">hardware wallet</span>
             </a>.
             <span translate="GEN_Help_3">
               Your device * is * your wallet.
@@ -91,11 +91,11 @@
             <strong>
               MetaMask
             </strong>
-            <span>
+            <span translate="Connect_via_ext">
               Connect via your
             </span>
             <a ng-click="globalService.currentTab=globalService.tabs.sendTransaction.id">
-              MetaMask Extension
+              MetaMask
             </a>.
             <span translate="GEN_Help_MetaMask">
               So easy! Keys stay in MetaMask, not on a phishing site! Try it today.

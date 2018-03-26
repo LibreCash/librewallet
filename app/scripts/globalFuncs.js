@@ -125,6 +125,11 @@ globalFuncs.parityErrorMsgs = {};
 globalFuncs.getParityMsg = function(str) {
     for (var reg in this.parityErrors) {
         if (this.parityErrors.hasOwnProperty(reg)) {
+            // console.log("STR", str)
+            if (typeof(str) !== "string") {
+                str = str.msg || str.message
+            }
+            if (str === undefined) str = "unknown error"
             let args = str.match("^" + reg + "$");
         if (args) {
                 let key = this.parityErrors[reg];
@@ -207,10 +212,11 @@ globalFuncs.getDefaultTokensAndNetworkType =  function getDefaultTokensAndNetwor
 
     var tokenMappings = {
         'eth': require('./tokens/ethTokens.json'),
-        'etc': require('./tokens/etcTokens.json'),
-        'rop': require('./tokens/ropstenTokens.json'),
-        'kov': require('./tokens/kovanTokens.json'),
         'rin': require('./tokens/rinkebyTokens.json')
+        /* 'etc': require('./tokens/etcTokens.json'),
+        'rop': require('./tokens/ropstenTokens.json'),
+        'kov': require('./tokens/kovanTokens.json')
+        */
     };
 
     var nodeErrMsg = 'Node does not exist, contact support@myetherwallet.com CODE:localstorageNodeMissing'

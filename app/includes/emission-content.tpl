@@ -299,8 +299,9 @@
       </div>
       <div class="col-sm-11">
         <label>
-            {{ readyOracles }} / {{ oracleCount }} <span translate="LIBRE_oraclesActual1">oracles have actual data now. Each oracle's data is actual for 10 minutes.</span>
-            <span translate="LIBRE_oraclesActual2">You need at least</span> {{ MIN_READY_ORACLES }} <span translate="LIBRE_oraclesActual3">actual oracles to calculate rates</span>
+            <p>{{ readyOracles }} / {{ oracleCount }} <span translate="LIBRE_oraclesActual1">oracles have actual data now. Each oracle's data is actual for 10 minutes.</span></p>
+            <p><span translate="LIBRE_oraclesActual2">You need at least</span> {{ MIN_READY_ORACLES }} <span translate="LIBRE_oraclesActual3">actual oracles to calculate rates</span></p>
+            <p><span translate="LIBRE_calcRateRemains">Time remaining for rates calculating:</span> {{ calcRatesRemains | secondsToDateTime | date:'HH:mm:ss' }}</p>
         </label>
       </div>
       <div class="col-sm-5">
