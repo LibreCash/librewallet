@@ -96,9 +96,9 @@
         </p>
       </div>
       <div class="col-sm-11">
-        <span translate="LIBRE_contractBalances">Contract balances</span>:<br/>
-        {{ tokenBalance | number: 3 }} Libre<br/>
-        {{ ethBalance | number: 3 }} ETH
+        <span translate="LIBRE_contractBalances">Contract balances</span>:
+        <p ng-class="tokenBalance < changedTokens ? 'text-danger' : ''">{{ tokenBalance | number: 3 }} Libre</p>
+        <p></p>{{ ethBalance | number: 3 }} ETH</p>
       </div>
 
       <!-- buy section -->
