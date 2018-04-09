@@ -96,8 +96,7 @@
         </p>
       </div>
       <div class="col-sm-11">
-        <span translate="LIBRE_contractBalances">Contract balances</span>:
-        <p ng-class="tokenBalance < changedTokens ? 'text-danger' : ''">{{ tokenBalance | number: 3 }} Libre</p>
+        <span translate="LIBRE_contractBalance">Contract balance</span>:
         <p></p>{{ ethBalance | number: 3 }} ETH</p>
       </div>
 
@@ -137,10 +136,10 @@
         <div class="col-sm-4">
           <button style="min-width: 170px"
               class="btn"
-              ng-class="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue) || changedTokens > tokenBalance ?
+              ng-class="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue) ?
                 'btn-default' : 'btn-success'"
               ng-click="buyModal()"
-              ng-disabled="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue) || changedTokens > tokenBalance">
+              ng-disabled="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue)">
             <strong>
               {{ buyPending ? 'LIBRE_txPending' : 'LIBRE_buy' | translate }}
             </strong>
@@ -318,22 +317,10 @@
         </button>
       </div>
     </section>
-    <section ng-show="deadlineRemains != 0"><!-- deadline section -->
-      <div class="col-sm-11">
-        <label>
-          <span translate="LIBRE_deadline1">Contract deadline in</span> {{ deadlineDays }} {{ 'LIBRE_days' | translate }} {{ deadlineRemains | secondsToDateTime | date:'HH:mm:ss' }}
-          <span translate="LIBRE_deadline2"></span>
-        </label>
-      </div>
-    </section>
   </article>
 
 </div>
 <!-- / Content -->
-
-
-
-
 
 <!-- Sidebar -->
 <section class="col-sm-4 no-padding">

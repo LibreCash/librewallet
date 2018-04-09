@@ -44,13 +44,11 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.buyOrSell = true;
 
     $scope.states = coeff.statesENUM;
-
     var RATE_ACTUAL = coeff.rateActual;
     var ORACLE_TIMEOUT = coeff.oracleTimeout;
     var ORACLE_ACTUAL = coeff.oracleActual;
     $scope.MIN_READY_ORACLES = coeff.minReadyOracles;
 
-    $scope.deadlineRemains = 0;
     $scope.calcRatesRemains = 0;
     $scope.gasPrice = {};
     $scope.txFees = {};
@@ -119,16 +117,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             $scope.calcRatesRemains--;
         }
 
-        let deadlineDays = $scope.deadlineRemains / (60 * 60 * 24);
-
-        if ($scope.deadlineRemains > 0) {
-            $scope.deadlineRemains--;
-        }
-
-        if (deadlineDays != $scope.deadlineDays) {
-            $scope.deadlineDays = Math.floor(deadlineDays);
-        }
-
         if ($scope.rateActualTime > 0) {
             $scope.rateActualTime--;
         }
@@ -141,7 +129,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         clearInterval(libreService.mainTimer)
     }
     
-    var lastCalcTime, lastRequestTime, lastLastBlockTime, deadline = 0;
+    var lastCalcTime, lastRequestTime, lastLastBlockTime;
     $scope.pendingOrderAllowCheck = false;
     var timerTicker = 0;
     libreService.mainTimer = setInterval(() => {
@@ -157,23 +145,21 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                 if (IS_DEBUG) console.info("BEFORE PROMISES")
                 Promise.all([
                     getContractData("getState"),
-                    getContractData("tokenBalance"),
+                    0, // for compatibility with the exchanger option
                     getContractData("requestPrice"),
                     getContractData("calcTime"),
                     getContractData("readyOracles"),
-                    getContractData("oracleCount"),
+                    getContractData("countOracles"),
                     getContractData("requestTime"),
                     walletService.wallet == null ? { data: 0 } :
                         getTokenData("balanceOf", [walletService.wallet.getAddressString()]),
                     walletService.wallet == null ? { data: 0 } :
-                        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress]),
-                    $scope.deadlineRemains == 0 ? getContractData("deadline") : { data : 0 }
+                        getTokenData("allowance", [walletService.wallet.getAddressString(), bankAddress])
                 ]).then((values) => {
                     if (IS_DEBUG) console.info("PROMISES DONE")
                     try {
                         let 
                             state = values[0],
-                            exchangerTokenBalance = values[1],
                             updateRatesCost = values[2],
                             calcTime = values[3],
                             readyOracles = values[4],
@@ -181,9 +167,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                             requestTime = values[6],
                             userTokenBalance = values[7],
                             allowedTokens = values[8];
-                        if (values[9].data !== 0) {
-                            deadline = values[9]
-                        }
 
                         ajaxReq.getBalance(bankAddress, function(balanceData) {
                             $scope.ethBalance = etherUnits.toEther(balanceData.data.balance, 'wei');
@@ -198,8 +181,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                         $scope.state = stateDec;
                         $scope.allowedTokens = +allowedTokens.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
                         $scope.allTokens = +userTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
-
-                        $scope.tokenBalance = +exchangerTokenBalance.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
 
                         $scope.readyOracles = +readyOracles.data[0];
                         $scope.oracleCount = +oracleCount.data[0];
@@ -220,13 +201,6 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                             $scope.waitOraclesRemains = ORACLE_TIMEOUT - (lastBlockTime - +requestTime.data[0]);
                             $scope.calcRatesRemains = ORACLE_ACTUAL - (lastBlockTime - +requestTime.data[0]);
                             lastRequestTime = +requestTime.data[0]
-                        }
-
-                        if (+deadline.data != 0) {
-                            if (lastLastBlockTime != lastBlockTime) {
-                                $scope.deadlineRemains = +deadline.data[0] - lastBlockTime;
-                                $scope.deadlineDays = Math.floor($scope.deadlineRemains / (60 * 60 * 24));
-                            }
                         }
 
                         if (lastLastBlockTime != lastBlockTime) {

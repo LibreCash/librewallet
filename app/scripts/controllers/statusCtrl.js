@@ -71,11 +71,11 @@ var statusCtrl = function($scope, libreService, $translate) {
             translate: "VAR_sellFee",
             process: (data) =>`${data/100} %`
         },
-        oracleCount: {
+        countOracles: {
             default: "Oracle Count",
             translate: "VAR_countOracles"
         },
-        requestPrice:{
+        requestPrice: {
            default:"Request price",
            translate: "VAR_requestPrice", // translate later
            process: (price) => `${etherUnits.toEther(price, 'wei')} ETH`
@@ -94,11 +94,6 @@ var statusCtrl = function($scope, libreService, $translate) {
             default: "Calc time",
             translate: "VAR_calcTime", //append later
             process: (timestamp)=> timestamp == 0 ? '-' : toUnixtime(timestamp)
-        },
-        tokenBalance: {
-            default: "Exchanger token balance",
-            translate: "VAR_tokenBalance",
-            process: (tokens) => `${tokens / Math.pow(10, libreService.coeff.tokenDecimals)} Libre`
         }
     };
     
@@ -117,13 +112,13 @@ var statusCtrl = function($scope, libreService, $translate) {
     }
 
     const oraclesStruct = {
-        address: 0,
-        name: 1,
-        type: 2,
-        waitQuery: 3,
-        updateTime: 4,
-        callbackTime: 5,
-        rate: 6,
+        name: 0,
+        type: 1,
+        updateTime: 2,
+        enabled: 3,
+        waitQuery: 4,
+        rate: 5,
+        next: 6,
     };
 
     function getData(varsObject){
@@ -158,43 +153,41 @@ var statusCtrl = function($scope, libreService, $translate) {
         let oracle = res.data;
 
         return Promise.resolve({
-            address: oracle[oraclesStruct.address],
             name: hexToString(oracle[oraclesStruct.name]),
             type: hexToString(oracle[oraclesStruct.type]),
             waitQuery: oracle[oraclesStruct.waitQuery],
             updateTime: toUnixtime(oracle[oraclesStruct.updateTime]),
-            callbackTime: toUnixtime(oracle[oraclesStruct.callbackTime]),
             waiting: oracle[oraclesStruct.waitQuery],
             outdated: oracle[oraclesStruct.waitQuery] &&
                         (+oracle[oraclesStruct.updateTime] + ORACLE_ACTUAL < latestBlockTime),
-            rate: normalizeRate(oracle[oraclesStruct.rate])
+            rate: normalizeRate(oracle[oraclesStruct.rate]),
+            next: oracle[oraclesStruct.next]
         });
     }
 
-    function getOracle(number) {
-        return getContractData("getOracleData", [number]).then(oracleData);
+    function getOracle(address) {
+        return getContractData("getOracleData", [address]).then(oracleData);
     }
 
-    function fillOracles() {
-        getLatestBlockData().then((blockData) => {
-            latestBlockTime = parseInt(blockData.data.timestamp, 16);
-            return;
-        })
-        .then(() => {
-            return getContractData("oracleCount");
-        })
-        .then((res) => {
-            let 
-                count = res.data[0],
-                oraclePromise = [];
-            for (let i = 0; i < count; i++) oraclePromise.push(getOracle(i));
-            return Promise.all(oraclePromise);
-        })
-        .then((result) => {
-            $scope.oracles = result;
-            $scope.loading = false;
-            applyScope();
-        })
+    async function fillOracles() {
+        let blockData = await getLatestBlockData();
+        latestBlockTime = parseInt(blockData.data.timestamp, 16);
+
+        let address = await getContractData("firstOracle"),
+            firstOracle = address.data[0],
+            oracleAddress = firstOracle,
+            oraclesData = [];
+
+        while (oracleAddress !== "0x0000000000000000000000000000000000000000") {
+            let oracleInfo = await getOracle(oracleAddress);
+            oracleInfo.address = oracleAddress;
+            oraclesData.push(oracleInfo);
+            oracleAddress = oracleInfo.next;
+        }
+
+        $scope.oracles = oraclesData;
+        $scope.loading = false;
+        applyScope();
     }
 
     translateMSGs().then(() => fillData(varsObject));

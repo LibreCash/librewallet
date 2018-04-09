@@ -4,7 +4,7 @@ var libreService = function(walletService, $translate) {
     var 
         networks = {rinkeby: 'rin_ethscan', eth: 'eth_infura'};
     var 
-        exchanger = getContract("LibreExchanger"),
+        exchanger = getContract("LibreBank"),
         cash = getContract("LibreCash"),
         mainTimer = null;
 
@@ -28,7 +28,7 @@ var libreService = function(walletService, $translate) {
             tokenDecimals: 18,
             rateMultiplier: 1000,
             gasEmission: 90000,
-            gasRemission: 90000,
+            gasRemission: 130000,
             gasApprove: 50000,
             gasUpdateRates: 1800000,
             gasCalcRates: 260000,
@@ -36,7 +36,7 @@ var libreService = function(walletService, $translate) {
             isDebug: IS_DEBUG,
             minReadyOracles: 2,
             oracleActual: 15 * 60,
-            rateActual: 10 * 60,
+            rateActual: 15 * 60,
             oracleTimeout: 10 * 60
         };
         
