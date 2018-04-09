@@ -19,7 +19,7 @@
                      blockie-address="{{wallet.getAddressString()}}"
                      watch-var="wallet.getAddressString()">
                 </div>
-                <p>
+                <p class="sendTx__text">
                   <strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">
                     {{wallet.getChecksumAddressString()}}
                   </strong>
@@ -41,7 +41,7 @@
               </td>
               <td ng-show="tx.sendMode=='ether'">
                 <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{tx.to}}" watch-var="tx.to"></div>
-                <p>
+                <p class="sendTx__text">
                   <strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">
                     {{tx.to}}
                   </strong>
@@ -49,7 +49,7 @@
               </td>
               <td ng-show="tx.sendMode!=='ether'">
                 <div class="addressIdenticon med" title="Address Indenticon" blockie-address="{{tokenTx.to}}" watch-var="tokenTx.to"></div>
-                <p>
+                <p class="sendTx__text">
                   <strong ng-show="tx.sendMode=='ether'" class="send-modal__addr">
                     {{tokenTx.to}}
                   </strong>
@@ -109,7 +109,7 @@
             </tr>
             <tr>
               <td class="small text-right">Data:</td>
-              <td class="small text-left mono">{{parsedSignedTx.data}}</td>
+              <td class="small text-left mono"><input class="form-control" value="{{parsedSignedTx.data}}"></input></td>
             </tr>
 
           </tbody>

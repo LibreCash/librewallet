@@ -85,5 +85,6 @@
 
 
 </main>
+<script src="js/menuToggler.js"></script>
 </body>
 </html>

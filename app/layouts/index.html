@@ -1,27 +1,19 @@
 
 @@include( '../includes/header.tpl', { "site": "mew" } )
 
-<section class="container" style="min-height: 50%" ng-controller='viewCtrl'>
+<section class="container wrapper" style="min-height: 50%" ng-controller='viewCtrl'>
 
   <div class="tab-content" >
 
     @@include( '../includes/generateWallet.tpl',     { "site": "mew" } )
 
-    @@include( '../includes/bankStatus.tpl',         { "site": "mew" } )
+    @@include( '../includes/status.tpl',             { "site": "mew" } )
 
     @@include( '../includes/sendTx.tpl',             { "site": "mew" } )
 
     @@include( '../includes/emission.tpl',           { "site": "mew" } )
 
-    @@include( '../includes/remission.tpl',           { "site": "mew" } )
-
-    @@include( '../includes/myOrders.tpl',           { "site": "mew" } )
-
-    @@include( '../includes/contracts.tpl',          { "site": "mew" } )
-
     @@include( '../includes/txStatus.tpl',           { "site": "mew" } )
-
-    @@include( '../includes/bulkGenerate.tpl',       { "site": "mew" } )
 
     @@include( '../includes/print.tpl',              { "site": "mew" } )
 
@@ -40,5 +32,5 @@
   -->
 
 </section>
-
-@@include( '../includes/footer.tpl', { "site": "mew" } )
+<script src="js/menuToggler.js"></script>
+<!-- @@include( '../includes/footer.tpl', { "site": "mew" } ) -->

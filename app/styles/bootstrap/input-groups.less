@@ -6,8 +6,6 @@
 // -------------------------
 .input-group {
   position: relative;
-  display: table;
-  border-collapse: separate;
   > * {
     margin-bottom: 0;
     margin-top: 0;
@@ -21,14 +19,54 @@
 
   .form-control {
     position: relative;
-    z-index: 2;
-    float: left;
+    z-index: 0;
     width: 100%;
+    font-size: @font-size-bump;
+    @media screen and (max-width: @screen-sm) {
+      font-size: @font-size-small;
+    }
   }
   .dropdown-toggle {
     padding-right: @space-md;
     padding-left: @space-md;
   }
+}
+
+.input-group--flex {
+  display: flex;
+  // justify-content: space-between;
+  .form-control {
+    flex-grow: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .input-group-btn {
+    border: 1px solid @btn-default-border;
+    border-top-right-radius: @border-radius;
+    border-bottom-right-radius: @border-radius;
+    @media screen and (max-width: @screen-sm) {
+        border-top-left-radius: @border-radius;
+        border-bottom-left-radius: @border-radius;
+      }
+  }
+  .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .form-control--narrow {
+    flex-grow: 0;
+    @media screen and (max-width: @screen-md) {
+      width: 100%;
+    }
+  }
+  @media screen and (max-width: @screen-md) {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.input-group--flex-start {
+  // justify-content: flex-start;
 }
 
 // Sizing options
@@ -50,12 +88,12 @@
 .input-group-addon,
 .input-group-btn,
 .input-group .form-control {
-  display: table-cell;
+  
 }
 // Addon and addon wrapper for buttons
 .input-group-addon,
 .input-group-btn {
-  width: 1%;
+  // width: 1%;
   white-space: nowrap;
   vertical-align: middle; // Match the inputs
 }
@@ -65,6 +103,9 @@
 .input-group-addon {
   padding-left: @padding-large-horizontal;
   padding-right: @padding-large-horizontal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: @font-size-base;
   font-weight: normal;
   line-height: 1;
@@ -123,6 +164,16 @@
       z-index: 2;
     }
   }
+  @media screen and (max-width: @screen-md) {
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  .btn {
+    @media screen and (max-width: @screen-md) {
+      width: 100%;
+    }
+  }
 
   // Negative margin to only have a 1px border between the two
   &:first-child {
@@ -136,6 +187,11 @@
     > .btn-group {
       z-index: 2;
       margin-left: -1px;
+      @media screen and (max-width: @screen-sm) {
+        margin-left: 0;
+        border-top-left-radius: @border-radius;
+        border-bottom-left-radius: @border-radius;
+      }
     }
   }
 }

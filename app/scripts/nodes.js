@@ -5,9 +5,9 @@ nodes.infuraNode = require('./nodeHelpers/infura');
 nodes.metamaskNode = require('./nodeHelpers/metamask');
 nodes.nodeTypes = {
     ETH: "ETH",
-    ETC: "ETC",
-    MUS: "MUSIC",
-    Ropsten: "ROPSTEN ETH",
+    //ETC: "ETC",
+    Rinkeby: "RINKEBY ETH",
+    /*Ropsten: "ROPSTEN ETH",
     Kovan: "KOVAN ETH",
     Rinkeby: "RINKEBY ETH",
     RSK: "RSK",
@@ -15,7 +15,7 @@ nodes.nodeTypes = {
     UBQ: "UBQ",
     POA: "POA",
     TOMO: "TOMO",
-    ELLA: "ELLA",
+    ELLA: "ELLA",*/
     Custom: "CUSTOM ETH"
 };
 nodes.ensNodeTypes = [nodes.nodeTypes.ETH, nodes.nodeTypes.Ropsten];
@@ -33,7 +33,7 @@ nodes.customNodeObj = {
     'lib': null
 };
 nodes.nodeList = {
-    'eth_mew': {
+/*    'eth_mew': {
         'name': 'ETH',
         'blockExplorerTX': 'https://etherscan.io/tx/[[txHash]]',
         'blockExplorerAddr': 'https://etherscan.io/address/[[address]]',
@@ -56,7 +56,7 @@ nodes.nodeList = {
         'abiList': require('./abiDefinitions/ethAbi.json'),
         'service': 'Etherscan.io',
         'lib': require('./nodeHelpers/etherscan')
-    },
+    },*/
     'eth_infura': {
         'name': 'ETH',
         'blockExplorerTX': 'https://etherscan.io/tx/[[txHash]]',
@@ -67,9 +67,21 @@ nodes.nodeList = {
         'tokenList': require('./tokens/ethTokens.json'),
         'abiList': require('./abiDefinitions/ethAbi.json'),
         'service': 'infura.io',
-        'lib': new nodes.infuraNode('https://mainnet.infura.io/mew')
+        'lib': new nodes.infuraNode('https://mainnet.infura.io/mew', '')
     },
-    'eth_giveth': {
+    'eth_libre': {
+        'name': 'ETH',
+        'blockExplorerTX': 'https://etherscan.io/tx/[[txHash]]',
+        'blockExplorerAddr': 'https://etherscan.io/address/[[address]]',
+        'type': nodes.nodeTypes.ETH,
+        'eip155': true,
+        'chainId': 1,
+        'tokenList': require('./tokens/ethTokens.json'),
+        'abiList': require('./abiDefinitions/ethAbi.json'),
+        'service': 'libre.live',
+        'lib': new nodes.customNode('https://mainnet.libre.live', '')
+    },
+/*    'eth_giveth': {
         'name': 'ETH',
         'blockExplorerTX': 'https://etherscan.io/tx/[[txHash]]',
         'blockExplorerAddr': 'https://etherscan.io/address/[[address]]',
@@ -140,7 +152,7 @@ nodes.nodeList = {
         'abiList': require('./abiDefinitions/kovanAbi.json'),
         'service': 'infura.io',
         'lib': new nodes.infuraNode('https://kovan.infura.io/mew')
-    },
+    },*/
     'rin_ethscan': {
         'name': 'Rinkeby',
         'type': nodes.nodeTypes.Rinkeby,
@@ -165,7 +177,7 @@ nodes.nodeList = {
         'service': 'infura.io',
         'lib': new nodes.infuraNode('https://rinkeby.infura.io/mew')
     },
-    'exp': {
+/*    'exp': {
         'name': 'EXP',
         'blockExplorerTX': 'http://www.gander.tech/tx/[[txHash]]',
         'blockExplorerAddr': 'http://www.gander.tech/address/[[address]]',
@@ -229,7 +241,7 @@ nodes.nodeList = {
         'estimateGas': true,
         'service': 'ellaism.org',
         'lib': new nodes.customNode('https://jsonrpc.ellaism.org', '')
-    }
+    }*/
 };
 
 

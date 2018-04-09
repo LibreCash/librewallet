@@ -1,459 +1,571 @@
-'use strict';
+/*jshint esversion: 6 */ 
+"use strict";
 var libreService = function(walletService, $translate) {
-    var libreBank = nodes.nodeList.rin_ethscan.abiList.find((contract) => contract.name == "LibreBank");
-    var bankAddress = libreBank.address;
-    var bankAbi = libreBank.abi;
-    var bankAbiRefactor = {};    
-    for (var i = 0; i < bankAbi.length; i++) bankAbiRefactor[bankAbi[i].name] = bankAbi[i];
+    var 
+        networks = {rinkeby: 'rin_ethscan', eth: 'eth_infura'};
+    var 
+        exchanger = getContract("LibreExchanger"),
+        cash = getContract("LibreCash"),
+        mainTimer = null;
 
-    var libreCash = nodes.nodeList.rin_ethscan.abiList.find((contract) => contract.name == "LibreCash");
-    var cashAddress = libreCash.address;
-    var cashAbi = libreCash.abi;
-    var cashAbiRefactor = {};    
-    for (var i = 0; i < cashAbi.length; i++) cashAbiRefactor[cashAbi[i].name] = cashAbi[i];
+    var 
+        IS_DEBUG = false,
+        states = [
+            'LOCKED',
+            'PROCESSING_ORDERS',
+            'WAIT_ORACLES',
+            'CALC_RATES',
+            'REQUEST_RATES'
+        ],
+        statesENUM = {
+            'LOCKED': 0,
+            'PROCESSING_ORDERS': 1,
+            'WAIT_ORACLES': 2,
+            'CALC_RATES': 3,
+            'REQUEST_RATES': 4
+        },
+        coeff = {
+            tokenDecimals: 18,
+            rateMultiplier: 1000,
+            gasEmission: 90000,
+            gasRemission: 90000,
+            gasApprove: 50000,
+            gasUpdateRates: 1800000,
+            gasCalcRates: 260000,
+            statesENUM: statesENUM,
+            isDebug: IS_DEBUG,
+            minReadyOracles: 2,
+            oracleActual: 15 * 60,
+            rateActual: 10 * 60,
+            oracleTimeout: 10 * 60
+        };
+        
+    if (IS_DEBUG) {
+        console.log("Used contracts")
+        console.log(exchanger);
+        console.log(cash);
+    }    
 
-    const RATE_MULTIPLIER = 1000;
-    const TOKEN_DECIMALS = 18;
-    const GAS_EMISSION = 300000,
-          GAS_REMISSION = 300000,
-          GAS_APPROVE = 70000,
-          GAS_WITHDRAW = 100000,
-          GAS_RUR = 1000000,
-          GAS_CR = 300000,
-          GAS_QUEUE = 500000;
+    function getDataString(func, inputs) {
+        let
+            fullName = ethUtil.solidityUtils.transformToFullName(func),
+            funcSig = ethFuncs.getFunctionSignature(fullName),
+            typeName = ethUtil.solidityUtils.extractTypeName(fullName),
+            types = typeName.split(',');
 
-    var getDataString = function(func, inputs) {
-        var fullFuncName = ethUtil.solidityUtils.transformToFullName(func);
-        var funcSig = ethFuncs.getFunctionSignature(fullFuncName);
-        var typeName = ethUtil.solidityUtils.extractTypeName(fullFuncName);
-        var types = typeName.split(',');
-        types = types[0] == "" ? [] : types;
-        return '0x' + funcSig + ethUtil.solidityCoder.encodeParams(types, inputs);
+            types = types[0] == "" ? [] : types;
+            
+        return `0x${funcSig}${ethUtil.solidityCoder.encodeParams(types, inputs)}`;
     };
 
-    function getDataCommon(address, abiRefactored, _var, process, transactionParams, processParam) {
-        return new Promise((resolve, reject) => {
-            ajaxReq.getEthCall({
-                from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
-                to: address,
-                data: getDataString(abiRefactored[_var], transactionParams)
-            }, function(data) {
-                if (data.error || data.data == '0x') {
-                    if (data.data == '0x') {
-                        data.error = true;
-                        $translate("LIBRE_possibleError").then((error) => {
-                            data.message = error;
-                            process(data, processParam);
-                        });
-                    }
-                } else {
-                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
-                        return i.type;
-                    });
-                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
-                    process(data, processParam);
-                }
-                
+    function getDataCommon(to, abi, varName, process, txParam, processParam) {
+        return getEthCall({
+                from: walletService.wallet == null ? null 
+                    : walletService.wallet.getAddressString(),
+                to,
+                data: getDataString(abi[varName], txParam)
+            })
+            .catch(()=>{
+                $translate("LIBRE_possibleError").then((error) => {
+                    res.error = true;
+                    res.message = error;
+                    process(res, processParam);
+                    //TODO: use reject() here
+                });
+            })
+            .then((res) => {
+                res.data = encodeData(abi[varName],res.data);
+                process(res, processParam);
+                //TODO: use resolve() here
             });
-        })
     }
 
-    function getDataProcess(address, abiRefactored, _var, process, params = []) {
-        return getDataCommon(address, abiRefactored, _var, process, params, "");
+    function getDataProcess(to, abi, varName, process, params = []) {
+        return getDataCommon(to, abi, varName, process, params, "");
+    }
+
+    function getContract(name){
+        let
+            _network = getNetwork(),
+            abiList = nodes.nodeList[_network].abiList,
+            contract = abiList.find((contract) => contract.name == name),
+            abi = JSON.parse(contract.abi),
+            refactored = {};
+
+        abi.forEach((item)=>refactored[item.name] = item);
+
+        return {
+            address: contract.address,
+            abi: abi,
+            abiRefactored: refactored
+        };
+    }
+
+    function getNetwork() {
+        let networkType = globalFuncs.getDefaultTokensAndNetworkType().networkType;
+        if (IS_DEBUG) console.log(~Object.keys(networks).indexOf(networkType) ? networks[networkType] : '');
+        return ~Object.keys(networks).indexOf(networkType) ? networks[networkType] : '';
     }
 
     function getBankDataProcess(_var, process, params = []) {
-        return getDataProcess(bankAddress, bankAbiRefactor, _var, process, params);
+        return getDataProcess(exchanger.address, exchanger.abiRefactored, _var, process, params);
     }
 
     function getCashDataProcess(_var, process, params = []) {
-        return getDataProcess(cashAddress, cashAbiRefactor, _var, process, params);
+        return getDataProcess(cash.address, cash.abiRefactored, _var, process, params);
     }
 
-    function getDataAsync(address, abiRefactored, _var, params = []) {
-        return new Promise((resolve, reject) => { 
-            ajaxReq.getEthCall({
-                from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
-                to: address,
-                data: getDataString(abiRefactored[_var], params)
-            }, function(data) {
-                data.varName = _var;
-                if (!data.error && data.data != '0x') {
-                    var outTypes = abiRefactored[_var].outputs.map(function(i) {
-                        return i.type;
-                    });
-                    data.data = ethUtil.solidityCoder.decodeParams(outTypes, data.data.replace('0x', ''));
-                }
-                data.params = params;
-                resolve(data);
-            });
+    function getDataAsync(to, abi, _var, params = []) {
+        if (IS_DEBUG) {
+            console.log(`[CALL ${getDataString(abi[_var], params)}]`);
+        }
+
+        return getEthCall({
+            from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
+            data: getDataString(abi[_var], params),
+            to
         })
+        .then((res) => {
+            res.varName = _var;
+            res.data = encodeData(abi[_var],res.data);
+            res.params = params;
+            return res;
+        })
+        .catch((e) => {
+            console.log(e);
+            console.log(`Error on getDataAsync: ${to} ${JSON.stringify(abi)} ${_var} ${params}`);
+        });
     }
 
-    function getBankDataAsync(_var, params = []) {
-        return getDataAsync(bankAddress, bankAbiRefactor, _var, params);
+    function encodeData(abi,data){
+        let outTypes = abi.outputs.map((i)=> i.type);
+        return ethUtil.solidityCoder.decodeParams(outTypes, data.replace('0x', ''));
     }
 
-    function getCashDataAsync(_var, params = []) {
-        return getDataAsync(cashAddress, cashAbiRefactor, _var, params);
+    function getContractData(varName, params = []) {
+        return getDataAsync(exchanger.address, exchanger.abiRefactored, varName, params);
+    }
+
+    function getTokenData(_var, params = []) {
+        return getDataAsync(cash.address, cash.abiRefactored, _var, params);
     }
 
     function setScope(_scope, _value, _key) {
         _scope[_key] = _value.data[0];
     }
 
-    function getDataScope(_scope, address, abiRefactored, _var, _key, params = []) {
-        return getDataCommon(_scope, address, abiRefactored, _var, setScope, params, _key);
+    function getScope(_scope, address, abi, _var, _key, params = []) {
+        return getDataCommon(_scope, address, abi, _var, setScope, params, _key);
     }
 
-    function getBankDataScope(_scope, _var, _key, params = []) {
-        return getDataScope(_scope, bankAddress, bankAbiRefactor, _var, _key, params);
+    function getContractScope(_scope, _var, _key, params = []) {
+        return getScope(_scope, exchanger.address, exchanger.abiRefactored, _var, _key, params);
     }
 
-    function getCashDataScope(_scope, _var, _key, params = []) {
-        return getDataScope(_scope, cashAddress, cashAbiRefactor, _var, _key, params);
+    function getTokenScope(_scope, _var, _key, params = []) {
+        return getScope(_scope, cash.address, cash.abiRefactored, _var, _key, params);
     }
 
-    var normalizeUnixTime = function(data) {
-        var date = new Date(data * 1000);
+    function toUnixtime(timestamp) {
+        let date = new Date(timestamp * 1000);
         return date.toLocaleString();
-    },
-    normalizeRate = function(data) {
-        return data / RATE_MULTIPLIER;
-    },
-    hexToString = function(_hex) {
-        var hex = _hex.toString();//force conversion
-        var str = '';
+    }
+
+    function normalizeRate(bigNumber) {
+        return bigNumber / coeff.rateMultiplier;
+    }
+
+    function hexToString(_hex) {
+        var 
+            hex = _hex.toString(),//force conversion
+            str = '';
+            
         for (var i = 2; i < hex.length; i += 2) {
             if (hex.substr(i, 2) !== "00") {
                 str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
             }
         }
         return str;
-    },
-    getStateName = function(data) { 
-        var states = ['REQUEST_UPDATE_RATES', 'CALC_RATE', 'PROCESS_ORDERS', 'ORDER_CREATION'];
+    }
+
+    function getStateName(number) { 
         try {
-            return states[data];
+            return states[number];
         } catch(e) {
             return e.message;
         }
-    },
-    fillStateData = function(_data) { 
+    }
+
+    function fillStateData(source) { 
         try {
-            var stateName = getStateName(_data.data[0]);
-            _data.data.push(stateName);
-            return _data;
+            let stateName = getStateName(source.data[0]);
+            source.data.push(stateName);
+            return source;
         } catch(e) {
             return {error: true, message: e.message};
         }
     }
 
-    var libreTransaction = function(_scope, pendingVarName, opPrefix, translator, updater) {
-        _scope[pendingVarName] = true;
-        if (_scope.wallet == null) throw globalFuncs.errorMsgs[3];
-        else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
-        ajaxReq.getTransactionData(_scope.wallet.getAddressString(), function(data) {
-            try {
-                if (data.error) {
-                    throw("getTransactionData: " + data.msg);
-                }
+    function getTransactionData(addr) {
+        return new Promise((resolve,reject) => {
+            ajaxReq.getTransactionData(addr, (data) => {
+                if(data.error) reject(data);
+                resolve(data);
+            });
+        });
+    }
+
+    function getEstimatedGas(txData) {
+        if (txData.value == "0x00") {
+            txData.value = 0;
+        }
+        return new Promise((resolve, reject) => {
+            ajaxReq.getEstimatedGas(txData, (data) => {
+                if (data.error) reject(data);
+                resolve(data);
+            });
+        });
+    }
+
+    function getLibreRawTx(_scope) {
+        return new Promise((resolve, reject) => {
+            if (_scope.wallet == null) throw globalFuncs.errorMsgs[3];
+            else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
+            let userWallet = _scope.wallet.getAddressString();
+            getTransactionData(userWallet).then((data) => {
                 var txData = uiFuncs.getTxData(_scope);
-                console.log(txData);
                 uiFuncs.generateTx(txData, function(rawTx) {
                     if (rawTx.isError) {
-                        _scope[pendingVarName] = false;
                         _scope.notifier.danger("generateTx: " + rawTx.error);
-                        return;
+                        reject(rawTx);
                     }
-                    _scope.rawTx = rawTx.rawTx;
-                    _scope.signedTx = rawTx.signedTx;
-                    uiFuncs.sendTx(_scope.signedTx, function(resp) {
-                        if (resp.isError) {
-                            _scope[pendingVarName] = false;
-                            _scope.notifier.danger("sendTx: " + resp.error);
-                            return;
-                        }
-                        var checkTxLink = "https://www.myetherwallet.com?txHash=" + resp.data + "#check-tx-status";
-                        var txHashLink = _scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
-                        var verifyTxBtn = _scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
-                        var checkTxBtn = '<a class="btn btn-xs btn-info" href="' + checkTxLink + '" target="_blank" rel="noopener noreferrer"> Check TX Status </a>';
-                        var completeMsg = '<p>' + globalFuncs.successMsgs[2] + '<strong>' + resp.data + '</strong></p><p>' + verifyTxBtn + ' ' + checkTxBtn + '</p>';
-                        _scope.notifier.success(completeMsg, 0);
-                        
-                        _scope.wallet.setBalance(function() {
-                            if (!_scope.$$phase) _scope.$apply();
-                        });
-
-                        var isCheckingTx = false,
-                        checkingTx = setInterval(() => {
-                            if (!_scope[pendingVarName]) {
-                                clearInterval(checkingTx);
-                                return;
-                            }
-                            if (isCheckingTx) return; // fixing doubling success messages
-                            isCheckingTx = true;
-                            ajaxReq.getTransactionReceipt(resp.data, (receipt) => {
-                                if (receipt.error) {
-                                    _scope[pendingVarName] = false;
-                                    _scope.notifier.danger(receipt.msg);
-                                } else {
-                                    if (receipt.data == null) {
-                                        isCheckingTx = false;
-                                        return; // next interval
-                                    }
-                                    _scope[pendingVarName] = false;
-                                    if (receipt.data.status == "0x1") { 
-                                        translator(`LIBRE${opPrefix}_txOk`).then((msg) => {
-                                            _scope.notifier.success(msg, 0);
-                                        });
-                                        updater();
-                                    } else {
-                                        translator(`LIBRE${opPrefix}_txFail`).then((msg) => {
-                                            _scope.notifier.danger(msg, 0);
-                                        });
-                                    }
-                                    _scope[pendingVarName] = false;
-                                }
-                                isCheckingTx = false;
-                            });
-                        }, 2000);
-                    });
+                    resolve(rawTx);
                 });
-            } catch (e) {
-                _scope[pendingVarName] = false;
-                _scope.notifier.danger("getTransactionData: " + e);
-            }
-        });
+            });
+        });    
     }
 
-    function statusAllowsOrders(_scope, transactionFunc) {
-        ajaxReq.getLatestBlockData(function(blockData) {
-            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
-                getBankDataAsync("timeUpdateRequest"),
-                getBankDataAsync("queuePeriod"),
-                getBankDataAsync("contractState"),
-                getBankDataAsync("paused")
-            ]).then((values) => {
-                let _timeUpdateRequest = values[0],
-                    _queuePeriod = values[1],
-                    _contractState = values[2],
-                    _paused = values[3].data[0];
-                _scope.queuePeriod = _queuePeriod;
-                _scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
-                _scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
-                var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
-                // allowing orders condition:
-                // state == ORDER_CREATION (3) || lastedTime >= _queuePeriod
-                if ((_contractState.error) && (_queuePeriod.error)) {
-                    $translate("LIBRE_gettingDataError").then((msg) => {
-                        _scope.notifier.danger(msg, 0);
-                    });
-                    return;
-                }
-                var allowedState = (!_paused) && ((_contractState.data[0] == 3) || (lastedTime >= _queuePeriod.data[0]));
-                if (allowedState)
-                    transactionFunc();                
-                else {
-                    $translate("LIBRE_orderNotAllowed").then((msg) => {
-                        _scope.notifier.danger(msg);
-                    });
-                }
+    function getTransactionReceipt(txData) {
+        return new Promise((resolve, reject) => {
+            ajaxReq.getTransactionReceipt(txData, (data) => {
+                if (data.error) reject(data);
+                resolve(data);
             });
-        });
+        })
     }
 
-    function ifAllowedRUR(_scope, transactionFunc) {
-        ajaxReq.getLatestBlockData(function(blockData) {
-            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
-                getBankDataAsync("timeUpdateRequest"),
-                getBankDataAsync("relevancePeriod"),
-                getBankDataAsync("contractState"),
-                getBankDataAsync("paused"),
-                getBankDataAsync("getOracleDeficit")
-            ]).then((values) => {
-                let _timeUpdateRequest = values[0],
-                    _relevancePeriod = values[1],
-                    _contractState = values[2],
-                    _paused = values[3].data[0],
-                    _oracleDeficit = values[4];
-                _scope.relevancePeriod = _relevancePeriod;
-                _scope.then = +_timeUpdateRequest.data[0] + +_relevancePeriod.data[0];
-                _scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
-                var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
-                // allowing RUR:
-                // state == REQUEST_UPDATE_RATES (0) || lastedTime >= _relevancePeriod
-                if ((_contractState.error) || (_relevancePeriod.error) || (_oracleDeficit.error)) {
-                    $translate("LIBRE_gettingDataError").then((msg) => {
-                        _scope.notifier.danger(msg);
-                        return;
-                    });
-                }
-                var allowedState = (!_paused) && ((_contractState.data[0] == 0) || (lastedTime >= _relevancePeriod.data[0]));
-                if (allowedState) {
-                    transactionFunc(_oracleDeficit.data[0]);           
-                } else {
-                    $translate("LIBRE_RURNotAllowed").then((msg) => {
-                        _scope.notifier.danger(msg);
-                    });
-                }
+    function sendTx(txData) {
+        return new Promise((resolve, reject) => {
+            uiFuncs.sendTx(txData, (data) => {
+                if (data.error) reject(data);
+                resolve(data);
             });
-        });
+        })
     }
 
-    function ifAllowedQueue(_scope, transactionFunc, numOrders) {
-        ajaxReq.getLatestBlockData(function(blockData) {
-            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
-                getBankDataAsync("timeUpdateRequest"),
-                getBankDataAsync("queuePeriod"),
-                getBankDataAsync("contractState"),
-                getBankDataAsync("paused"),
-                getBankDataAsync("getOracleDeficit")
-            ]).then((values) => {
-                let _timeUpdateRequest = values[0],
-                    _queuePeriod = values[1],
-                    _contractState = values[2],
-                    _paused = values[3].data[0],
-                    _oracleDeficit = values[4];
-                _scope.queuePeriod = _queuePeriod;
-                _scope.then = +_timeUpdateRequest.data[0] + +_queuePeriod.data[0];
-                _scope.timeUpdateRequest = normalizeUnixTimeObject(_timeUpdateRequest);
-                var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
-                // allowing queues:
-                // state == REQUEST_UPDATE_RATES (2) && lastedTime < _queuePeriod
-                if ((_contractState.error) || (_queuePeriod.error)) {
-                    $translate("LIBRE_gettingDataError").then((msg) => {
-                        _scope.notifier.danger(msg);
-                        return;
-                    });
-                }
-                var allowedState = (!_paused) && ((_contractState.data[0] == 2) && (lastedTime < _queuePeriod.data[0]));
-                if (allowedState) {
-                    transactionFunc(numOrders);           
-                } else {
-                    $translate("LIBRE_QueueNotAllowed").then((msg) => {
-                        _scope.notifier.danger(msg);
-                    });
-                }
+    function generateTx(txData) {
+        return new Promise((resolve, reject) => {
+            uiFuncs.generateTx(txData, (data) => {
+                if (data.error) reject(data);
+                resolve(data);
             });
-        });
-    }    
-
-    function ifAllowedCR(_scope, transactionFunc) {
-        const MIN_READY_ORACLES = 2;
-        ajaxReq.getLatestBlockData(function(blockData) {
-            var lastBlockTime = parseInt(blockData.data.timestamp, 16);
-            Promise.all([
-                getBankDataAsync("contractState"),
-                getBankDataAsync("paused"),
-                getBankDataAsync("numReadyOracles"),
-                getBankDataAsync("numEnabledOracles"),
-                getBankDataAsync("timeUpdateRequest")
-            ]).then((values) => {
-                let _contractState = values[0],
-                    _paused = values[1].data[0],
-                    _readyOracles = values[2],
-                    _enabledOracles = values[3],
-                    _timeUpdateRequest = values[4];
-
-                // allowing CR:
-                // state == CALC_RATES (1)
-                if ((_contractState.error) || (_readyOracles.error)) {
-                    $translate("LIBRE_gettingDataError").then((msg) => {
-                        _scope.notifier.danger(msg);
-                        return;
-                    });
-                }
-                var lastedTime = +lastBlockTime - +_timeUpdateRequest.data[0];
-                var allowedState = (!_paused) && (_contractState.data[0] == 1) && (
-                    (+_readyOracles.data[0] == +_enabledOracles.data[0]) ||
-                    (+_readyOracles.data[0] >= MIN_READY_ORACLES && lastedTime >= 10 * 60) // 10 minutes to wait for oracles
-                );
-                if (allowedState) {
-                    transactionFunc();           
-                } else {
-                    $translate("LIBRE_CRNotAllowed").then((msg) => {
-                        _scope.notifier.danger(msg);
-                    });
-                }
-            });
-        });
+        })
     }
 
-    function ifNotPaused(_scope, transactionFunc) {
-        getBankDataAsync("paused").then((value) => {
-            if (value.error) {
-                $translate("LIBRE_gettingDataError").then((msg) => {
-                    _scope.notifier.danger(msg);
-                });
+    function TX(methodName, translator) {
+        this.fail = async () => {
+            this.status = await translator('LIBRE_txState_Fail')
+            this.color = "red"
+        }
+        this.success = async () => {
+            this.color = 'green';
+            this.status = await translator('LIBRE_txState_Success')
+        }
+        this.sending = async () => {
+            this.color = '#cc0';
+            this.status = await translator('LIBRE_txState_Send')
+        }
+        this.pending = async () => {
+            this.color = '#cc0';
+            this.status = await translator('LIBRE_txState_Pending')
+        }
+        this.init = async () => {
+            let time = new Date();
+            this.name = await translator(`LIBRE_txName_${methodName}`)
+            this.date = `${time.getHours()}:${time.getMinutes()<10?'0':''}${time.getMinutes()}`
+            await this.sending()
+        }
+    }
+
+    async function libreTransaction(_scope, methodName, opPrefix, translator, updater) {
+        var pendingName = `${methodName}Pending`;
+        _scope[pendingName] = true;
+        if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
+        else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
+        
+        try {
+            let tx = new TX(methodName, translator)
+            await tx.init()
+
+            _scope.notifier.txs.push(tx)
+            let userWallet = _scope.wallet.getAddressString();
+            var data = await getTransactionData(userWallet)
+
+            var txData = uiFuncs.getTxData(_scope);
+            if (IS_DEBUG) console.log(txData);
+            var rawTx = await generateTx(txData)
+            if (rawTx.isError) {
+                await tx.fail()
+                _scope.notifier.danger("generateTx: " + rawTx.error);
+                _scope[pendingName] = false
                 return;
             }
-            var _paused = value.data[0];
-            if (!_paused)
-                transactionFunc();                
-            else {
-                $translate("LIBRE_bankPaused").then((msg) => {
-                    _scope.notifier.danger(msg);
-                });
+            _scope.rawTx = rawTx.rawTx;
+            _scope.signedTx = rawTx.signedTx;
+
+            var resp = await sendTx(_scope.signedTx)
+
+            if (resp.isError) {
+                _scope.notifier.danger("sendTx: " + resp.error);
+                await tx.fail()
+                _scope[pendingName] = false
+                return;
             }
+            var checkTxLink = `https://www.myetherwallet.com?txHash=${resp.data}#check-tx-status`;
+            var txHashLink = _scope.ajaxReq.blockExplorerTX.replace("[[txHash]]", resp.data);
+            var verifyTxBtn = _scope.ajaxReq.type != nodes.nodeTypes.Custom ? '<a class="btn btn-xs btn-info" href="' + txHashLink + '" class="strong" target="_blank" rel="noopener noreferrer">Verify Transaction</a>' : '';
+            var checkTxBtn = `<a class="btn btn-xs btn-info" href="${checkTxLink}" target="_blank" rel="noopener noreferrer"> Check TX Status </a>`;
+            var completeMsg = `<p>${globalFuncs.successMsgs[2]}<strong>${resp.data}</strong></p><p>${verifyTxBtn} ${checkTxBtn}</p>`;
+            _scope.notifier.success(completeMsg, 0);
+
+            tx.hash = resp.data;
+            await tx.pending()
+
+            _scope.wallet.setBalance(function() {
+                if (!_scope.$$phase) _scope.$apply();
+            });
+            if (IS_DEBUG) console.log("resp", resp);
+            
+            var isCheckingTx = false,
+                noTxCounter = 0,
+                receiptInterval = 5000,
+                txCheckingTimeout = 1.5 * 60 * 1000;
+            var checkingTx = setInterval(async () => {
+                if (!_scope[pendingName]) {
+                    clearInterval(checkingTx);
+                    return;
+                }
+                if (isCheckingTx) return; // fixing doubling success messages
+                isCheckingTx = true;
+                try {
+                    var receipt = await getTransactionReceipt(resp.data)
+                } catch (e) {
+                    var receipt = e
+                }
+                if (receipt.error) {
+                    if (receipt.msg == "unknown transaction") {
+                        noTxCounter++;
+                        if (noTxCounter > txCheckingTimeout / receiptInterval) {
+                            _scope.notifier.danger(receipt.msg, 0);
+                            await tx.fail()
+                            _scope[pendingName] = false
+                        }
+                    } else {
+                        _scope.notifier.danger(`tx receipt error: ${receipt.msg}`, 0);
+                        await tx.fail()
+                        _scope[pendingName] = false
+                    }
+                } else {
+                    if (receipt.data == null || receipt.data.blockNumber == null) {
+                        isCheckingTx = false
+                        return
+                    }
+                    if (receipt.data.status == "0x1") {
+                        _scope.notifier.success(await translator(`LIBRE${opPrefix}_txOk`), 0);
+                        await tx.success()
+                        _scope[pendingName] = false
+                        if (updater != null) {
+                            updater();
+                        }
+                    } else {
+                        _scope.notifier.danger(await translator(`LIBRE${opPrefix}_txFail`), 0);
+                        await tx.fail()
+                        _scope[pendingName] = false
+                    }
+                    _scope.wallet.setBalance(function() {
+                        if (!_scope.$$phase) _scope.$apply();
+                    });
+                }
+                isCheckingTx = false;
+            }, receiptInterval);
+
+            for(;_scope.notifier.txs.length > 10;) {
+                _scope.notifier.txs.shift()
+            }
+        } catch (e) {
+            _scope[pendingName] = false;
+            isCheckingTx = false
+            _scope.notifier.danger("getTransactionData: " + e);
+        }
+    }
+
+    function canOrder(rates = [0, 0]) {
+        return new Promise((resolve, reject) => {
+            if (rates[0] == 0 && rates[1] == 0) {
+                $translate("LIBRE_errorValidatingRates").then((msg) => reject(msg));
+            }
+            return Promise.all([
+                getContractData("getState"),
+                getContractData(rates[0] != 0 ? "buyRate" : "sellRate")
+            ])
+            .then((values) => {
+                let 
+                    state = values[0],
+                    rate = values[1];
+    
+                let prevRate = rates[0] != 0 ? rates[0] : rates[1];
+                if (rate.data[0] / coeff.rateMultiplier != prevRate) {
+                    $translate("LIBRE_errorValidatingRates").then((msg) => reject(msg));
+                }
+    
+                let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
+                if (canOrder)
+                    resolve();
+                else {
+                    $translate("LIBRE_orderNotAllowed").then((msg) => reject(msg));
+                }
+            });    
         });
     }
+
+    function canRequest() {
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                getContractData("getState")
+            ]).then((values) => {
+                let 
+                    state = values[0];
     
-    var normalizeUnixTimeObject = function(data) {
+                let сanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
+                if (сanRequest) {
+                    resolve();
+                } else {
+                    $translate("LIBRE_RURNotAllowed").then((msg) => reject(msg));
+                }
+            });
+        });
+    };
+
+    function canCalc() {
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                getContractData("getState")
+            ]).then((values) => {
+                let 
+                    state = values[0]; // Append user balance checking later
+
+                let allowedState = (+state.data[0] == statesENUM.CALC_RATES);
+                if (allowedState) {
+                    resolve();
+                } else {
+                    $translate("LIBRE_CRNotAllowed").then((msg) => {
+                        reject(msg);
+                    });
+                }
+            });
+        });
+    }
+
+    function getLatestBlockData() {
+        return new Promise((resolve, reject) => {
+            ajaxReq.getLatestBlockData((res) => {
+                if (res.error) reject(res);
+                if (IS_DEBUG) console.log(res);
+                resolve(res);
+            }) 
+        })     
+    }
+
+    function toUnixtimeObject(obj) {
         try {
-            var _time = normalizeUnixTime(data.data[0]);
-            data.data.push(_time);
-            return data;
+            var _time = toUnixtime(obj.data[0]);
+            obj.data.push(_time);
+            return obj;
         } catch(e) {
             return {error: true, message: e.message};
         }
+    }
+
+    function getGasPrice() {
+        return globalFuncs.localStorage.getItem("gasPrice", null);
+    }
+
+    function getEthCall(options) {
+        return new Promise((resolve,reject) => {
+            ajaxReq.getEthCall({
+                from: options.from,
+                data: options.data,
+                to: options.to
+            }, (res) => {
+                if(!res.error && res.data != '0x') {
+                    resolve(res);
+                } else {
+                    reject(res);
+                }
+            });
+        });
+    }
+
+    function getLatestBlockData() {
+        return new Promise((resolve, reject) => {
+            ajaxReq.getLatestBlockData((res) => {
+                if (res.error) reject(res);
+                if (IS_DEBUG) console.log(res);
+                resolve(res);
+            }) 
+        })
     }
 
     return {
         bank: {
-            address: bankAddress,
-            abi: bankAbiRefactor
+            address: exchanger.address,
+            abi: exchanger.abiRefactored
         },
         token: {
-            address: cashAddress,
-            abi: cashAbiRefactor
+            address: cash.address,
+            abi: cash.abiRefactored
         },
-        coeff: {
-            rateMultiplier: RATE_MULTIPLIER,
-            tokenDecimals: TOKEN_DECIMALS,
-            gasEmission: GAS_EMISSION,
-            gasRemission: GAS_REMISSION,
-            gasApprove: GAS_APPROVE,
-            gasWithdraw: GAS_WITHDRAW,
-            gasRUR: GAS_RUR,
-            gasCR: GAS_CR,
-            gasQueue: GAS_QUEUE
-        },
+        coeff: coeff,
         methods: {
             getDataString: getDataString,
             getBankDataProcess: getBankDataProcess,
             getCashDataProcess: getCashDataProcess,
-            getBankDataAsync: getBankDataAsync,
-            getCashDataAsync: getCashDataAsync,
-            getBankDataScope: getBankDataScope,
-            getCashDataScope: getCashDataScope,
-            normalizeUnixTime: normalizeUnixTime,
-            normalizeUnixTimeObject: normalizeUnixTimeObject,
+            getContractData: getContractData,
+            getTokenData: getTokenData,
+            getContractScope: getContractScope,
+            getTokenScope: getTokenScope,
+            toUnixtime: toUnixtime,
+            toUnixtimeObject: toUnixtimeObject,
             normalizeRate: normalizeRate,
             hexToString: hexToString,
             getStateName: getStateName,
             fillStateData: fillStateData,
             libreTransaction: libreTransaction,
-            statusAllowsOrders: statusAllowsOrders,
-            ifNotPaused: ifNotPaused,
-            ifAllowedRUR: ifAllowedRUR,
-            ifAllowedCR: ifAllowedCR,
-            ifAllowedQueue: ifAllowedQueue
+            getLibreRawTx: getLibreRawTx,
+            canRequest: canRequest,
+            canCalc: canCalc,
+            canOrder: canOrder,
+            getGasPrice: getGasPrice,
+            getLatestBlockData: getLatestBlockData,
+            getEstimatedGas: getEstimatedGas,
+            getNetwork: getNetwork,
+            TXConstructor: TX,
+            getTransactionReceipt: getTransactionReceipt,
+            sendTx: sendTx
         },
-        networkType: "rinkeby"
-    }
+        networks: networks,
+        IS_DEBUG: IS_DEBUG,
+        mainTimer: mainTimer
+    };
 };
 module.exports = libreService;

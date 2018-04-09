@@ -130,6 +130,7 @@ uiFuncs.generateTx = function(txData, callback) {
                 gasPrice: data.isOffline ? ethFuncs.sanitizeHex(data.gasprice) : ethFuncs.sanitizeHex(ethFuncs.addTinyMoreToGas(data.gasprice)),
                 gasLimit: ethFuncs.sanitizeHex(ethFuncs.decimalToHex(txData.gasLimit)),
                 to: ethFuncs.sanitizeHex(txData.to),
+                from: ethFuncs.sanitizeHex(txData.from),
                 value: ethFuncs.sanitizeHex(ethFuncs.decimalToHex(etherUnits.toWei(txData.value, txData.unit))),
                 data: ethFuncs.sanitizeHex(txData.data)
             }
@@ -263,6 +264,7 @@ uiFuncs.transferAllBalance = function(fromAdd, gasLimit, callback) {
 }
 uiFuncs.notifier = {
     alerts: {},
+    txs: [],
     warning: function(msg, duration = 5000) {
         this.addAlert("warning", msg, duration);
     },

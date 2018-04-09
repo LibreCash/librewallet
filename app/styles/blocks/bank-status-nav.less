@@ -1,0 +1,20 @@
+.bank-status-nav {
+	&__list {
+		display: flex;
+		list-style: none;
+		padding-left: 0;
+	}
+	&__item {
+		margin-bottom: 0;
+	}
+	&__item a {
+		color: @text-color;
+		display: block;
+		padding: 40px 16px 16px;
+		border-bottom: 2px solid transparent;
+	}
+	&__item.active a {
+		border-bottom-color: @brand-primary;
+		color: @text-color-strong;
+	}
+}

@@ -3,8 +3,6 @@
       ng-controller='emissionCtrl'
       ng-cloak >
 
-  @@include('./libreStatus.tpl')
-
   <!-- Header : todo turn into warning notification-->
   <div class="alert alert-info" ng-show="hasQueryString">
     <p translate="WARN_Send_Link">
@@ -15,11 +13,15 @@
 
   <!-- Unlock Wallet -->
   <article class="collapse-container">
+    <div class="row">
+    <div class="col-xs-12 less-padding">
     <div ng-click="wd = !wd">
       <a class="collapse-button"><span ng-show="wd">+</span><span ng-show="!wd">-</span></a>
-      <h1 translate="LIBRE_buyLibreCash">
-        Buy LibreCash
+      <h1 translate="LIBRE_exchangeLibreCash">
+        Exchange LibreCash
       </h1>
+    </div>
+    </div>
     </div>
     <div ng-show="!wd">
         @@if (site === 'cx' )  {  <cx-wallet-decrypt-drtv></cx-wallet-decrypt-drtv>   }
@@ -27,14 +29,18 @@
     </div>
   </article>
 
-
   <!-- Send Tx Content -->
   <article class="row" ng-show="wallet!=null">
-    @@if (site === 'mew' ) { @@include( './emission-content.tpl', { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './emission-content.tpl', { "site": "cx"  } ) }
+    <section ng-hide="state == states.LOCKED">
+      @@if (site === 'mew' ) { @@include( './emission-content.tpl', { "site": "mew" } ) }
+      @@if (site === 'cx'  ) { @@include( './emission-content.tpl', { "site": "cx"  } ) }
 
-    @@if (site === 'mew' ) { @@include( './emission-modal.tpl',   { "site": "mew" } ) }
-    @@if (site === 'cx'  ) { @@include( './emission-modal.tpl',   { "site": "cx"  } ) }
+      @@if (site === 'mew' ) { @@include( './tx-modal.tpl',   { "site": "mew" } ) }
+      @@if (site === 'cx'  ) { @@include( './tx-modal.tpl',   { "site": "cx"  } ) }
+    </section>
+    <section ng-show="state == states.LOCKED" translate="LIBRE_exchangerLocked">
+      The exchanger is locked
+    </section>
   </article>
 
 
