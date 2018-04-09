@@ -96,9 +96,9 @@
         </p>
       </div>
       <div class="col-sm-11">
-        <span translate="LIBRE_contractBalances">Contract balances</span>:<br/>
-        {{ tokenBalance | number: 3 }} Libre<br/>
-        {{ ethBalance | number: 3 }} ETH
+        <span translate="LIBRE_contractBalances">Contract balances</span>:
+        <p ng-class="tokenBalance < changedTokens ? 'text-danger' : ''">{{ tokenBalance | number: 3 }} Libre</p>
+        <p></p>{{ ethBalance | number: 3 }} ETH</p>
       </div>
 
       <!-- buy section -->
@@ -136,7 +136,9 @@
 
         <div class="col-sm-4">
           <button style="min-width: 170px"
-              class="btn btn-default"
+              class="btn"
+              ng-class="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue) || changedTokens > tokenBalance ?
+                'btn-default' : 'btn-success'"
               ng-click="buyModal()"
               ng-disabled="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue) || changedTokens > tokenBalance">
             <strong>
@@ -188,7 +190,8 @@
           </p>
           <div class="col-sm-8 offset-col-sm-2">
             <button style="min-width: 170px"
-              class="btn btn-default"
+              class="btn"
+              ng-class="approvePending || !Validator.isPositiveNumber(tokensToAllow) ? 'btn-default' : 'btn-success'"
               ng-disabled="approvePending || !Validator.isPositiveNumber(tokensToAllow)"
               ng-click="approveModal()">
               <strong>
@@ -244,7 +247,9 @@
           
             <div class="col-sm-8 offset-col-sm-2">
               <button style="min-width: 170px"
-                class="btn btn-default"
+                class="btn"
+                ng-class="sellPending || !orderAllowed || !Validator.isPositiveNumber(tokenValue) || changedEth > ethBalance ?
+                  'btn-default' : 'btn-success'"
                 ng-click="sellModal()"
                 ng-disabled="sellPending || !orderAllowed || !Validator.isPositiveNumber(tokenValue) || changedEth > ethBalance">
                 <strong>
