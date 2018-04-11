@@ -550,7 +550,7 @@ LIBRE_exchanger                 :  'Exchanger',
 
 LIBRE_errorValidatingRates      :  'Error validating rates',
 LIBRE_RURCost                   :  'Update rates cost',
-LIBRE_exchangerLocked           :  'The exchanger is locked',
+LIBRE_exchangerLocked           :  'The exchanger is locked. Try again later and write to support@librebank.com',
 LIBRE_days                      :  'days',
 LIBRE_waiting                   :  'waiting...',
 LIBRE_captionUpdateRates        :  'Update Rates',
