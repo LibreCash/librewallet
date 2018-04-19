@@ -167,6 +167,9 @@ var libreService = function(walletService, $translate) {
     }
 
     function toUnixtime(timestamp) {
+        if (timestamp == 0)
+            return '-'
+        
         let date = new Date(timestamp * 1000);
         return date.toLocaleString();
     }
