@@ -193,5 +193,20 @@ var statusCtrl = function($scope, libreService, $translate) {
     translateMSGs().then(() => fillData(varsObject));
     fillOracles();
 
+    $scope.copyButton = function(address) {
+        const txt = document.createElement('textarea');
+        document.body.appendChild(txt);
+        txt.value = address; // chrome uses this
+        txt.textContent = address; // FF uses this
+        var sel = getSelection();
+        var range = document.createRange();
+        range.selectNode(txt);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        if(document.execCommand('copy')){
+          console.log('copied');
+        }
+        document.body.removeChild(txt);
+    }
 };
 module.exports = statusCtrl;
