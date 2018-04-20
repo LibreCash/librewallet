@@ -704,7 +704,7 @@ tx_Summary                      :  'During times of high volume (like during ICO
 
 TXFEE_Desc                      :  'The TX Fee is paid to miners for including your TX in a block. Is is the `gas limit` * `gas price`. [You can convert GWEI -> ETH here](https://www.LibreBank.com/helpers.html)',
 
-VAR_tokenAddress                :  'LibreCash Contract',
+VAR_tokenAddress                :  'LibreCash contract',
 VAR_cryptoFiatRate              :  'Nominal Tokens Rate',
 VAR_buyRate                     :  'Buy Tokens Rate',
 VAR_sellRate                    :  'Sell Tokens Rate',
@@ -722,7 +722,7 @@ VAR_contractState               :  'Contract state',
 VAR_reserveBalance              :  'Reserve Balance',
 VAR_tokenBalance                :  'Exchanger token balance',
 
-LIBRESTATUS_bankContractAddress  :  'Bank contract address',
+LIBRESTATUS_bankContractAddress  :  'Emission contract',
 LIBRESTATUS_contractStatus       :  'Contract Status',
 LIBRESTATUS_oraclesStatus        :  'Oracles Status',
 LIBRESTATUS_name                 :  'Name',
