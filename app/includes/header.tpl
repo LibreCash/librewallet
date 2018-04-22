@@ -146,14 +146,6 @@
                    rel="noopener noreferrer"></a>
               </div>
             </ul>
-            <!--     <p class="dropdown-gas__msg"
-               ng-show="gasPriceMsg"
-               ng-hide="ajaxReq.type!='ETH'">
-              The network is really full right now. Check
-              <a href="https://ethgasstation.info/"
-                 target="_blank" rel="noopener noreferrer">Eth Gas Station</a>
-              for gas price to use.
-            </p> -->
           </span>
           
           <!-- Warning: The separators you see on the frontend are in styles/etherwallet-custom.less. If you add / change a node, you have to adjust these. Ping tayvano if you're not a CSS wizard -->
@@ -194,21 +186,19 @@
   @@if (site === 'mew' ) {
       <a class="brand" href="/" aria-label="Go to homepage">
         <picture>
-          <source srcset="images/logo-libre2-mobile.svg" media="(max-width: 900px)">
-          <img src="images/logo-libre2.svg" alt="LibreWallet" />  
+          <source srcset="images/libre-mobile.svg" media="(max-width: 900px)">
+          <img src="images/libre.svg" alt="LibreWallet" />  
         </picture>
-        
-        <!--<p class="small visible-xs">3.11.1.7</p>-->
+      
       </a>
     }
-    <!-- <button class="nav-settings"></button> -->
+
     @@if (site === 'cx'  ) {
       <a class="brand" href="/cx-wallet.html" aria-label="Go to homepage">
         <img src="images/logo-libre.svg" height="64px" width="245px" alt="LibreWallet" />
-        <!-- <p class="small visible-xs">3.11.1.7</p> -->
+
       </a>
     }
-<!--   <a aria-hidden="true" ng-show="showLeftArrow" class="nav-arrow-left" ng-click="scrollLeft(100);" ng-mouseover="scrollHoverIn(true,2);" ng-mouseleave="scrollHoverOut()">&#171;</a> -->
   <div class="nav-scroll">
     <ul class="nav-inner">
       @@if (site === 'mew' ) {
