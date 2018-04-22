@@ -186,10 +186,10 @@
   @@if (site === 'mew' ) {
       <a class="brand" href="/" aria-label="Go to homepage">
         <picture>
-          <source srcset="images/libre-mobile.svg" media="(max-width: 900px)">
-          <img src="images/libre.svg" alt="LibreWallet" />  
+          <source srcset="images/logo-libre2-mobile.svg" media="(max-width: 900px)">
+          <img src="images/logo-libre2.svg" alt="LibreWallet" />  
         </picture>
-      
+
       </a>
     }
 
