@@ -6,7 +6,7 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
     $scope.customNodeModal = document.getElementById('customNodeModal') ? new Modal(document.getElementById('customNodeModal')) : null;
     $scope.Validator = Validator;
     $scope.nodeList = nodes.nodeList;
-    $scope.defaultNodeKey = 'eth_infura';
+    $scope.defaultNodeKey = 'rin_infura';
     $scope.customNode = { options: 'eth', name: '', url: '', port: '', httpBasicAuth: null, eip155: false, chainId: '' };
     $scope.customNodeCount = 0;
     $scope.nodeIsConnected = true;
@@ -112,7 +112,7 @@ var tabsCtrl = function($scope, globalService, $translate, $sce) {
     $scope.setCurNodeFromStorage = function() {
         var node = globalFuncs.localStorage.getItem('curNode', null);
         if (node === JSON.stringify({"key":"eth_metamask"})) {
-          node = JSON.stringify({"key":"eth_infura"})
+          node = JSON.stringify({"key":"rin_infura"})
         }
        if (node == null) {
             $scope.changeNode($scope.defaultNodeKey);

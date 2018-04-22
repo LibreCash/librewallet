@@ -54,7 +54,6 @@
                     <thead>
                     <tr>
                         <th translate="LIBRESTATUS_name">Name</th>
-                        <!--th translate="LIBRESTATUS_type">Type</th-->
                         <th translate="LIBRESTATUS_updateTime">Update Time</th>
                         <th translate="LIBRESTATUS_rate">Rate</th>
                     </tr>

@@ -2,7 +2,7 @@
 "use strict";
 var libreService = function(walletService, $translate) {
     var 
-        networks = {rinkeby: 'rin_ethscan', eth: 'eth_infura'};
+        networks = {rinkeby: 'rin_infura', eth: 'eth_infura'};
     var 
         exchanger = getContract("LibreBank"),
         cash = getContract("LibreCash"),
