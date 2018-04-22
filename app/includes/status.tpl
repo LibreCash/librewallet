@@ -27,7 +27,7 @@
                     <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', address) }}" target="_blank" rel="noopener noreferrer" class="contract-status__BCA-link">
                         {{ address }}
                     </a>
-                    <p translate="LIBRESTATUS_bankContractAddress" class="contract-status__BCA-bottom">Bank contract address</p>
+                    <p translate="LIBRESTATUS_bankContractAddress" class="contract-status__BCA-bottom">Exchanger contract</p>
                     <button class="contract-status__copy-btn" ng-click="copyButton(address)">copy</button>
                 </div>
 
@@ -35,7 +35,7 @@
                     <a href="{{ ajaxReq.blockExplorerAddr.replace('[[address]]', tokenAddress) }}" target="_blank" rel="noopener noreferrer" class="contract-status__BCA-link">
                         {{ tokenAddress }}
                     </a>
-                    <p translate="VAR_tokenAddress" class="contract-status__BCA-bottom">LibreCash Contract</p>
+                    <p translate="VAR_tokenAddress" class="contract-status__BCA-bottom">LibreCash contract</p>
                     <button class="contract-status__copy-btn" ng-click="copyButton(tokenAddress)">copy</button>
                 </div>
 
