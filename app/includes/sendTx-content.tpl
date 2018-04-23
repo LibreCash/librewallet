@@ -274,11 +274,12 @@
 
     <div class="row form-group">
       <div class="col-xs-12 clearfix">
-        <a class="btn btn-info btn-block"
+        <button class="btn btn-info btn-block"
            ng-click="generateTx()"
-           translate="SEND_generate">
+           translate="SEND_generate"
+           ng-disabled="disableGenerate()">
               Generate Transaction
-        </a>
+        </button>
       </div>
     </div>
 

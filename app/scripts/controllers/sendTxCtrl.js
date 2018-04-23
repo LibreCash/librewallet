@@ -249,6 +249,12 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope,
         });
     }
 
+    $scope.disableGenerate = function() {
+        if (!$scope.wallet || $scope.wallet.balance == 'loading') return true;
+
+        return +$scope.tx.value > ($scope.tx.sendMode != 'token' ? +$scope.wallet.balance : $scope.wallet.tokenObjs[$scope.tokenTx.id].getBalance())
+    }
+
     $scope.sendTx = async function() {
         $scope.sendTxModal.close();
         let time = new Date(),
