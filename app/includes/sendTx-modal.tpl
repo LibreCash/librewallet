@@ -26,17 +26,13 @@
                 </p>
               </td>
               <td ng-show="tx.sendMode=='ether'" class="mono">
-                ->
-                <br />
                 <h4 class="text-danger">
-                  {{tx.value}} {{unitReadable}}
+                  -> {{tx.value}} {{unitReadable}} ->
                 </h4>
               </td>
               <td ng-show="tx.sendMode!=='ether'" class="mono">
-                ->
-                <br />
                 <h4 class="text-primary">
-                  {{tx.value}} {{unitReadable}}
+                  -> {{tx.value}} {{unitReadable}} ->
                 </h4>
               </td>
               <td ng-show="tx.sendMode=='ether'">
@@ -87,10 +83,6 @@
               <td class="small text-left mono">{{unitReadable}}</td>
             </tr>
             <tr>
-              <td class="small text-right">Network:</td>
-              <td class="small text-left mono">{{ajaxReq.type}} by {{ajaxReq.service}}</td>
-            </tr>
-            <tr>
               <td class="small text-right">Gas Limit:</td>
               <td class="small text-left mono">{{parsedSignedTx.gasLimit}}</td>
             </tr>
@@ -107,7 +99,7 @@
               <td class="small text-right">Nonce:</td>
               <td class="small text-left mono">{{parsedSignedTx.nonce}}</td>
             </tr>
-            <tr>
+            <tr ng-hide="parsedSignedTx.data == '(none)'">
               <td class="small text-right">Data:</td>
               <td class="small text-left mono"><input class="form-control" value="{{parsedSignedTx.data}}"></input></td>
             </tr>
@@ -117,18 +109,6 @@
       </div>
 
       <div class="modal-footer">
-        <h4 class="text-center">
-          <span translate="SENDModal_Content_1">You are about to send</span>
-          <strong ng-show="tx.sendMode=='ether'" class="mono">{{tx.value}} {{unitReadable}}</strong>
-          <strong ng-show="tx.sendMode!=='ether'" class="mono">{{tokenTx.value}} {{unitReadable}}</strong>
-          <span translate="SENDModal_Content_2">to address</span>
-          <strong ng-show="tx.sendMode=='ether'" class="mono">{{tx.to}}.</strong>
-          <strong ng-show="tx.sendMode!=='ether'" class="mono">{{tokenTx.to}}</strong>
-        </h4>
-        <p translate="SENDModal_Content_3">
-          Are you sure you want to do this?
-        </p>
-        <br />
         <button class="btn btn-default" data-dismiss="modal" translate="SENDModal_No">
           No, get me out of here!
         </button>
