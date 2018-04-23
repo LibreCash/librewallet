@@ -1,11 +1,6 @@
-[{
-"address":"0xA52832A0B3EBfAeF629B1a44A922F46c90445108",
-"symbol":"☼ PLASMA",
-"decimal":6,
-"type":"default"
-},
+[
 {
-"address":"0x7fd77651395020fe0da9505cf8ecd7bda82f4f4c",
+"address":"0x4241Edd25a560Bb6Be4d39B6d63C2945847C26F6",
 "symbol":"Libre",
 "decimal":18,
 "type":"default"
