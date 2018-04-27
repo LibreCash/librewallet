@@ -20,7 +20,7 @@
             </div>
 
             <div class="col-lg-12 bank-status__wrapper" ng-hide="showOracles">
-                <h1 translate="LIBRESTATUS_contractStatus">Contract Status</h1>
+                <h1 translate="LIBRESTATUS_contractStatus" class="text-center">Contract Status</h1>
                 <div class="contract-status">
 
                 <div class="contract-status__BCA">
@@ -49,7 +49,7 @@
             </div>
 
             <div class="col-lg-12" ng-show="showOracles">
-                <h1 translate="LIBRESTATUS_oraclesStatus">Oracles status</h1>
+                <h1 translate="LIBRESTATUS_oraclesStatus" class="text-center">Oracles status</h1>
                 <table class="table oracles-table">
                     <thead>
                     <tr>

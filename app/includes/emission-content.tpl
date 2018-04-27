@@ -113,8 +113,8 @@
                     ng-class="Validator.isPositiveNumber(buyTXValue) ? 'is-valid' : 'is-invalid'"
                     ng-change="changedTokens = Validator.isPositiveNumber(buyTXValue) ? buyTXValue * buyRate : 0"/>
                     <div class="input-group-btn">
-              <span style="min-width: 170px"
-                    class="btn btn-default btn-inside-input"
+              <span 
+                    class="btn btn-std btn-default btn-inside-input"
                     ng-class="'disabled'">
                     <strong>
                       {{ changedTokens }} Libre
@@ -133,9 +133,9 @@
           </a>
         </p>
 
-        <div class="col-sm-4">
-          <button style="min-width: 170px"
-              class="btn"
+        <div class="col-sm-11">
+          <button
+              class="btn btn-std"
               ng-class="buyPending || !orderAllowed || !Validator.isPositiveNumber(buyTXValue) ?
                 'btn-default' : 'btn-success'"
               ng-click="buyModal()"
@@ -187,9 +187,9 @@
               </span>
             </a>
           </p>
-          <div class="col-sm-8 offset-col-sm-2">
-            <button style="min-width: 170px"
-              class="btn"
+          <div class="col-sm-11 offset-col-sm-2">
+            <button
+              class="btn btn-std"
               ng-class="approvePending || !Validator.isPositiveNumber(tokensToAllow) ? 'btn-default' : 'btn-success'"
               ng-disabled="approvePending || !Validator.isPositiveNumber(tokensToAllow)"
               ng-click="approveModal()">
@@ -224,7 +224,7 @@
                         ng-class="Validator.isPositiveNumber(tokenValue) ? 'is-valid' : 'is-invalid'"
                         ng-change="changedEth = Validator.isPositiveNumber(tokenValue) ? tokenValue / sellRate : 0"/>
                 <div class="input-group-btn">
-                  <span style="min-width: 170px"
+                  <span
                         class="btn btn-default btn-inside-input"
                         ng-class="'disabled'">
                           <strong>
@@ -244,9 +244,9 @@
               </a>
             </p>
           
-            <div class="col-sm-8 offset-col-sm-2">
-              <button style="min-width: 170px"
-                class="btn"
+            <div class="col-sm-11 offset-col-sm-2">
+              <button
+                class="btn btn-std"
                 ng-class="sellPending || !orderAllowed || !Validator.isPositiveNumber(tokenValue) || changedEth > ethBalance ?
                   'btn-default' : 'btn-success'"
                 ng-click="sellModal()"

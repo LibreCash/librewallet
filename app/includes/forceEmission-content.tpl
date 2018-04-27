@@ -89,7 +89,7 @@
         </tbody>
         </table>
   
-        <div class="col-sm-5">
+        <div class="col-sm-11">
           <a class="btn btn-block"
                 ng-click="generateRURTx()"
                 ng-class="RURAllowed ? 'btn-success' : 'btn-default'"
@@ -97,7 +97,7 @@
             {{ RURPending ? 'LIBRE_txPending' : 'LIBREFORCE_RUR' | translate }}
           </a>
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-11">
           <a class="btn btn-block"
                 ng-click="generatePBUYTx()"
                 ng-class="queuesAllowed ? 'btn-success' : 'btn-default'"
@@ -105,7 +105,7 @@
             {{ PBuyPending ? 'LIBRE_txPending' : 'LIBREFORCE_PBUY' | translate }}
           </a>
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-11">
           <a class="btn btn-block"
                 ng-click="generateCRTx()"
                 ng-class="CRAllowed ? 'btn-success' : 'btn-default'"
@@ -113,7 +113,7 @@
             {{ CRPending ? 'LIBRE_txPending' : 'LIBREFORCE_CR' | translate }}
           </a>
         </div>
-        <div class="col-sm-5">
+        <div class="col-sm-11 ">
           <a class="btn btn-block"
                 ng-click="generatePSELLTx()"
                 ng-class="queuesAllowed ? 'btn-success' : 'btn-default'"

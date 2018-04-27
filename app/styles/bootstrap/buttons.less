@@ -31,6 +31,11 @@
     }
   }
 
+  &-std {
+    min-width: 170px;
+    width: 100%;
+  }
+
   &:hover,
   &:focus,
   &.focus {
@@ -174,7 +179,7 @@
   // line-height: ensure even-numbered height of button next to large input
   .button-size(@padding-large-vertical; @padding-large-horizontal; @font-size-bump-more; @line-height-large; @border-radius);
 }
-.btn-sm {
+.btn-sm { 
   // line-height: ensure proper height of button next to small input
   .button-size(@padding-small-vertical; @padding-small-horizontal; @font-size-base; @line-height-small; @border-radius);
 }
