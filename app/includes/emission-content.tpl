@@ -308,7 +308,7 @@
             <p><span translate="LIBRE_calcRateRemains">Time remaining for rates calculating:</span> {{ calcRatesRemains | secondsToDateTime | date:'HH:mm:ss' }}</p>
         </label>
       </div>
-      <div class="col-sm-5">
+      <div class="col-sm-11">
         <button class="btn btn-block"
               ng-click="calcRatesModal()"
               ng-class="calcRatesAllowed ? 'btn-success' : 'btn-default'"
