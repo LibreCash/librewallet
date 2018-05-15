@@ -38,9 +38,9 @@
       @@if (site === 'mew' ) { @@include( './tx-modal.tpl',   { "site": "mew" } ) }
       @@if (site === 'cx'  ) { @@include( './tx-modal.tpl',   { "site": "cx"  } ) }
     </section>
-    <section ng-show="state == states.LOCKED" translate="LIBRE_exchangerLocked">
-      The exchanger is locked
-    </section>
+    <article ng-show="state == states.LOCKED">
+      <p class="alert alert-warning" translate="LIBRE_exchangerLocked">The exchanger is locked. Try again later and write to support@librebank.com</p>
+    </article>
   </article>
 
 

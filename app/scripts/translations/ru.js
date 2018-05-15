@@ -1004,7 +1004,7 @@ LIBRE_exchanger                 :  'Обменник',
 
 LIBRE_errorValidatingRates      :  'Курсы устарели. Запросите расчетчё снова',
 LIBRE_RURCost                   :  'Стоимость обновления курсов:',
-LIBRE_exchangerLocked           :  'Контракт обмена отключен',
+LIBRE_exchangerLocked           :  'Контракт обмена отключен. Попробуйте позже или напишите на support@librebank.com',
 LIBRE_days                      :  'дня (дней)',
 LIBRE_waiting                   :  'обработка...',
 LIBRE_captionUpdateRates        :  'Обновление курса',

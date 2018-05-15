@@ -72,7 +72,7 @@
         Transaction Details
       </h4>
       <br />
-      <table class="table table-striped txstatus__2 cont-md"> <!-- ng-show="tx.status=='foundOnChain' || foundInPending'"-->
+      <table class="table table-striped txstatus__2 cont-md">
         <tbody>
           <tr>
             <td translate="x_TxHash">
@@ -166,26 +166,6 @@
               </small>
             </td>
           </tr>
-        <!--
-          <tr>
-            <td>
-              <a class="account-help-icon"
-                 href="https://myetherwallet.github.io/knowledge-base/gas/what-is-gas-ethereum.html"
-                 target="_blank"
-                 rel="noopener noreferrer">
-                   <img src="images/icon-help.svg" class="help-icon" />
-                   <p class="account-help-text" translate="TXFEE_Desc"></p>
-              </a>
-              <span translate="x_TXFee">
-                TX Fee
-              </span>
-            </td>
-            <td>
-              ({{ txFee.eth }} ETH)
-              <small>({{ txFee.usd }} USD)</small>
-            </td>
-          </tr>
-        -->
           <tr>
             <td translate="OFFLINE_Step2_Label_6">
               Data

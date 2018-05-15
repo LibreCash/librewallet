@@ -89,15 +89,11 @@ var libreService = function(walletService, $translate) {
             _network = getNetwork(),
             abiList = nodes.nodeList[_network].abiList,
             contract = abiList.find((contract) => contract.name == name),
-            abi = JSON.parse(contract.abi),
-            refactored = {};
-
-        abi.forEach((item)=>refactored[item.name] = item);
+            abi = JSON.parse(contract.abiRefactored);
 
         return {
             address: contract.address,
-            abi: abi,
-            abiRefactored: refactored
+            abiRefactored: abi
         };
     }
 
@@ -167,6 +163,9 @@ var libreService = function(walletService, $translate) {
     }
 
     function toUnixtime(timestamp) {
+        if (timestamp == 0)
+            return '-'
+        
         let date = new Date(timestamp * 1000);
         return date.toLocaleString();
     }
