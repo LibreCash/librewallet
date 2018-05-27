@@ -3,4 +3,11 @@
 "symbol":"Libre",
 "decimal":18,
 "type":"default"
-}]
+},
+{
+"address":"0x60072ECFf986b0D4715ac21f203a3c8bcCdbEbdD",
+"symbol":"LBRS",
+"decimal":18,
+"type":"default"
+}
+]
