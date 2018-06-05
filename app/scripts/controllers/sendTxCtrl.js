@@ -4,6 +4,7 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope,
     $scope.tx = {};
     $scope.signedTx;
     $scope.allTokens = 'Loading';
+    $scope.LBRSBalance = 'Loading';
     $scope.ajaxReq = ajaxReq;
     $scope.unitReadable = ajaxReq.type;
     $scope.sendTxModal = new Modal(document.getElementById('sendTransaction'));
@@ -43,6 +44,14 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope,
         $scope.wallet.tokenObjs.forEach(token => {
             if (token.symbol === 'Libre')
                 token.balance = $scope.allTokens;
+        })
+    };
+
+    var setLBRSBalance = function(data) {
+        $scope.LBRSBalance = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+        $scope.wallet.tokenObjs.forEach(token => {
+            if (token.symbol === 'LBRS')
+                token.balance = $scope.LBRSBalance;
         })
     };
 
@@ -96,6 +105,7 @@ var sendTxCtrl = function($scope, $sce, walletService, libreService, $rootScope,
         if (walletService.wallet == null) return;
         $scope.wallet = walletService.wallet;
         libreService.methods.getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
+        libreService.methods.getLBRSDataProcess("balanceOf", setLBRSBalance, [walletService.wallet.getAddressString()]);
         $scope.wd = true;
         $scope.wallet.setBalance(applyScope);
         $scope.wallet.setTokens();
