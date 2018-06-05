@@ -1,13 +1,19 @@
 [{
-"address":"0xA52832A0B3EBfAeF629B1a44A922F46c90445108",
-"symbol":"☼ PLASMA",
-"decimal":6,
-"type":"default"
+    "address":"0xA52832A0B3EBfAeF629B1a44A922F46c90445108",
+    "symbol":"☼ PLASMA",
+    "decimal":6,
+    "type":"default"
 },
 {
-"address":"0x80a4711a1048eda5eeb4116f972b53c8878883ea",
-"symbol":"Libre",
-"decimal":18,
-"type":"default"
+    "address":"0x610f28b804d5f7e359edb5647d3dc5986d1a16b3",
+    "symbol":"Libre",
+    "decimal":18,
+    "type":"default"
+},
+{
+    "address":"0xcf46ec41aa51c77ff7438654429d82f32c35bd8c",
+    "symbol":"LBRS",
+    "decimal":18,
+    "type":"default"
 }
 ]

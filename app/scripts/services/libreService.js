@@ -6,6 +6,7 @@ var libreService = function(walletService, $translate) {
     var 
         exchanger = getContract("LibreExchanger"),
         cash = getContract("LibreCash"),
+        liberty = getContract("LibertyToken"),
         mainTimer = null;
 
     var 
@@ -37,7 +38,12 @@ var libreService = function(walletService, $translate) {
             minReadyOracles: 2,
             oracleActual: 15 * 60,
             rateActual: 10 * 60,
-            oracleTimeout: 10 * 60
+            oracleTimeout: 10 * 60,
+            callbackGas: {
+                min: 2,
+                max: 15,
+                value: 3
+            }
         };
         
     if (IS_DEBUG) {
@@ -115,11 +121,14 @@ var libreService = function(walletService, $translate) {
         return getDataProcess(cash.address, cash.abiRefactored, _var, process, params);
     }
 
+    function getLBRSDataProcess(_var, process, params = []) {
+        return getDataProcess(liberty.address, cash.abiRefactored, _var, process, params);
+    }
+
     function getDataAsync(to, abi, _var, params = []) {
         if (IS_DEBUG) {
             console.log(`[CALL ${getDataString(abi[_var], params)}]`);
         }
-
         return getEthCall({
             from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
             data: getDataString(abi[_var], params),
@@ -408,7 +417,7 @@ var libreService = function(walletService, $translate) {
         } catch (e) {
             _scope[pendingName] = false;
             isCheckingTx = false
-            _scope.notifier.danger("getTransactionData: " + e);
+            _scope.notifier.danger("getTransactionData: " + (e.error || e));
         }
     }
 
@@ -540,9 +549,11 @@ var libreService = function(walletService, $translate) {
         },
         coeff: coeff,
         methods: {
+            getDataAsync: getDataAsync,
             getDataString: getDataString,
             getBankDataProcess: getBankDataProcess,
             getCashDataProcess: getCashDataProcess,
+            getLBRSDataProcess: getLBRSDataProcess,
             getContractData: getContractData,
             getTokenData: getTokenData,
             getContractScope: getContractScope,

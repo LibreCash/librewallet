@@ -8,6 +8,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         getContractData = libreService.methods.getContractData,
         getBankDataProcess = libreService.methods.getBankDataProcess,
         getCashDataProcess = libreService.methods.getCashDataProcess,
+        getLBRSDataProcess = libreService.methods.getLBRSDataProcess,
         getDataString = libreService.methods.getDataString,
         toUnixtime = libreService.methods.toUnixtime,
         toUnixtimeObject = libreService.methods.toUnixtimeObject,
@@ -56,6 +57,8 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     $scope.txFees = {};
     $scope.txModal = {};
 
+    $scope.callbackGas = coeff.callbackGas;
+
     //$scope.allTokens = 'Loading';
     $scope.approvePending = false;
     $scope.sellPending = false;
@@ -70,10 +73,11 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     $scope.txModal = new Modal(document.getElementById('txModal'));
 
-    //$scope.allTokens = 'Loading';
     $scope.Validator = Validator;
     var currentTab = $scope.globalService.currentTab;
     var tabs = $scope.globalService.tabs;
+    var oracleCount = 6,
+        gasLimit = 150000;
 
     $scope.tx = {
         unit: "ether",
@@ -97,6 +101,10 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         $scope.allTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     }
 
+    function setLBRSBalance(data) {
+        $scope.LBRSBalance = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
+    }
+
     function setAllowance(data) {
         $scope.allowedTokens = data.data[0] / Math.pow(10, libreService.coeff.tokenDecimals);
     }
@@ -106,6 +114,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
             return;
         }
         getCashDataProcess("balanceOf", setAllTokens, [walletService.wallet.getAddressString()]);
+        getLBRSDataProcess("balanceOf", setLBRSBalance, [walletService.wallet.getAddressString()]);
         getCashDataProcess("allowance", setAllowance, [walletService.wallet.getAddressString(), bankAddress]);
     }
 
@@ -141,7 +150,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
         clearInterval(libreService.mainTimer)
     }
     
-    var lastCalcTime, lastRequestTime, lastLastBlockTime, deadline = 0;
+    var lastCalcTime, lastRequestTime, lastLastBlockTime, deadline = 0, gasPrice = 0;
     $scope.pendingOrderAllowCheck = false;
     var timerTicker = 0;
     libreService.mainTimer = setInterval(() => {
@@ -161,6 +170,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                     getContractData("requestPrice"),
                     getContractData("calcTime"),
                     getContractData("readyOracles"),
+                    getContractData("getOracleData", [0]),
                     getContractData("oracleCount"),
                     getContractData("requestTime"),
                     walletService.wallet == null ? { data: 0 } :
@@ -177,14 +187,14 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                             updateRatesCost = values[2],
                             calcTime = values[3],
                             readyOracles = values[4],
-                            oracleCount = values[5],
-                            requestTime = values[6],
-                            userTokenBalance = values[7],
-                            allowedTokens = values[8];
-                        if (values[9].data !== 0) {
-                            deadline = values[9]
+                            firstOracleData = values[5], // different methods in bank branch!
+                            requestTime = values[7],
+                            userTokenBalance = values[8],
+                            allowedTokens = values[9];
+                        if (values[10].data !== 0) {
+                            deadline = values[10]
                         }
-
+                        oracleCount = values[6];
                         ajaxReq.getBalance(bankAddress, function(balanceData) {
                             $scope.ethBalance = etherUnits.toEther(balanceData.data.balance, 'wei');
                         });
@@ -229,6 +239,22 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
                             }
                         }
 
+                        libreService.methods.getDataAsync(
+                            firstOracleData.data[0],
+                            {"gasPrice":{"constant":true,"inputs":[],"name":"gasPrice","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}},
+                            "gasPrice"
+                        ).then(_gasPrice => {
+                            gasPrice = _gasPrice;
+                            return libreService.methods.getDataAsync(
+                                firstOracleData.data[0],
+                                {"gasLimit":{"constant":true,"inputs":[],"name":"gasLimit","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}},
+                                "gasLimit"
+                            )
+                        }).then(_gasLimit => {
+                            gasLimit = _gasLimit;
+                            $scope.recountRatesCost();
+                        })
+
                         if (lastLastBlockTime != lastBlockTime) {
                             lastLastBlockTime = lastBlockTime;
                         }
@@ -248,6 +274,17 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
 
     function applyScope() {
         if (!$scope.$$phase) $scope.$apply();
+    }
+
+    $scope.recountRatesCost = function() {
+        let newGas = $scope.callbackGas.value * 10**9;
+        let oldGas = +gasPrice.data[0];
+        let estimate = $scope.updateRatesCost * Math.pow(10, libreService.coeff.tokenDecimals),
+            a = oracleCount.data[0] * gasLimit.data[0],
+            b = estimate - oldGas * a,
+            bMax = 2 * b;
+        $scope.callbackGas.recalculated = (newGas * a + b) / Math.pow(10, libreService.coeff.tokenDecimals);
+        $scope.callbackGas.recalculatedMax = (newGas * a + bMax) / Math.pow(10, libreService.coeff.tokenDecimals);
     }
 
     $scope.$watch(function() {
@@ -398,21 +435,15 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     }
 
     function prepareUpdateRatesTx() {
-        return new Promise((resolve, reject) => {
-            getContractData("requestPrice", []).then((oracleDeficit) => {
-                $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], []);
-    
-                $scope.tx.to = bankAddress;
-                $scope.tx.value = etherUnits.toEther(+oracleDeficit.data[0], 'wei');
-                $scope.tx.unit = 'ether';
-                resolve();
-            });
-        });
+        $scope.tx.data = getDataString(bankAbiRefactor["requestRates"], [$scope.callbackGas.value * 10**9]);
+        $scope.tx.to = bankAddress;
+        $scope.tx.value = $scope.callbackGas.recalculatedMax;
+        $scope.tx.unit = 'ether';
     }
 
     $scope.updateRatesTx = function(estimate = false) {
         if (!estimate) $scope.txModal.close();
-        canRequest().then(function() {
+        canRequest().then(() => {
             return prepareUpdateRatesTx();
         }).catch(function(err) {
             $scope.notifier.danger(err);
