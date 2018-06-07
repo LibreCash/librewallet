@@ -39,7 +39,7 @@
       @@if (site === 'cx'  ) { @@include( './tx-modal.tpl',   { "site": "cx"  } ) }
     </section>
     <article ng-show="state == states.LOCKED">
-      <p class="alert alert-warning" translate="LIBRE_exchangerLocked">The exchanger is locked</p>
+      <p class="alert alert-warning" translate="LIBRE_exchangerLocked">The exchanger is locked. Try again later and write to support@librebank.com</p>
     </article>
   </article>
 

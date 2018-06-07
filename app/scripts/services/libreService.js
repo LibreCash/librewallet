@@ -1,14 +1,23 @@
-/*jshint esversion: 6 */ 
+/*jshint esversion: 6 */
 "use strict";
 var libreService = function(walletService, $translate) {
-    var 
+    var
         networks = {rinkeby: 'rin_infura', eth: 'eth_infura'};
-    var 
+    var
         exchanger = getContract("LibreBank"),
         cash = getContract("LibreCash"),
+        liberty = getContract("LibertyToken"),
+        oracleABI = {"gasPrice":
+        {"constant":true,"inputs":[],"name":"gasPrice",
+        "outputs":[{"name":"","type":"uint256"}],"payable":false,
+        "stateMutability":"view","type":"function"},
+        "gasLimit":{"constant":true,"inputs":[],"name":"gasLimit",
+        "outputs":[{"name":"","type":"uint256"}],"payable":false,
+        "stateMutability":"view","type":"function"}
+        },
         mainTimer = null;
 
-    var 
+    var
         IS_DEBUG = false,
         states = [
             'LOCKED',
@@ -37,14 +46,19 @@ var libreService = function(walletService, $translate) {
             minReadyOracles: 2,
             oracleActual: 15 * 60,
             rateActual: 15 * 60,
-            oracleTimeout: 10 * 60
+            oracleTimeout: 10 * 60,
+            callbackGas: {
+                min: 2,
+                max: 15,
+                value: 3
+            }
         };
-        
+
     if (IS_DEBUG) {
         console.log("Used contracts")
         console.log(exchanger);
         console.log(cash);
-    }    
+    }
 
     function getDataString(func, inputs) {
         let
@@ -54,13 +68,13 @@ var libreService = function(walletService, $translate) {
             types = typeName.split(',');
 
             types = types[0] == "" ? [] : types;
-            
+
         return `0x${funcSig}${ethUtil.solidityCoder.encodeParams(types, inputs)}`;
     };
 
     function getDataCommon(to, abi, varName, process, txParam, processParam) {
         return getEthCall({
-                from: walletService.wallet == null ? null 
+                from: walletService.wallet == null ? null
                     : walletService.wallet.getAddressString(),
                 to,
                 data: getDataString(abi[varName], txParam)
@@ -115,11 +129,14 @@ var libreService = function(walletService, $translate) {
         return getDataProcess(cash.address, cash.abiRefactored, _var, process, params);
     }
 
+    function getLBRSDataProcess(_var, process, params = []) {
+        return getDataProcess(liberty.address, cash.abiRefactored, _var, process, params);
+    }
+
     function getDataAsync(to, abi, _var, params = []) {
         if (IS_DEBUG) {
             console.log(`[CALL ${getDataString(abi[_var], params)}]`);
         }
-
         return getEthCall({
             from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
             data: getDataString(abi[_var], params),
@@ -169,7 +186,7 @@ var libreService = function(walletService, $translate) {
     function toUnixtime(timestamp) {
         if (timestamp == 0)
             return '-'
-        
+
         let date = new Date(timestamp * 1000);
         return date.toLocaleString();
     }
@@ -179,10 +196,10 @@ var libreService = function(walletService, $translate) {
     }
 
     function hexToString(_hex) {
-        var 
+        var
             hex = _hex.toString(),//force conversion
             str = '';
-            
+
         for (var i = 2; i < hex.length; i += 2) {
             if (hex.substr(i, 2) !== "00") {
                 str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
@@ -191,7 +208,7 @@ var libreService = function(walletService, $translate) {
         return str;
     }
 
-    function getStateName(number) { 
+    function getStateName(number) {
         try {
             return states[number];
         } catch(e) {
@@ -199,7 +216,7 @@ var libreService = function(walletService, $translate) {
         }
     }
 
-    function fillStateData(source) { 
+    function fillStateData(source) {
         try {
             let stateName = getStateName(source.data[0]);
             source.data.push(stateName);
@@ -245,7 +262,7 @@ var libreService = function(walletService, $translate) {
                     resolve(rawTx);
                 });
             });
-        });    
+        });
     }
 
     function getTransactionReceipt(txData) {
@@ -305,7 +322,7 @@ var libreService = function(walletService, $translate) {
         _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
-        
+
         try {
             let tx = new TX(methodName, translator)
             await tx.init()
@@ -348,7 +365,7 @@ var libreService = function(walletService, $translate) {
                 if (!_scope.$$phase) _scope.$apply();
             });
             if (IS_DEBUG) console.log("resp", resp);
-            
+
             var isCheckingTx = false,
                 noTxCounter = 0,
                 receiptInterval = 5000,
@@ -408,7 +425,7 @@ var libreService = function(walletService, $translate) {
         } catch (e) {
             _scope[pendingName] = false;
             isCheckingTx = false
-            _scope.notifier.danger("getTransactionData: " + e);
+            _scope.notifier.danger("getTransactionData: " + (e.error || e));
         }
     }
 
@@ -422,22 +439,22 @@ var libreService = function(walletService, $translate) {
                 getContractData(rates[0] != 0 ? "buyRate" : "sellRate")
             ])
             .then((values) => {
-                let 
+                let
                     state = values[0],
                     rate = values[1];
-    
+
                 let prevRate = rates[0] != 0 ? rates[0] : rates[1];
                 if (rate.data[0] / coeff.rateMultiplier != prevRate) {
                     $translate("LIBRE_errorValidatingRates").then((msg) => reject(msg));
                 }
-    
+
                 let canOrder = (+state.data[0] == statesENUM.PROCESSING_ORDERS);
                 if (canOrder)
                     resolve();
                 else {
                     $translate("LIBRE_orderNotAllowed").then((msg) => reject(msg));
                 }
-            });    
+            });
         });
     }
 
@@ -446,11 +463,11 @@ var libreService = function(walletService, $translate) {
             Promise.all([
                 getContractData("getState")
             ]).then((values) => {
-                let 
+                let
                     state = values[0];
-    
-                let сanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
-                if (сanRequest) {
+
+                let CanRequest = (+state.data[0] == statesENUM.REQUEST_RATES);
+                if (CanRequest) {
                     resolve();
                 } else {
                     $translate("LIBRE_RURNotAllowed").then((msg) => reject(msg));
@@ -464,7 +481,7 @@ var libreService = function(walletService, $translate) {
             Promise.all([
                 getContractData("getState")
             ]).then((values) => {
-                let 
+                let
                     state = values[0]; // Append user balance checking later
 
                 let allowedState = (+state.data[0] == statesENUM.CALC_RATES);
@@ -485,8 +502,8 @@ var libreService = function(walletService, $translate) {
                 if (res.error) reject(res);
                 if (IS_DEBUG) console.log(res);
                 resolve(res);
-            }) 
-        })     
+            })
+        })
     }
 
     function toUnixtimeObject(obj) {
@@ -525,7 +542,7 @@ var libreService = function(walletService, $translate) {
                 if (res.error) reject(res);
                 if (IS_DEBUG) console.log(res);
                 resolve(res);
-            }) 
+            })
         })
     }
 
@@ -540,9 +557,11 @@ var libreService = function(walletService, $translate) {
         },
         coeff: coeff,
         methods: {
+            getDataAsync: getDataAsync,
             getDataString: getDataString,
             getBankDataProcess: getBankDataProcess,
             getCashDataProcess: getCashDataProcess,
+            getLBRSDataProcess: getLBRSDataProcess,
             getContractData: getContractData,
             getTokenData: getTokenData,
             getContractScope: getContractScope,
@@ -568,7 +587,8 @@ var libreService = function(walletService, $translate) {
         },
         networks: networks,
         IS_DEBUG: IS_DEBUG,
-        mainTimer: mainTimer
+        mainTimer: mainTimer,
+        oracleABI: oracleABI    
     };
 };
 module.exports = libreService;

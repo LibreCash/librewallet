@@ -71,7 +71,7 @@ var statusCtrl = function($scope, libreService, $translate) {
             translate: "VAR_sellFee",
             process: (data) =>`${data/100} %`
         },
-        countOracles: {
+        oracleCount: {
             default: "Oracle Count",
             translate: "VAR_countOracles"
         },
@@ -96,7 +96,7 @@ var statusCtrl = function($scope, libreService, $translate) {
             process: (timestamp)=> timestamp == 0 ? '-' : toUnixtime(timestamp)
         }
     };
-    
+
     $scope.address = bankAddress;
     $scope.tokenAddress = libreService.token.address;
     $scope.contractData = varsObject;
@@ -128,9 +128,9 @@ var statusCtrl = function($scope, libreService, $translate) {
 
     function processData(bankData, varsObject) {
         return Promise.resolve(bankData.map(item => {
-            let 
+            let
                 varItem = varsObject[item.varName];
-                
+
             return {
                 data: varItem.process ? varItem.process(item.data) : item.data[0],
                 translate: varItem.translate,
@@ -190,7 +190,8 @@ var statusCtrl = function($scope, libreService, $translate) {
         applyScope();
     }
 
-    translateMSGs().then(() => fillData(varsObject));
+    translateMSGs();
+    fillData(varsObject);
     fillOracles();
 
     $scope.copyButton = function(address) {

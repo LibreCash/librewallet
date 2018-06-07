@@ -281,8 +281,13 @@
     </section>
   
     <section ng-show="state == states.REQUEST_RATES">
+      <div class="col-sm-8" ng-show="updateRatesAllowed">
+        <div><span translate="LIBRE_callbackCost">Oracles callback gas price</span>: {{ callbackGas.value }} GWei</div>
+        <input type="range" ng-model="callbackGas.value" min="{{callbackGas.min}}" max="{{callbackGas.max}}" step="1" 
+          ng-change="recountRatesCost()"/>
+      </div>      
       <div class="col-sm-11" ng-show="updateRatesAllowed">
-        <span translate="LIBRE_RURCost">Update rates cost</span>: {{ updateRatesCost }} ETH
+        <span translate="LIBRE_RURCost">Est./max update rates cost</span>: {{ callbackGas.recalculated }} / {{ callbackGas.recalculatedMax }} ETH
       </div>
 
       <div class="col-sm-8">
