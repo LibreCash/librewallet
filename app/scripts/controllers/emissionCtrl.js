@@ -302,6 +302,7 @@ var emissionCtrl = function($scope, $sce, walletService, libreService, $rootScop
     });
 
     function isEnough(valA, valB) {
+        if (valA.toString() == '') return 0;
         return new BigNumber(valA.toString()).lte(new BigNumber(valB.toString()));
     }
 

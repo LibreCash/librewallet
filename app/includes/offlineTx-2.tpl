@@ -13,7 +13,7 @@
       </label>
       <input class="form-control"
              type="text"
-             placeholder="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8"
+             placeholder="0xDECAF9CD2367cdbb726E904cD6397eDFcAe6068D"
              ng-model="tx.to"
              ng-change="validateAddress(tx.to,'')"/>
     </section>
@@ -108,7 +108,17 @@
                ng-disabled="checkTxReadOnly"
                ng-class="Validator.isPositiveNumber(gasPriceDec) ? 'is-valid' : 'is-invalid'" />
         <div class="input-group-btn">
-          <button style="min-width: 170px" class="btn btn-default"> WEI </button>
+          <span class="dropdown dropdown-gprice" ng-cloak>
+            <a tabindex="0" style="min-width: 170px"  aria-haspopup="true" aria-expanded="false" aria-label="gas price" class="dropdown-toggle btn btn-default" ng-click="gpDropdown = !gpDropdown">
+              {{ gasPriceDef }}
+              <i class="caret"></i>
+            </a>
+            <ul class="dropdown-menu" ng-show="gpDropdown">
+              <li><a ng-class="{true:'active'}[gasPriceDef=='WEI']" ng-click="changePrice('WEI')"> WEI          </a></li>
+              <li><a ng-class="{true:'active'}[gasPriceDef=='GWEI']" ng-click="changePrice('GWEI')"> GWEI         </a></li>
+            </ul>
+          </span>
+
         </div>
       </div>
     </section>
