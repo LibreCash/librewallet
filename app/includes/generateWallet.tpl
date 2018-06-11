@@ -37,6 +37,7 @@
              translate="NAV_GenerateWallet">
                Generate Wallet
           </a>
+          @@include('./apple-mobile-modal.tpl', { "site": "" } )
         </div>
         <div class="col-sm-12">
           <p translate="x_PasswordDesc"></p>
@@ -70,7 +71,7 @@
         <li>
           <p>
             <strong>
-              Ledger / TREZOR / Digital Bitbox
+              Ledger / TREZOR / Digital Bitbox / Secalot
             </strong>:
             <span translate="GEN_Help_1">
               Use your

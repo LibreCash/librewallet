@@ -18,6 +18,23 @@
 .pull-left {
   float: left !important;
 }
+.pull-right-x {
+  @media screen and (min-width: @screen-lg) {
+    float: right !important;
+  }
+}
+.pull-left-x {
+  @media screen and (min-width: @screen-lg) {
+    float: left !important;
+  }
+}
+.for-block {
+  @media screen and (max-width: @screen-lg) {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+}
 
 
 // Toggling content

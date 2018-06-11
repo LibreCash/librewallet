@@ -71,8 +71,14 @@ globalFuncs.errorMsgs = [
     'Please enter valid TX hash', // 36
     'Please enter valid hex string. Hex only contains: 0x, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, a, b, c, d, e, f', // 37
     'Offer must have either price or reserve set to more than 0', // 38
-    'Bid must be more than the specified minimum' // 39
+    'Bid must be more than the specified minimum', // 39
+    'Please enter a valid private key' // 40
 ];
+
+globalFuncs.phishingWarning = [
+  'This address has been flagged: ',
+  'This address has been flagged in our Phishing list. Please make sure you are sending to the right address'
+]
 
 // These are translated in the translation files
 globalFuncs.successMsgs = [
@@ -153,7 +159,7 @@ globalFuncs.getEthNodeMsg = function(str) {
         return this.getParityMsg(str);
 };
 globalFuncs.scrypt = {
-    n: 1024
+    n: 8192
 };
 globalFuncs.postDelay = 300;
 globalFuncs.kdf = "scrypt";
@@ -168,11 +174,7 @@ globalFuncs.urlGet = function(name) {
     if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search.toLowerCase())) return this.stripTags(decodeURIComponent(name[1]));
 };
 globalFuncs.stripTags = function(str) {
-    var SCRIPT_REGEX = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
-    while (SCRIPT_REGEX.test(str)) {
-        str = str.replace(SCRIPT_REGEX, "");
-    }
-    return str;
+    return xssFilters.inHTMLData(str);
 };
 globalFuncs.checkAndRedirectHTTPS = function() {
     var host = "myetherwallet.com";
@@ -195,6 +197,10 @@ globalFuncs.getRandomBytes = function(num) {
     return ethUtil.crypto.randomBytes(num);
 };
 
+globalFuncs.isAlphaNumericOrSpec = function(value) {
+  return !/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(value);
+}
+
 function getFromLS(key, errorMsg) {
     var localStorageItemString = globalFuncs.localStorage.getItem(key);
     if (!localStorageItemString && errorMsg) {
@@ -212,11 +218,10 @@ globalFuncs.getDefaultTokensAndNetworkType =  function getDefaultTokensAndNetwor
 
     var tokenMappings = {
         'eth': require('./tokens/ethTokens.json'),
+//        'etc': require('./tokens/etcTokens.json'),
+//        'rop': require('./tokens/ropstenTokens.json'),
+//        'kov': require('./tokens/kovanTokens.json'),
         'rin': require('./tokens/rinkebyTokens.json')
-        /* 'etc': require('./tokens/etcTokens.json'),
-        'rop': require('./tokens/ropstenTokens.json'),
-        'kov': require('./tokens/kovanTokens.json')
-        */
     };
 
     var nodeErrMsg = 'Node does not exist, contact support@myetherwallet.com CODE:localstorageNodeMissing'
@@ -306,7 +311,7 @@ globalFuncs.saveTokenToLocal = function(localToken, callback) {
     try {
         if (!ethFuncs.validateEtherAddress(localToken.contractAdd)) {throw globalFuncs.errorMsgs[5]}
         else if (!globalFuncs.isNumeric(localToken.decimals) || parseFloat(localToken.decimals) < 0) {throw globalFuncs.errorMsgs[7]}
-        else if (!globalFuncs.isAlphaNumeric(localToken.symbol) || localToken.symbol == "") {throw globalFuncs.errorMsgs[19]}
+        else if (globalFuncs.isAlphaNumericOrSpec(localToken.symbol) || localToken.symbol === "") {throw globalFuncs.errorMsgs[19]}
         var storedTokens = globalFuncs.localStorage.getItem("localTokens", null) != null ? JSON.parse(globalFuncs.localStorage.getItem("localTokens")) : [];
 
         // catch if TOKEN SYMBOL is already in storedTokens
@@ -345,9 +350,10 @@ globalFuncs.saveTokenToLocal = function(localToken, callback) {
         });
 
     } catch (e) {
+        const newE = e.message ? e.message : e;
         callback({
             error: true,
-            msg: e.message
+            msg: newE
         });
     }
 };

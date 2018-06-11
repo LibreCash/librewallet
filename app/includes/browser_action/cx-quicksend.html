@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Quicksend - LibreWallet Chrome Extension</title>
-  <meta name="description" content="LibreWallet is a free, open-source, client-side interface for generating Ethereum wallets &amp; more. Interact with the Ethereum blockchain easily &amp; securely.">
+  <title>Quicksend - MyEtherWallet Chrome Extension</title>
+  <meta name="description" content="MyEtherWallet is a free, open-source, client-side interface for generating Ethereum wallets &amp; more. Interact with the Ethereum blockchain easily &amp; securely.">
   <link rel="stylesheet" href="../css/etherwallet-master.min.css">
   <script type="text/javascript" src="../js/etherwallet-static.min.js"></script>
   <script type="text/javascript" src="../js/etherwallet-master.js"></script>
@@ -47,7 +47,7 @@
       <div ng-show="selectedWallet!='' && !showConfirm">
         <div class="form-group">
           <label class="strong" translate="SEND_addr"> To Address: </label>
-          <input class="form-control" type="text" placeholder="0x7cB57B5A97eAbe94205C07890BE4c1aD31E486A8" ng-model="tx.to" ng-change="validateAddress()" />
+          <input class="form-control" type="text" placeholder="0xDECAF9CD2367cdbb726E904cD6397eDFcAe6068D" ng-model="tx.to" ng-change="validateAddress()" />
           <div ng-bind-html="validateAddressStatus"></div>
         </div>
         <div class="form-group">

@@ -4,13 +4,13 @@
 
     <div class="col-xs-11">
       <div class="account-help-icon">
+        <img src="images/icon-help.svg" class="help-icon" />
         <p class="account-help-text" translate="x_AddessDesc">
           You may know this as your "Account #" or your "Public Key". It's what you send people so they can send you ETH. That icon is an easy way to recognize your address.
         </p>
         <h5 translate="x_Address">
           Your Address:
         </h5>
-        <img src="images/icon-help.svg" class="help-icon" />
       </div>
       <input class="form-control"
              type="text"
@@ -19,7 +19,7 @@
     </div>
 
     <div class="col-xs-1 address-identicon-container">
-      <div class="addressIdenticon margin-top"
+      <div class="addressIdenticon"
            title="Address Indenticon"
            blockie-address="{{wallet.getAddressString()}}"
            watch-var="wallet">
@@ -28,13 +28,13 @@
 
     <div class="col-xs-12" ng-show='showEnc'>
       <div class="account-help-icon">
+        <img src="images/icon-help.svg" class="help-icon" />
         <p class="account-help-text" translate="x_KeystoreDesc">
           This Keystore / JSON file matches the format used by Mist & Geth so you can easily import it in the future. It is the recommended file to download and back up.
         </p>
         <h5 translate="x_Keystore">
           Keystore/JSON File (Recommended • Encrypted • Mist/Geth Format)
         </h5>
-        <img src="images/icon-help.svg" class="help-icon" />
       </div>
       <a class="btn btn-info btn-block" href="{{blobEnc}}" download="{{encFileName}}" translate="x_Download">
         DOWNLOAD
@@ -43,6 +43,7 @@
 
     <div class="col-xs-12" ng-show="wallet.type=='default'">
       <div class="account-help-icon">
+        <img src="images/icon-help.svg" class="help-icon" />
         <p class="account-help-text" translate="x_PrivKeyDesc">
           This is the unencrypted text version of your private key, meaning no password is necessary. If someone were to find your unencrypted private key, they could access your wallet without a password. For this reason, encrypted versions are typically recommended.
         </p>
@@ -51,9 +52,8 @@
             Private Key (unencrypted)
           </span>
         </h5>
-        <img src="images/icon-help.svg" class="help-icon" />
       </div>
-      <div class="input-group input-group--flex">
+      <div class="input-group">
         <input class="form-control no-animate"
                type="{{pkeyVisible ? 'text' : 'password'}}"
                ng-value="wallet.getPrivateKeyString()"
@@ -69,13 +69,13 @@
 
     <div class="col-xs-12" ng-show="wallet.type=='default'">
       <div class="account-help-icon">
+        <img src="images/icon-help.svg" class="help-icon" />
         <p class="account-help-text" translate="x_PrintDesc">
           ProTip: If you cannot print this right now, click "Print" and save it as a PDF until you are able to get it printed. Remove it from your computer afterwards!
         </p>
         <h5 translate="x_Print">
           Print Paper Wallet:
         </h5>
-        <img src="images/icon-help.svg" class="help-icon" />
       </div>
       <a class="btn btn-info btn-block" ng-click="printQRCode()" translate="x_Print">
         Print Paper Wallet
@@ -126,6 +126,6 @@
 
 </article>
 
-<article class="col-sm-4 no-padding">
+<article class="col-sm-4">
   <wallet-balance-drtv></wallet-balance-drtv>
 </article>

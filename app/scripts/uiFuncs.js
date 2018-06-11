@@ -104,6 +104,32 @@ uiFuncs.signTxDigitalBitbox = function(eTx, rawTx, txData, callback) {
     var app = new DigitalBitboxEth(txData.hwTransport, '');
     app.signTransaction(txData.path, eTx, localCallback);
 }
+uiFuncs.signTxSecalot = function(eTx, rawTx, txData, callback) {
+
+    var localCallback = function(result, error) {
+        if (typeof error != "undefined") {
+            error = error.errorCode ? u2f.getErrorByCode(error.errorCode) : error;
+            if (callback !== undefined) callback({
+                isError: true,
+                error: error
+            });
+            return;
+        }
+        uiFuncs.notifier.info("The transaction was signed but not sent. Click the blue 'Send Transaction' button to continue.");
+        rawTx.v = ethFuncs.sanitizeHex(result['v']);
+        rawTx.r = ethFuncs.sanitizeHex(result['r']);
+        rawTx.s = ethFuncs.sanitizeHex(result['s']);
+
+        var eTx_ = new ethUtil.Tx(rawTx);
+        rawTx.rawTx = JSON.stringify(rawTx);
+        rawTx.signedTx = ethFuncs.sanitizeHex(eTx_.serialize().toString('hex'));
+        rawTx.isError = false;
+        if (callback !== undefined) callback(rawTx);
+    }
+    uiFuncs.notifier.info("Tap a touch button on your device to confirm signing.");
+    var app = new SecalotEth(txData.hwTransport);
+    app.signTransaction(txData.path, eTx, localCallback);
+}
 uiFuncs.trezorUnlockCallback = function(txData, callback) {
     TrezorConnect.open(function(error) {
         if (error) {
@@ -125,6 +151,7 @@ uiFuncs.generateTx = function(txData, callback) {
     try {
         uiFuncs.isTxDataValid(txData);
         var genTxWithInfo = function(data) {
+            // console.log("genTxWithInfo", data); // todo remove dev item
             var rawTx = {
                 nonce: ethFuncs.sanitizeHex(data.nonce),
                 gasPrice: data.isOffline ? ethFuncs.sanitizeHex(data.gasprice) : ethFuncs.sanitizeHex(ethFuncs.addTinyMoreToGas(data.gasprice)),
@@ -134,7 +161,12 @@ uiFuncs.generateTx = function(txData, callback) {
                 value: ethFuncs.sanitizeHex(ethFuncs.decimalToHex(etherUnits.toWei(txData.value, txData.unit))),
                 data: ethFuncs.sanitizeHex(txData.data)
             }
+            if(txData.kyberGasPrice){
+              rawTx.gasPrice = txData.kyberGasPrice;
+            }
+            console.log("rawTx to Sign", rawTx); // todo remove dev item
             if (ajaxReq.eip155) rawTx.chainId = ajaxReq.chainId;
+            rawTx.data = rawTx.data == '' ? '0x' : rawTx.data;
             var eTx = new ethUtil.Tx(rawTx);
             if ((typeof txData.hwType != "undefined") && (txData.hwType == "ledger")) {
                 var app = new ledgerEth(txData.hwTransport);
@@ -163,16 +195,21 @@ uiFuncs.generateTx = function(txData, callback) {
             } else if ((typeof txData.hwType != "undefined") && (txData.hwType == "trezor")) {
                 uiFuncs.signTxTrezor(rawTx, txData, callback);
             } else if ((typeof txData.hwType != "undefined") && (txData.hwType == "web3")) {
-              // for web3, we dont actually sign it here
-              // instead we put the final params in the "signedTx" field and
-              // wait for the confirmation dialogue / sendTx method
-              var txParams = Object.assign({ from: txData.from }, rawTx)
-              rawTx.rawTx = JSON.stringify(rawTx);
-              rawTx.signedTx = JSON.stringify(txParams);
-              rawTx.isError = false;
-              callback(rawTx)
+                // for web3, we dont actually sign it here
+                // instead we put the final params in the "signedTx" field and
+                // wait for the confirmation dialogue / sendTx method
+                var txParams = Object.assign({
+                    from: txData.from,
+                    gas: ethFuncs.sanitizeHex(ethFuncs.decimalToHex(txData.gasLimit)) // MetaMask and Web3 v1.0 use 'gas' not 'gasLimit'
+                }, rawTx)
+                rawTx.rawTx = JSON.stringify(rawTx);
+                rawTx.signedTx = JSON.stringify(txParams);
+                rawTx.isError = false;
+                callback(rawTx)
             } else if ((typeof txData.hwType != "undefined") && (txData.hwType == "digitalBitbox")) {
                 uiFuncs.signTxDigitalBitbox(eTx, rawTx, txData, callback);
+            } else if ((typeof txData.hwType != "undefined") && (txData.hwType == "secalot")) {
+                uiFuncs.signTxSecalot(eTx, rawTx, txData, callback);
             } else {
                 eTx.sign(new Buffer(txData.privKey, 'hex'));
                 rawTx.rawTx = JSON.stringify(rawTx);
@@ -210,19 +247,22 @@ uiFuncs.generateTx = function(txData, callback) {
     }
 }
 uiFuncs.sendTx = function(signedTx, callback) {
-  // check for web3 late signed tx
-    if (signedTx.slice(0,2) !== '0x') {
-      var txParams = JSON.parse(signedTx)
-      window.web3.eth.sendTransaction(txParams, function(err, txHash){
-        if (err) {
-          return callback({
-            isError: true,
-            error: err.stack,
-          })
-        }
-        callback({ data: txHash })
-      });
-      return
+    console.log("signedTx", signedTx); // todo remove dev item
+    // check for web3 late signed tx
+    if (signedTx.slice(0, 2) !== '0x') {
+        var txParams = JSON.parse(signedTx)
+        window.web3.eth.sendTransaction(txParams, function(err, txHash) {
+            if (err) {
+                return callback({
+                    isError: true,
+                    error: err.stack,
+                })
+            }
+            callback({
+                data: txHash
+            })
+        });
+        return
     }
 
     ajaxReq.sendRawTx(signedTx, function(data) {
@@ -304,5 +344,5 @@ uiFuncs.notifier = {
             }
         }
     },
-  }
+}
 module.exports = uiFuncs;

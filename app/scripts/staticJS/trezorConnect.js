@@ -42,7 +42,7 @@ if (window.location.hostname === 'localhost' && !window.TREZOR_POPUP_ORIGIN) {
     //POPUP_ORIGIN = window.location.origin;
     //POPUP_PATH = POPUP_ORIGIN;
 }
-var POPUP_URL = window.TREZOR_POPUP_URL || POPUP_PATH + '/popup/popup.html';
+var POPUP_URL = window.TREZOR_POPUP_URL || POPUP_PATH + '/popup/popup.html?v=' + new Date().getTime();
 
 var POPUP_INIT_TIMEOUT = 15000;
 
@@ -265,7 +265,7 @@ function TrezorConnect() {
         }, requiredFirmware), callback);
     };
 
-    // new implementation with ethereum at beginnig
+    // new implementation with ethereum at beginning
     this.ethereumSignTx = function() {
         this.signEthereumTx.apply(this, arguments);
     }
@@ -378,7 +378,7 @@ function TrezorConnect() {
     /**
       * Sign a message
       *
-      * @param {string|array} path  
+      * @param {string|array} path
       * @param {string} message to sign (ascii)
       * @param {string|function(SignMessageResult)} callback
       * @param {?string} opt_coin - (optional) name of coin (default Bitcoin)
@@ -608,7 +608,7 @@ function TrezorConnect() {
       * Display address on device
       *
       * @param {array} address
-      * @param {string} coin 
+      * @param {string} coin
       * @param {boolean} segwit
       * @param {?(string|array<number>)} requiredFirmware
       *

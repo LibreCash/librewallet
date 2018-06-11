@@ -317,14 +317,24 @@ var libreService = function(walletService, $translate) {
         }
     }
 
+    function checkMetamaskError(translator, error) {
+        const METAMASK_DENY_CHROME = "User denied transaction signature";
+        const METAMASK_DENY_FF = "@moz-extension";
+        if (~error.indexOf(METAMASK_DENY_CHROME) || ~error.indexOf(METAMASK_DENY_FF)) {
+            return translator("LIBRE_metamaskError");
+        }
+        return false;
+    }
+
     async function libreTransaction(_scope, methodName, opPrefix, translator, updater) {
         var pendingName = `${methodName}Pending`;
         _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
         
+        var tx;
         try {
-            let tx = new TX(methodName, translator)
+            tx = new TX(methodName, translator)
             await tx.init()
 
             _scope.notifier.txs.push(tx)
@@ -424,8 +434,12 @@ var libreService = function(walletService, $translate) {
             }
         } catch (e) {
             _scope[pendingName] = false;
-            isCheckingTx = false
-            _scope.notifier.danger("getTransactionData: " + (e.error || e));
+            isCheckingTx = false;
+            let error = e.error || e,
+                metamaskError = await checkMetamaskError(translator, error);
+            console.log("metamask", metamaskError)
+            _scope.notifier.danger(metamaskError || "getTransactionData: " + error, 0);
+            await tx.fail();
         }
     }
 
@@ -572,6 +586,7 @@ var libreService = function(walletService, $translate) {
             hexToString: hexToString,
             getStateName: getStateName,
             fillStateData: fillStateData,
+            checkMetamaskError: checkMetamaskError,
             libreTransaction: libreTransaction,
             getLibreRawTx: getLibreRawTx,
             canRequest: canRequest,

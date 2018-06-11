@@ -1,4 +1,5 @@
 'use strict';
+require('babel-polyfill');
 require('./localStoragePolyfill');
 var IS_CX = false;
 if (typeof chrome != 'undefined') IS_CX = chrome.windows === undefined ? false : true;
@@ -9,6 +10,8 @@ var angularSanitize          = require('angular-sanitize');
 var angularAnimate           = require('angular-animate');
 var bip39                    = require('bip39');
 var HDKey                    = require('hdkey');
+var xssFilters               = require('xss-filters');
+window.xssFilters            = xssFilters;
 window.hd                    = { bip39: bip39, HDKey: HDKey };
 var BigNumber                = require('bignumber.js');
 window.BigNumber             = BigNumber;
@@ -49,6 +52,8 @@ var Validator                = require('./validator');
 window.Validator             = Validator;
 var bity                     = require('./bity');
 window.bity                  = bity;
+var kyber                    = require('./kyber');
+window.kyber                 = kyber;
 var ens                      = require('./ens');
 window.ens                   = ens;
 var domainsale               = require('./domainsale');
@@ -56,7 +61,18 @@ window.domainsale            = domainsale;
 var translate                = require('./translations/translate.js');
 if (IS_CX) {
   var cxFuncs                = require('./cxFuncs');
+  var punycode               = require('punycode');
+  var similarity             = require('similarity');
+  var levenshtein            = require('levenshtein');
+  var uniMap                 = require('unicode/category/Ll');
+  var homoglyphs             = require('./homoglyphs.json');
+  window.cxHelpers           = {};
   window.cxFuncs             = cxFuncs;
+  window.cxHelpers['punycode'] = punycode;
+  window.cxHelpers['uniMap'] = uniMap;
+  window.cxHelpers['homoglyphs'] = homoglyphs;
+  window.cxHelpers['similarity'] = similarity;
+  window.cxHelpers['levenshtein'] = levenshtein;
 } else {
     var u2f                  = require('./staticJS/u2f-api');
     var ledger3              = require('./staticJS/ledger3');
@@ -64,18 +80,24 @@ if (IS_CX) {
     var trezorConnect        = require('./staticJS/trezorConnect');
     var digitalBitboxUsb     = require('./staticJS/digitalBitboxUsb');
     var digitalBitboxEth     = require('./staticJS/digitalBitboxEth');
+    var secalotUsb           = require('./staticJS/secalotUsb');
+    var secalotEth           = require('./staticJS/secalotEth');
     window.u2f               = u2f;
     window.Ledger3           = ledger3;
     window.ledgerEth         = ledgerEth;
     window.TrezorConnect     = trezorConnect.TrezorConnect;
     window.DigitalBitboxUsb  = digitalBitboxUsb;
     window.DigitalBitboxEth  = digitalBitboxEth;
+    window.SecalotUsb        = secalotUsb;
+    window.SecalotEth        = secalotEth;
 }
 var CustomGasMessages        = require('./customGas.js')
 window.CustomGasMessages     = CustomGasMessages;
+var darkListConst            = require('./constants/darkListConst');
 var tabsCtrl                 = require('./controllers/tabsCtrl');
 var viewCtrl                 = require('./controllers/viewCtrl');
 var walletGenCtrl            = require('./controllers/walletGenCtrl');
+var onboardingCtrl            = require('./controllers/onboardingCtrl');
 var bulkGenCtrl              = require('./controllers/bulkGenCtrl');
 var decryptWalletCtrl        = require('./controllers/decryptWalletCtrl');
 var viewWalletCtrl           = require('./controllers/viewWalletCtrl');
@@ -125,23 +147,25 @@ app.factory('globalService', ['$http', '$httpParamSerializerJQLike', globalServi
 app.factory('walletService', walletService);
 app.factory('libreService', ['walletService', '$translate', libreService]);
 app.directive('blockieAddress', blockiesDrtv);
-app.directive('addressField', ['$compile', addressFieldDrtv]);
+app.directive('addressField', ['$compile', 'darkList', addressFieldDrtv]);
 app.directive('qrCode', QRCodeDrtv);
 app.directive('onReadFile', fileReaderDrtv);
 app.directive('walletBalanceDrtv', balanceDrtv);
 app.directive('walletDecryptDrtv', walletDecryptDrtv);
 app.directive('cxWalletDecryptDrtv', cxWalletDecryptDrtv);
+app.constant('darkList', darkListConst);
 app.controller('tabsCtrl', ['$scope', 'globalService', '$translate', '$sce', tabsCtrl]);
 app.controller('viewCtrl', ['$scope', 'globalService', '$sce', viewCtrl]);
 app.controller('walletGenCtrl', ['$scope', walletGenCtrl]);
 app.controller('bulkGenCtrl', ['$scope', bulkGenCtrl]);
+app.controller('onboardingCtrl', ['$scope', onboardingCtrl]);
 app.controller('decryptWalletCtrl', ['$scope', '$sce', 'walletService', decryptWalletCtrl]);
 app.controller('viewWalletCtrl', ['$scope', 'walletService', viewWalletCtrl]);
 app.controller('statusCtrl', ['$scope', 'libreService', '$translate', statusCtrl]);
 app.controller('txStatusCtrl', ['$scope', txStatusCtrl]);
 app.controller('sendTxCtrl', ['$scope', '$sce', 'walletService', 'libreService', '$rootScope', '$translate', sendTxCtrl]);
 app.controller('emissionCtrl',['$scope', '$sce', 'walletService', 'libreService', '$rootScope', '$translate', emissionCtrl]);
-app.controller('swapCtrl', ['$scope', '$sce', 'walletService', swapCtrl]);
+app.controller('swapCtrl', ['$scope', '$sce', 'walletService', 'libreService', swapCtrl]);
 app.controller('signMsgCtrl', ['$scope', '$sce', 'walletService', signMsgCtrl]);
 app.controller('contractsCtrl', ['$scope', '$sce', 'walletService', contractsCtrl]);
 app.controller('ensCtrl', ['$scope', '$sce', 'walletService', ensCtrl]);
@@ -152,9 +176,9 @@ app.controller('walletBalanceCtrl', ['$scope', '$sce', '$rootScope', walletBalan
 app.controller('helpersCtrl', ['$scope', helpersCtrl]);
 if (IS_CX) {
   app.controller('addWalletCtrl', ['$scope', '$sce', addWalletCtrl]);
-  app.controller('myWalletsCtrl', ['$scope', '$sce','walletService', myWalletsCtrl]);
+  app.controller('myWalletsCtrl', ['$scope', '$sce', '$timeout', 'walletService', myWalletsCtrl]);
   app.controller('mainPopCtrl', ['$scope', '$sce', mainPopCtrl]);
-  app.controller('quickSendCtrl', ['$scope', '$sce', quickSendCtrl]);
+  app.controller('quickSendCtrl', ['$scope', '$sce', 'darkList', quickSendCtrl]);
   app.controller('cxDecryptWalletCtrl', ['$scope', '$sce', 'walletService', cxDecryptWalletCtrl]);
 }
 app.filter('secondsToDateTime', [function() {
