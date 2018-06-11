@@ -9,7 +9,8 @@ var viewWalletCtrl = function($scope, walletService) {
     $scope.pkeyVisible = false;
 
     //walletService.wallet = null;
-    //$scope.ajaxReq = ajaxReq;
+    //walletService.password = '';
+    $scope.ajaxReq = ajaxReq;
     $scope.$watch(function() {
         if (walletService.wallet == null) return null;
         return walletService.wallet.getAddressString();
