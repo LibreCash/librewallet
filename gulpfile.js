@@ -18,7 +18,7 @@ const rename       = require('gulp-rename');
 const runSequence  = require('run-sequence');
 const shell        = require('gulp-shell');
 const source       = require('vinyl-source-stream');
-const uglify       = require('gulp-uglify');
+const uglify       = require('gulp-uglify-es').default;;
 const zip          = require('gulp-zip');
 const html2js      = require('html2js-browserify');
 
@@ -104,6 +104,10 @@ let js_destFile = 'etherwallet-master.js';
 let browseOpts = { debug: true }; // generates inline source maps - only in js-debug
 let babelOpts = {
     presets: ['es2015'],
+    plugins: [
+    	'syntax-async-functions',
+    	'transform-regenerator'
+    ],
     compact: false,
     global: true
 };
@@ -113,6 +117,7 @@ function bundle_js(bundler) {
         .pipe(plumber({ errorHandler: onError }))
         .pipe(source('main.js'))
         .pipe(buffer())
+        .pipe(uglify())
         .pipe(rename(js_destFile))
         .pipe(gulp.dest(js_destFolder))
         .pipe(gulp.dest(js_destFolder_CX))
@@ -124,6 +129,7 @@ function bundle_js_debug(bundler) {
         .pipe(plumber({ errorHandler: onError }))
         .pipe(source('main.js'))
         .pipe(buffer())
+        .pipe(uglify())
         .pipe(rename(js_destFile))
         .pipe(gulp.dest(js_destFolder))
         .pipe(gulp.dest(js_destFolder_CX))
@@ -132,7 +138,7 @@ function bundle_js_debug(bundler) {
 
 
 gulp.task('js', function() {
-    let bundler = browserify(js_srcFile).transform(babelify).transform(html2js);
+    let bundler = browserify(js_srcFile).transform(babelify, babelOpts).transform(html2js);
     bundle_js(bundler)
 });
 
@@ -154,6 +160,7 @@ let js_destFolderStatic = app + 'scripts/staticJS/';
 let js_destFileStatic = 'etherwallet-static.min.js';
 
 gulp.task('staticJS', function() {
+
     return gulp.src(js_srcFilesStatic)
         .pipe(plumber({ errorHandler: onError }))
         .pipe(concat(js_destFileStatic))
