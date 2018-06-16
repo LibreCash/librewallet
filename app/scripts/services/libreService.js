@@ -6,7 +6,16 @@ var libreService = function(walletService, $translate) {
     var 
         exchanger = getContract("LibreExchanger"),
         cash = getContract("LibreCash"),
-        mainTimer = null;
+        liberty = getContract("LibertyToken"),
+        mainTimer = null,
+        oracleABI = {"gasPrice":
+            {"constant":true,"inputs":[],"name":"gasPrice",
+            "outputs":[{"name":"","type":"uint256"}],"payable":false,
+            "stateMutability":"view","type":"function"},
+            "gasLimit":{"constant":true,"inputs":[],"name":"gasLimit",
+            "outputs":[{"name":"","type":"uint256"}],"payable":false,
+            "stateMutability":"view","type":"function"}
+        };
 
     var 
         IS_DEBUG = false,
@@ -37,7 +46,12 @@ var libreService = function(walletService, $translate) {
             minReadyOracles: 2,
             oracleActual: 15 * 60,
             rateActual: 10 * 60,
-            oracleTimeout: 10 * 60
+            oracleTimeout: 10 * 60,
+            callbackGas: {
+                min: 2,
+                max: 15,
+                value: 3
+            }
         };
         
     if (IS_DEBUG) {
@@ -115,11 +129,14 @@ var libreService = function(walletService, $translate) {
         return getDataProcess(cash.address, cash.abiRefactored, _var, process, params);
     }
 
+    function getLBRSDataProcess(_var, process, params = []) {
+        return getDataProcess(liberty.address, cash.abiRefactored, _var, process, params);
+    }
+
     function getDataAsync(to, abi, _var, params = []) {
         if (IS_DEBUG) {
             console.log(`[CALL ${getDataString(abi[_var], params)}]`);
         }
-
         return getEthCall({
             from: walletService.wallet == null ? null : walletService.wallet.getAddressString(),
             data: getDataString(abi[_var], params),
@@ -300,14 +317,24 @@ var libreService = function(walletService, $translate) {
         }
     }
 
+    function checkMetamaskError(translator, error) {
+        const METAMASK_DENY_CHROME = "User denied transaction signature";
+        const METAMASK_DENY_FF = "@moz-extension";
+        if (~error.indexOf(METAMASK_DENY_CHROME) || ~error.indexOf(METAMASK_DENY_FF)) {
+            return translator("LIBRE_metamaskError");
+        }
+        return false;
+    }
+
     async function libreTransaction(_scope, methodName, opPrefix, translator, updater) {
         var pendingName = `${methodName}Pending`;
         _scope[pendingName] = true;
         if (_scope.wallet == null) throw globalFuncs.errorMsgs[3]; // TODO: Replace to const
         else if (!globalFuncs.isNumeric(_scope.tx.gasLimit) || parseFloat(_scope.tx.gasLimit) <= 0) throw globalFuncs.errorMsgs[8];
         
+        var tx;
         try {
-            let tx = new TX(methodName, translator)
+            tx = new TX(methodName, translator)
             await tx.init()
 
             _scope.notifier.txs.push(tx)
@@ -407,8 +434,12 @@ var libreService = function(walletService, $translate) {
             }
         } catch (e) {
             _scope[pendingName] = false;
-            isCheckingTx = false
-            _scope.notifier.danger("getTransactionData: " + e);
+            isCheckingTx = false;
+            let error = e.error || e,
+                metamaskError = await checkMetamaskError(translator, error);
+            console.log("metamask", metamaskError)
+            _scope.notifier.danger(metamaskError || "getTransactionData: " + error, 0);
+            await tx.fail();
         }
     }
 
@@ -540,9 +571,11 @@ var libreService = function(walletService, $translate) {
         },
         coeff: coeff,
         methods: {
+            getDataAsync: getDataAsync,
             getDataString: getDataString,
             getBankDataProcess: getBankDataProcess,
             getCashDataProcess: getCashDataProcess,
+            getLBRSDataProcess: getLBRSDataProcess,
             getContractData: getContractData,
             getTokenData: getTokenData,
             getContractScope: getContractScope,
@@ -553,6 +586,7 @@ var libreService = function(walletService, $translate) {
             hexToString: hexToString,
             getStateName: getStateName,
             fillStateData: fillStateData,
+            checkMetamaskError: checkMetamaskError,
             libreTransaction: libreTransaction,
             getLibreRawTx: getLibreRawTx,
             canRequest: canRequest,
@@ -568,7 +602,8 @@ var libreService = function(walletService, $translate) {
         },
         networks: networks,
         IS_DEBUG: IS_DEBUG,
-        mainTimer: mainTimer
+        mainTimer: mainTimer,
+        oracleABI: oracleABI
     };
 };
 module.exports = libreService;

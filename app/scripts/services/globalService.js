@@ -36,50 +36,57 @@ var globalService = function($http, $httpParamSerializerJQLike) {
     mew: true,
     cx: true
   },
-  contracts: {
+  swap: {
     id: 4,
+    name: "NAV_Swap",
+    url: "swap",
+    mew: true,
+    cx: true
+  },
+  contracts: {
+    id: 5,
     name: "NAV_Contracts",
     url: "contracts",
     mew: false,
     cx: false
   },
   ens: {
-    id:5,
+    id: 6,
     name: "NAV_ENS",
     url: "ens",
     mew: false,
     cx: false
   },
   domainsale: {
-    id: 6,
+    id: 7,
     name: "NAV_DomainSale",
     url: "domainsale",
     mew: false,
     cx: true
   },
   signMsg: {
-    id: 7,
+    id: 8,
     name: "NAV_SignMsg",
     url: "sign-message",
     mew: false,
     cx: false
   },
   bulkGenerate: {
-    id: 8,
+    id: 9,
     name: "NAV_BulkGenerate",
     url: "bulk-generate",
     mew: false,
     cx: false
   },
   emission: {
-    id: 9,
+    id: 10,
     name: "NAV_Exchange",
     url: "exchange",
     mew: true,
     cx: true
   },
   status: {
-    id: 10,
+    id: 11,
     name: "NAV_Status",
     url: "status",
     mew: true,
