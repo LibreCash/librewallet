@@ -155,7 +155,7 @@
             Save your Keystore File (UTC / JSON)
           </h1>
         </div>
-        
+
         <div class="col-sm-12">
           <a tabindex="0" role="button"
              class="btn btn-primary"
@@ -173,7 +173,7 @@
             </span>
           </a>
         </div>
-        
+
         <div class="col-sm-12">
           <div class="warn">
             <p class="GEN_Warning_1">
@@ -187,7 +187,7 @@
             </p>
           </div>
         </div>
-        
+
         <div class="col-sm-12">
           <p>
             <a tabindex="0"
@@ -266,7 +266,7 @@
                  type="text"
                  readonly="readonly"/>
         </div>
-        
+
         <div class="col-sm-12">
           <a tabindex="0"
              aria-label="{{'x_Print'|translate}}"
@@ -278,7 +278,7 @@
               PRINT
           </a>
         </div>
-        
+
         <div class="col-sm-12">
           <div class="warn">
             <p>
@@ -292,9 +292,9 @@
             </p>
           </div>
         </div>
-        
+
         <div class="col-sm-12">
-          <a class="btn btn-default btn-sm" ng-click="getAddress()">
+          <a class="btn btn-default btn-sm withMargin" ng-click="getAddress()">
             <span translate="GEN_Label_3"> Save your Address </span> →
           </a>
         </div>
