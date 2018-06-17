@@ -1,6 +1,7 @@
 'use strict';
 var walletGenCtrl = function($scope) {
-    $scope.appleMobileModal = document.getElementById('appleMobileModal') ? new Modal(document.getElementById('appleMobileModal')) : null
+    var enableAppleWarring = false;
+    if(enableAppleWarring) $scope.appleMobileModal = document.getElementById('appleMobileModal') ? new Modal(document.getElementById('appleMobileModal')) : null
     $scope.password = "";
     $scope.wallet = null;
     $scope.showWallet = false;
